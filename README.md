@@ -13,10 +13,9 @@
 
 ## Структура
 
-- api/      — FastAPI + сервисы
-- ui/       — Dash-интерфейс
-- configs/  — настройки
+- api/       — FastAPI + сервисы
+- ui/        — Dash-интерфейс (Python)
+- frontend/  — прототип React-клиента
+- configs/   — настройки
 - docker-compose.yml
 - .github/workflows/ci.yml
-
-
