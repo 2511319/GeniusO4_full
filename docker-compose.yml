@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      - ENV_FILE=.env.docker
+    volumes:
+      - ./api/dev_logs:/app/api/dev_logs
+
+  ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+    depends_on:
+      - api
+    ports:
+      - "${DASH_PORT:-8050}:8050"
+    environment:
+      - ENV_FILE=.env.docker
+    volumes:
+      - ./ui/dev_logs:/app/ui/dev_logs

@@ -1,0 +1,26 @@
+name: CI
+
+on: [push]
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with: python-version: "3.10"
+      - name: Lint API
+        run: |
+          pip install flake8
+          flake8 api
+      - name: Lint UI
+        run: |
+          pip install flake8
+          flake8 ui
+      - name: Build API image
+        run: |
+          docker build -t geniuso4-api:latest api
+      - name: Build UI image
+        run: |
+          docker build -t geniuso4-ui:latest ui

@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+httpx
+pandas
+ta
+jinja2
+openai
+PyJWT
+pydantic
+plotly
+statsmodels
+scipy
+google-cloud-firestore
+pyyaml
+python-dotenv
