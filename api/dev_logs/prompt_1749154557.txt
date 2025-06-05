@@ -1,0 +1,438 @@
+[{"High": 105740.25, "Low": 105266.2, "Open": 105740.22, "Volume": 1415, "Quote Asset Volume": 149232060, "Close": 105375.85, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-03 23:00:00", "Close Time": "2025-06-04 00:00:00", "RSI": 48.0, "MACD": 144.0, "MACD_signal": 210.0, "MACD_hist": -67.0, "OBV": 11819, "MA_20": 105607.4725, "MA_50": 105235.1368, "MA_100": 104757.8526, "MA_200": null, "ATR": 528, "Stochastic_Oscillator": 20.0, "Bollinger_Middle": 105607.4725, "Bollinger_Upper": 106499.46972, "Bollinger_Lower": 104715.47528, "ADX": 12.92, "Williams_%R": -80.43, "Parabolic_SAR": 106724.35504, "Ichimoku_A": 105925.51, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 106024.93, "VWAP": 105918.82302, "Moving_Average_Envelope_Upper": 107719.62195, "Moving_Average_Envelope_Lower": 103495.32305}, {"High": 105524.99, "Low": 105126.26, "Open": 105375.85, "Volume": 1844, "Quote Asset Volume": 194229918, "Close": 105473.36, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 00:00:00", "Close Time": "2025-06-04 01:00:00", "RSI": 49.0, "MACD": 115.0, "MACD_signal": 191.0, "MACD_hist": -76.0, "OBV": 13663, "MA_20": 105622.8195, "MA_50": 105234.4052, "MA_100": 104766.8322, "MA_200": null, "ATR": 519, "Stochastic_Oscillator": 25.0, "Bollinger_Middle": 105622.8195, "Bollinger_Upper": 106494.26008, "Bollinger_Lower": 104751.37892, "ADX": 12.35, "Williams_%R": -74.86, "Parabolic_SAR": 106666.02884, "Ichimoku_A": 105861.2775, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 105896.465, "VWAP": 105903.54046, "Moving_Average_Envelope_Upper": 107735.27589, "Moving_Average_Envelope_Lower": 103510.36311}, {"High": 105732.02, "Low": 105421.0, "Open": 105473.36, "Volume": 1372, "Quote Asset Volume": 144875530, "Close": 105585.33, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 01:00:00", "Close Time": "2025-06-04 02:00:00", "RSI": 51.0, "MACD": 100.0, "MACD_signal": 173.0, "MACD_hist": -73.0, "OBV": 15035, "MA_20": 105629.6795, "MA_50": 105233.1974, "MA_100": 104776.3925, "MA_200": null, "ATR": 504, "Stochastic_Oscillator": 32.0, "Bollinger_Middle": 105629.6795, "Bollinger_Upper": 106497.66467, "Bollinger_Lower": 104761.69433, "ADX": 11.62, "Williams_%R": -68.46, "Parabolic_SAR": 106573.64271, "Ichimoku_A": 105801.1075, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 105776.125, "VWAP": 105906.58945, "Moving_Average_Envelope_Upper": 107742.27309, "Moving_Average_Envelope_Lower": 103517.08591}, {"High": 105830.11, "Low": 105416.51, "Open": 105585.33, "Volume": 1232, "Quote Asset Volume": 130154325, "Close": 105475.43, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 02:00:00", "Close Time": "2025-06-04 03:00:00", "RSI": 49.0, "MACD": 79.0, "MACD_signal": 154.0, "MACD_hist": -75.0, "OBV": 13803, "MA_20": 105632.6485, "MA_50": 105234.1758, "MA_100": 104791.3929, "MA_200": null, "ATR": 497, "Stochastic_Oscillator": 25.0, "Bollinger_Middle": 105632.6485, "Bollinger_Upper": 106498.09293, "Bollinger_Lower": 104767.20407, "ADX": 11.18, "Williams_%R": -74.74, "Parabolic_SAR": 106486.79975, "Ichimoku_A": 105801.1075, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 105776.125, "VWAP": 105917.20242, "Moving_Average_Envelope_Upper": 107745.30147, "Moving_Average_Envelope_Lower": 103519.99553}, {"High": 105744.43, "Low": 105443.45, "Open": 105475.43, "Volume": 1184, "Quote Asset Volume": 125052845, "Close": 105520.96, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 03:00:00", "Close Time": "2025-06-04 04:00:00", "RSI": 50.0, "MACD": 65.0, "MACD_signal": 136.0, "MACD_hist": -71.0, "OBV": 14987, "MA_20": 105650.224, "MA_50": 105236.7836, "MA_100": 104806.6366, "MA_200": null, "ATR": 483, "Stochastic_Oscillator": 24.0, "Bollinger_Middle": 105650.224, "Bollinger_Upper": 106491.26072, "Bollinger_Lower": 104809.18728, "ADX": 10.77, "Williams_%R": -76.19, "Parabolic_SAR": 106405.16736, "Ichimoku_A": 105801.1075, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 105776.125, "VWAP": 105946.35552, "Moving_Average_Envelope_Upper": 107763.22848, "Moving_Average_Envelope_Lower": 103537.21952}, {"High": 105611.55, "Low": 105406.26, "Open": 105520.96, "Volume": 1054, "Quote Asset Volume": 111153744, "Close": 105413.38, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 04:00:00", "Close Time": "2025-06-04 05:00:00", "RSI": 48.0, "MACD": 45.0, "MACD_signal": 118.0, "MACD_hist": -73.0, "OBV": 13933, "MA_20": 105666.743, "MA_50": 105244.392, "MA_100": 104821.1565, "MA_200": null, "ATR": 464, "Stochastic_Oscillator": 17.0, "Bollinger_Middle": 105666.743, "Bollinger_Upper": 106474.90243, "Bollinger_Lower": 104858.58357, "ADX": 10.28, "Williams_%R": -82.68, "Parabolic_SAR": 106328.43292, "Ichimoku_A": 105756.2975, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 105686.505, "VWAP": 105893.0481, "Moving_Average_Envelope_Upper": 107780.07786, "Moving_Average_Envelope_Lower": 103553.40814}, {"High": 105533.69, "Low": 105348.64, "Open": 105413.38, "Volume": 1938, "Quote Asset Volume": 204280570, "Close": 105363.02, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 05:00:00", "Close Time": "2025-06-04 06:00:00", "RSI": 47.0, "MACD": 24.0, "MACD_signal": 99.0, "MACD_hist": -75.0, "OBV": 11996, "MA_20": 105675.3175, "MA_50": 105254.915, "MA_100": 104839.8977, "MA_200": null, "ATR": 444, "Stochastic_Oscillator": 15.0, "Bollinger_Middle": 105675.3175, "Bollinger_Upper": 106466.58966, "Bollinger_Lower": 104884.04534, "ADX": 9.65, "Williams_%R": -84.63, "Parabolic_SAR": 106256.30254, "Ichimoku_A": 105668.44, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 105510.79, "VWAP": 105725.78833, "Moving_Average_Envelope_Upper": 107788.82385, "Moving_Average_Envelope_Lower": 103561.81115}, {"High": 105440.15, "Low": 105256.2, "Open": 105363.02, "Volume": 1402, "Quote Asset Volume": 147725009, "Close": 105302.08, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 06:00:00", "Close Time": "2025-06-04 07:00:00", "RSI": 46.0, "MACD": 3.0, "MACD_signal": 80.0, "MACD_hist": -77.0, "OBV": 10593, "MA_20": 105676.511, "MA_50": 105265.5634, "MA_100": 104860.9733, "MA_200": null, "ATR": 425, "Stochastic_Oscillator": 14.0, "Bollinger_Middle": 105676.511, "Bollinger_Upper": 106465.45225, "Bollinger_Lower": 104887.56975, "ADX": 9.14, "Williams_%R": -86.47, "Parabolic_SAR": 106188.49999, "Ichimoku_A": 105668.44, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 105510.79, "VWAP": 105641.45475, "Moving_Average_Envelope_Upper": 107790.04122, "Moving_Average_Envelope_Lower": 103562.98078}, {"High": 105458.86, "Low": 105262.66, "Open": 105302.08, "Volume": 1418, "Quote Asset Volume": 149372712, "Close": 105318.12, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 07:00:00", "Close Time": "2025-06-04 08:00:00", "RSI": 47.0, "MACD": -12.0, "MACD_signal": 62.0, "MACD_hist": -74.0, "OBV": 12011, "MA_20": 105678.0615, "MA_50": 105275.2834, "MA_100": 104877.3653, "MA_200": null, "ATR": 409, "Stochastic_Oscillator": 15.0, "Bollinger_Middle": 105678.0615, "Bollinger_Upper": 106464.05188, "Bollinger_Lower": 104892.07112, "ADX": 8.6, "Williams_%R": -85.24, "Parabolic_SAR": 106124.76559, "Ichimoku_A": 105652.1375, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 105478.185, "VWAP": 105595.08084, "Moving_Average_Envelope_Upper": 107791.62273, "Moving_Average_Envelope_Lower": 103564.50027}, {"High": 105578.83, "Low": 105317.68, "Open": 105318.12, "Volume": 878, "Quote Asset Volume": 92611716, "Close": 105434.26, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 08:00:00", "Close Time": "2025-06-04 09:00:00", "RSI": 49.0, "MACD": -15.0, "MACD_signal": 46.0, "MACD_hist": -61.0, "OBV": 12890, "MA_20": 105684.4225, "MA_50": 105280.642, "MA_100": 104893.6106, "MA_200": null, "ATR": 398, "Stochastic_Oscillator": 24.0, "Bollinger_Middle": 105684.4225, "Bollinger_Upper": 106460.29328, "Bollinger_Lower": 104908.55172, "ADX": 8.27, "Williams_%R": -76.3, "Parabolic_SAR": 106064.85526, "Ichimoku_A": 105652.1375, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 105478.185, "VWAP": 105566.62926, "Moving_Average_Envelope_Upper": 107798.11095, "Moving_Average_Envelope_Lower": 103570.73405}, {"High": 105902.28, "Low": 105326.54, "Open": 105434.26, "Volume": 1766, "Quote Asset Volume": 186455332, "Close": 105820.02, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 09:00:00", "Close Time": "2025-06-04 10:00:00", "RSI": 56.0, "MACD": 14.0, "MACD_signal": 40.0, "MACD_hist": -26.0, "OBV": 14655, "MA_20": 105704.3705, "MA_50": 105289.2498, "MA_100": 104916.4667, "MA_200": null, "ATR": 411, "Stochastic_Oscillator": 62.0, "Bollinger_Middle": 105704.3705, "Bollinger_Upper": 106472.6082, "Bollinger_Lower": 104936.1328, "ADX": 8.91, "Williams_%R": -38.08, "Parabolic_SAR": 106008.53954, "Ichimoku_A": 105702.665, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105826.09, "Ichimoku_Conversion_Line": 105579.24, "VWAP": 105515.4948, "Moving_Average_Envelope_Upper": 107818.45791, "Moving_Average_Envelope_Lower": 103590.28309}, {"High": 105986.8, "Low": 105647.95, "Open": 105820.02, "Volume": 1290, "Quote Asset Volume": 136505672, "Close": 105687.84, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 10:00:00", "Close Time": "2025-06-04 11:00:00", "RSI": 53.0, "MACD": 26.0, "MACD_signal": 37.0, "MACD_hist": -11.0, "OBV": 13365, "MA_20": 105661.2595, "MA_50": 105296.3384, "MA_100": 104934.7403, "MA_200": null, "ATR": 406, "Stochastic_Oscillator": 65.0, "Bollinger_Middle": 105661.2595, "Bollinger_Upper": 106324.41215, "Bollinger_Lower": 104998.10685, "ADX": 9.72, "Williams_%R": -34.74, "Parabolic_SAR": 105126.26, "Ichimoku_A": 105764.975, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105908.45, "Ichimoku_Conversion_Line": 105621.5, "VWAP": 105507.66175, "Moving_Average_Envelope_Upper": 107774.48469, "Moving_Average_Envelope_Lower": 103548.03431}, {"High": 105797.52, "Low": 105094.02, "Open": 105687.84, "Volume": 3683, "Quote Asset Volume": 388214588, "Close": 105097.36, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 11:00:00", "Close Time": "2025-06-04 12:00:00", "RSI": 43.0, "MACD": -12.0, "MACD_signal": 27.0, "MACD_hist": -39.0, "OBV": 9682, "MA_20": 105585.638, "MA_50": 105306.561, "MA_100": 104948.218, "MA_200": null, "ATR": 427, "Stochastic_Oscillator": 0.0, "Bollinger_Middle": 105585.638, "Bollinger_Upper": 106133.86377, "Bollinger_Lower": 105037.41223, "ADX": 9.37, "Williams_%R": -99.63, "Parabolic_SAR": 105986.8, "Ichimoku_A": 105724.43, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105908.45, "Ichimoku_Conversion_Line": 105540.41, "VWAP": 105477.87181, "Moving_Average_Envelope_Upper": 107697.35076, "Moving_Average_Envelope_Lower": 103473.92524}, {"High": 105167.96, "Low": 104808.0, "Open": 105097.36, "Volume": 2594, "Quote Asset Volume": 272403370, "Close": 105046.29, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 12:00:00", "Close Time": "2025-06-04 13:00:00", "RSI": 43.0, "MACD": -46.0, "MACD_signal": 13.0, "MACD_hist": -58.0, "OBV": 7088, "MA_20": 105546.955, "MA_50": 105319.9146, "MA_100": 104962.1579, "MA_200": null, "ATR": 422, "Stochastic_Oscillator": 20.0, "Bollinger_Middle": 105546.955, "Bollinger_Upper": 106131.56156, "Bollinger_Lower": 104962.34844, "ADX": 9.75, "Williams_%R": -79.79, "Parabolic_SAR": 105986.8, "Ichimoku_A": 105596.615, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105795.83, "Ichimoku_Conversion_Line": 105397.4, "VWAP": 105416.68649, "Moving_Average_Envelope_Upper": 107657.8941, "Moving_Average_Envelope_Lower": 103436.0159}, {"High": 105272.33, "Low": 104723.69, "Open": 105046.29, "Volume": 2215, "Quote Asset Volume": 232501789, "Close": 104761.85, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 13:00:00", "Close Time": "2025-06-04 14:00:00", "RSI": 39.0, "MACD": -94.0, "MACD_signal": -9.0, "MACD_hist": -86.0, "OBV": 4874, "MA_20": 105488.0985, "MA_50": 105334.2042, "MA_100": 104974.3936, "MA_200": null, "ATR": 431, "Stochastic_Oscillator": 3.0, "Bollinger_Middle": 105488.0985, "Bollinger_Upper": 106136.51945, "Bollinger_Lower": 104839.67755, "ADX": 9.78, "Williams_%R": -96.98, "Parabolic_SAR": 105939.648, "Ichimoku_A": 105554.46, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105753.675, "Ichimoku_Conversion_Line": 105355.245, "VWAP": 105367.92446, "Moving_Average_Envelope_Upper": 107597.86047, "Moving_Average_Envelope_Lower": 103378.33653}, {"High": 105043.44, "Low": 104190.27, "Open": 104761.85, "Volume": 4153, "Quote Asset Volume": 434236623, "Close": 105032.35, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 14:00:00", "Close Time": "2025-06-04 15:00:00", "RSI": 44.0, "MACD": -110.0, "MACD_signal": -29.0, "MACD_hist": -81.0, "OBV": 9026, "MA_20": 105439.2995, "MA_50": 105350.9412, "MA_100": 104990.6377, "MA_200": null, "ATR": 461, "Stochastic_Oscillator": 47.0, "Bollinger_Middle": 105439.2995, "Bollinger_Upper": 106070.43937, "Bollinger_Lower": 104808.15963, "ADX": 10.95, "Williams_%R": -53.13, "Parabolic_SAR": 105866.69052, "Ichimoku_A": 105287.75, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105486.965, "Ichimoku_Conversion_Line": 105088.535, "VWAP": 105270.26849, "Moving_Average_Envelope_Upper": 107548.08549, "Moving_Average_Envelope_Lower": 103330.51351}, {"High": 105547.21, "Low": 104930.31, "Open": 105032.35, "Volume": 3408, "Quote Asset Volume": 359010706, "Close": 105299.06, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 15:00:00", "Close Time": "2025-06-04 16:00:00", "RSI": 49.0, "MACD": -99.0, "MACD_signal": -43.0, "MACD_hist": -56.0, "OBV": 12434, "MA_20": 105392.6135, "MA_50": 105380.804, "MA_100": 105008.6661, "MA_200": null, "ATR": 473, "Stochastic_Oscillator": 62.0, "Bollinger_Middle": 105392.6135, "Bollinger_Upper": 105909.94354, "Bollinger_Lower": 104875.28346, "ADX": 10.66, "Williams_%R": -38.28, "Parabolic_SAR": 105732.57688, "Ichimoku_A": 105287.75, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105486.965, "Ichimoku_Conversion_Line": 105088.535, "VWAP": 105253.85407, "Moving_Average_Envelope_Upper": 107500.46577, "Moving_Average_Envelope_Lower": 103284.76123}, {"High": 105461.69, "Low": 105091.67, "Open": 105299.06, "Volume": 1926, "Quote Asset Volume": 202818738, "Close": 105444.51, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 16:00:00", "Close Time": "2025-06-04 17:00:00", "RSI": 51.0, "MACD": -78.0, "MACD_signal": -50.0, "MACD_hist": -28.0, "OBV": 14361, "MA_20": 105377.94, "MA_50": 105406.297, "MA_100": 105022.8696, "MA_200": null, "ATR": 465, "Stochastic_Oscillator": 70.0, "Bollinger_Middle": 105377.94, "Bollinger_Upper": 105871.34872, "Bollinger_Lower": 104884.53128, "ADX": 10.39, "Williams_%R": -30.19, "Parabolic_SAR": 105609.19233, "Ichimoku_A": 105287.75, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105486.965, "Ichimoku_Conversion_Line": 105088.535, "VWAP": 105245.45602, "Moving_Average_Envelope_Upper": 107485.4988, "Moving_Average_Envelope_Lower": 103270.3812}, {"High": 105477.8, "Low": 104959.04, "Open": 105444.51, "Volume": 1837, "Quote Asset Volume": 193318018, "Close": 105047.62, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 17:00:00", "Close Time": "2025-06-04 18:00:00", "RSI": 45.0, "MACD": -93.0, "MACD_signal": -59.0, "MACD_hist": -34.0, "OBV": 12523, "MA_20": 105361.9455, "MA_50": 105418.7724, "MA_100": 105032.2329, "MA_200": null, "ATR": 469, "Stochastic_Oscillator": 48.0, "Bollinger_Middle": 105361.9455, "Bollinger_Upper": 105875.97796, "Bollinger_Lower": 104847.91304, "ADX": 10.43, "Williams_%R": -52.28, "Parabolic_SAR": 105547.21, "Ichimoku_A": 105258.5025, "Ichimoku_B": 105228.025, "Ichimoku_Base_Line": 105428.47, "Ichimoku_Conversion_Line": 105088.535, "VWAP": 105227.25445, "Moving_Average_Envelope_Upper": 107469.18441, "Moving_Average_Envelope_Lower": 103254.70659}, {"High": 105296.37, "Low": 104927.38, "Open": 105047.62, "Volume": 1491, "Quote Asset Volume": 156715190, "Close": 104948.61, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 18:00:00", "Close Time": "2025-06-04 19:00:00", "RSI": 43.0, "MACD": -111.0, "MACD_signal": -69.0, "MACD_hist": -42.0, "OBV": 11032, "MA_20": 105322.365, "MA_50": 105432.1202, "MA_100": 105036.0218, "MA_200": null, "ATR": 462, "Stochastic_Oscillator": 42.0, "Bollinger_Middle": 105322.365, "Bollinger_Upper": 105835.70099, "Bollinger_Lower": 104809.02901, "ADX": 10.54, "Williams_%R": -57.79, "Parabolic_SAR": 105461.69, "Ichimoku_A": 105198.3325, "Ichimoku_B": 105344.575, "Ichimoku_Base_Line": 105308.13, "Ichimoku_Conversion_Line": 105088.535, "VWAP": 105210.04311, "Moving_Average_Envelope_Upper": 107428.8123, "Moving_Average_Envelope_Lower": 103215.9177}, {"High": 105084.87, "Low": 104873.57, "Open": 104948.61, "Volume": 1330, "Quote Asset Volume": 139639705, "Close": 104919.34, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 19:00:00", "Close Time": "2025-06-04 20:00:00", "RSI": 43.0, "MACD": -126.0, "MACD_signal": -81.0, "MACD_hist": -46.0, "OBV": 9702, "MA_20": 105299.5395, "MA_50": 105442.6232, "MA_100": 105039.6655, "MA_200": null, "ATR": 444, "Stochastic_Oscillator": 41.0, "Bollinger_Middle": 105299.5395, "Bollinger_Upper": 105841.15147, "Bollinger_Lower": 104757.92753, "ADX": 10.78, "Williams_%R": -59.42, "Parabolic_SAR": 105477.8, "Ichimoku_A": 105151.0125, "Ichimoku_B": 105404.46, "Ichimoku_Base_Line": 105308.13, "Ichimoku_Conversion_Line": 104993.895, "VWAP": 105185.1733, "Moving_Average_Envelope_Upper": 107405.53029, "Moving_Average_Envelope_Lower": 103193.54871}, {"High": 104959.99, "Low": 104413.93, "Open": 104919.34, "Volume": 1737, "Quote Asset Volume": 181849587, "Close": 104613.79, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 20:00:00", "Close Time": "2025-06-04 21:00:00", "RSI": 39.0, "MACD": -161.0, "MACD_signal": -97.0, "MACD_hist": -64.0, "OBV": 7965, "MA_20": 105256.561, "MA_50": 105447.8316, "MA_100": 105040.8884, "MA_200": null, "ATR": 451, "Stochastic_Oscillator": 24.0, "Bollinger_Middle": 105256.561, "Bollinger_Upper": 105868.08588, "Bollinger_Lower": 104645.03612, "ADX": 11.96, "Williams_%R": -76.43, "Parabolic_SAR": 105374.7976, "Ichimoku_A": 105088.435, "Ichimoku_B": 105416.235, "Ichimoku_Base_Line": 105308.13, "Ichimoku_Conversion_Line": 104868.74, "VWAP": 105147.66742, "Moving_Average_Envelope_Upper": 107361.69222, "Moving_Average_Envelope_Lower": 103151.42978}, {"High": 105048.28, "Low": 104552.8, "Open": 104613.79, "Volume": 1178, "Quote Asset Volume": 123449415, "Close": 104933.75, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 21:00:00", "Close Time": "2025-06-04 22:00:00", "RSI": 45.0, "MACD": -161.0, "MACD_signal": -110.0, "MACD_hist": -52.0, "OBV": 9143, "MA_20": 105223.982, "MA_50": 105458.0194, "MA_100": 105046.6923, "MA_200": null, "ATR": 454, "Stochastic_Oscillator": 41.0, "Bollinger_Middle": 105223.982, "Bollinger_Upper": 105831.38688, "Bollinger_Lower": 104616.57712, "ADX": 12.78, "Williams_%R": -58.62, "Parabolic_SAR": 105280.03539, "Ichimoku_A": 105043.625, "Ichimoku_B": 105416.235, "Ichimoku_Base_Line": 105218.51, "Ichimoku_Conversion_Line": 104868.74, "VWAP": 105126.01135, "Moving_Average_Envelope_Upper": 107328.46164, "Moving_Average_Envelope_Lower": 103119.50236}, {"High": 105036.73, "Low": 104745.21, "Open": 104933.75, "Volume": 1014, "Quote Asset Volume": 106331749, "Close": 104781.7, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 22:00:00", "Close Time": "2025-06-04 23:00:00", "RSI": 43.0, "MACD": -171.0, "MACD_signal": -122.0, "MACD_hist": -49.0, "OBV": 8129, "MA_20": 105189.2955, "MA_50": 105456.118, "MA_100": 105049.5887, "MA_200": null, "ATR": 443, "Stochastic_Oscillator": 33.0, "Bollinger_Middle": 105189.2955, "Bollinger_Upper": 105814.27993, "Bollinger_Lower": 104564.31107, "ADX": 13.54, "Williams_%R": -67.08, "Parabolic_SAR": 105192.85416, "Ichimoku_A": 104978.6375, "Ichimoku_B": 105416.235, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104868.74, "VWAP": 105107.30238, "Moving_Average_Envelope_Upper": 107293.08141, "Moving_Average_Envelope_Lower": 103085.50959}, {"High": 104869.17, "Low": 104626.48, "Open": 104781.7, "Volume": 1040, "Quote Asset Volume": 108929845, "Close": 104694.56, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-04 23:00:00", "Close Time": "2025-06-05 00:00:00", "RSI": 41.0, "MACD": -184.0, "MACD_signal": -134.0, "MACD_hist": -50.0, "OBV": 7088, "MA_20": 105147.9755, "MA_50": 105451.3676, "MA_100": 105049.517, "MA_200": null, "ATR": 428, "Stochastic_Oscillator": 28.0, "Bollinger_Middle": 105147.9755, "Bollinger_Upper": 105788.85656, "Bollinger_Lower": 104507.09444, "ADX": 14.49, "Williams_%R": -71.93, "Parabolic_SAR": 105112.64743, "Ichimoku_A": 105034.5525, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104980.57, "VWAP": 105058.5488, "Moving_Average_Envelope_Upper": 107250.93501, "Moving_Average_Envelope_Lower": 103045.01599}, {"High": 104980.32, "Low": 104654.96, "Open": 104694.56, "Volume": 1042, "Quote Asset Volume": 109248046, "Close": 104980.03, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 00:00:00", "Close Time": "2025-06-05 01:00:00", "RSI": 47.0, "MACD": -170.0, "MACD_signal": -141.0, "MACD_hist": -28.0, "OBV": 8131, "MA_20": 105126.308, "MA_50": 105437.2798, "MA_100": 105051.4675, "MA_200": null, "ATR": 421, "Stochastic_Oscillator": 49.0, "Bollinger_Middle": 105126.308, "Bollinger_Upper": 105759.08272, "Bollinger_Lower": 104493.53328, "ADX": 14.98, "Williams_%R": -50.86, "Parabolic_SAR": 105038.85723, "Ichimoku_A": 105017.2, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104945.865, "VWAP": 105019.51733, "Moving_Average_Envelope_Upper": 107228.83416, "Moving_Average_Envelope_Lower": 103023.78184}, {"High": 105154.5, "Low": 104703.42, "Open": 104980.03, "Volume": 1228, "Quote Asset Volume": 128819885, "Close": 104775.97, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 01:00:00", "Close Time": "2025-06-05 02:00:00", "RSI": 44.0, "MACD": -173.0, "MACD_signal": -148.0, "MACD_hist": -25.0, "OBV": 6903, "MA_20": 105096.9555, "MA_50": 105415.6182, "MA_100": 105050.5733, "MA_200": null, "ATR": 423, "Stochastic_Oscillator": 43.0, "Bollinger_Middle": 105096.9555, "Bollinger_Upper": 105737.50089, "Bollinger_Lower": 104456.41011, "ADX": 14.81, "Williams_%R": -56.84, "Parabolic_SAR": 104190.27, "Ichimoku_A": 105017.2, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104945.865, "VWAP": 104969.27489, "Moving_Average_Envelope_Upper": 107198.89461, "Moving_Average_Envelope_Lower": 102995.01639}, {"High": 105240.25, "Low": 104775.97, "Open": 104775.97, "Volume": 1520, "Quote Asset Volume": 159670302, "Close": 105000.33, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 02:00:00", "Close Time": "2025-06-05 03:00:00", "RSI": 48.0, "MACD": -155.0, "MACD_signal": -149.0, "MACD_hist": -6.0, "OBV": 8423, "MA_20": 105081.868, "MA_50": 105389.966, "MA_100": 105054.2454, "MA_200": null, "ATR": 426, "Stochastic_Oscillator": 60.0, "Bollinger_Middle": 105081.868, "Bollinger_Upper": 105716.56474, "Bollinger_Lower": 104447.17126, "ADX": 14.36, "Williams_%R": -40.3, "Parabolic_SAR": 104209.5546, "Ichimoku_A": 104971.8425, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104855.15, "VWAP": 104967.53004, "Moving_Average_Envelope_Upper": 107183.50536, "Moving_Average_Envelope_Lower": 102980.23064}, {"High": 105067.43, "Low": 104880.32, "Open": 105000.33, "Volume": 867, "Quote Asset Volume": 91016520, "Close": 105044.56, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 03:00:00", "Close Time": "2025-06-05 04:00:00", "RSI": 49.0, "MACD": -136.0, "MACD_signal": -147.0, "MACD_hist": 11.0, "OBV": 9290, "MA_20": 105068.19, "MA_50": 105361.212, "MA_100": 105058.708, "MA_200": null, "ATR": 409, "Stochastic_Oscillator": 63.0, "Bollinger_Middle": 105068.19, "Bollinger_Upper": 105693.65541, "Bollinger_Lower": 104442.72459, "ADX": 13.95, "Williams_%R": -37.04, "Parabolic_SAR": 104250.78242, "Ichimoku_A": 104957.8125, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104827.09, "VWAP": 104973.11518, "Moving_Average_Envelope_Upper": 107169.5538, "Moving_Average_Envelope_Lower": 102966.8262}, {"High": 105226.52, "Low": 105033.47, "Open": 105044.56, "Volume": 700, "Quote Asset Volume": 73646964, "Close": 105177.43, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 04:00:00", "Close Time": "2025-06-05 05:00:00", "RSI": 51.0, "MACD": -109.0, "MACD_signal": -139.0, "MACD_hist": 30.0, "OBV": 9991, "MA_20": 105055.3485, "MA_50": 105352.436, "MA_100": 105065.9799, "MA_200": null, "ATR": 394, "Stochastic_Oscillator": 67.0, "Bollinger_Middle": 105055.3485, "Bollinger_Upper": 105660.43741, "Bollinger_Lower": 104450.25959, "ADX": 13.0, "Williams_%R": -32.63, "Parabolic_SAR": 104290.36112, "Ichimoku_A": 104957.8125, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104827.09, "VWAP": 105023.57045, "Moving_Average_Envelope_Upper": 107156.45547, "Moving_Average_Envelope_Lower": 102954.24153}, {"High": 105188.43, "Low": 104577.87, "Open": 105177.43, "Volume": 1631, "Quote Asset Volume": 171017029, "Close": 104649.78, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 05:00:00", "Close Time": "2025-06-05 06:00:00", "RSI": 43.0, "MACD": -128.0, "MACD_signal": -137.0, "MACD_hist": 8.0, "OBV": 8359, "MA_20": 104996.8365, "MA_50": 105335.8428, "MA_100": 105071.2182, "MA_200": null, "ATR": 409, "Stochastic_Oscillator": 22.0, "Bollinger_Middle": 104996.8365, "Bollinger_Upper": 105514.90081, "Bollinger_Lower": 104478.77219, "ADX": 13.42, "Williams_%R": -77.83, "Parabolic_SAR": 104328.35667, "Ichimoku_A": 104992.53, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104896.525, "VWAP": 104961.12543, "Moving_Average_Envelope_Upper": 107096.77323, "Moving_Average_Envelope_Lower": 102896.89977}, {"High": 104698.78, "Low": 104380.48, "Open": 104649.78, "Volume": 1265, "Quote Asset Volume": 132237390, "Close": 104454.39, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 06:00:00", "Close Time": "2025-06-05 07:00:00", "RSI": 40.0, "MACD": -158.0, "MACD_signal": -141.0, "MACD_hist": -17.0, "OBV": 7094, "MA_20": 104935.164, "MA_50": 105321.6022, "MA_100": 105073.776, "MA_200": null, "ATR": 403, "Stochastic_Oscillator": 7.0, "Bollinger_Middle": 104935.164, "Bollinger_Upper": 105400.49089, "Bollinger_Lower": 104469.83711, "ADX": 14.26, "Williams_%R": -93.26, "Parabolic_SAR": 104364.83241, "Ichimoku_A": 104949.45, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104810.365, "VWAP": 104889.27937, "Moving_Average_Envelope_Upper": 107033.86728, "Moving_Average_Envelope_Lower": 102836.46072}, {"High": 104621.69, "Low": 104426.41, "Open": 104454.39, "Volume": 1044, "Quote Asset Volume": 109085050, "Close": 104517.11, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 07:00:00", "Close Time": "2025-06-05 08:00:00", "RSI": 41.0, "MACD": -174.0, "MACD_signal": -148.0, "MACD_hist": -26.0, "OBV": 8138, "MA_20": 104906.1515, "MA_50": 105302.9818, "MA_100": 105075.1164, "MA_200": null, "ATR": 388, "Stochastic_Oscillator": 15.0, "Bollinger_Middle": 104906.1515, "Bollinger_Upper": 105398.95423, "Bollinger_Lower": 104413.34877, "ADX": 15.04, "Williams_%R": -85.08, "Parabolic_SAR": 104380.48, "Ichimoku_A": 104949.45, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104810.365, "VWAP": 104837.56329, "Moving_Average_Envelope_Upper": 107004.27453, "Moving_Average_Envelope_Lower": 102808.02847}, {"High": 104674.52, "Low": 104425.63, "Open": 104517.11, "Volume": 909, "Quote Asset Volume": 95099045, "Close": 104672.48, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 08:00:00", "Close Time": "2025-06-05 09:00:00", "RSI": 44.0, "MACD": -173.0, "MACD_signal": -153.0, "MACD_hist": -20.0, "OBV": 9047, "MA_20": 104887.461, "MA_50": 105288.1104, "MA_100": 105075.4653, "MA_200": null, "ATR": 378, "Stochastic_Oscillator": 34.0, "Bollinger_Middle": 104887.461, "Bollinger_Upper": 105385.9085, "Bollinger_Lower": 104389.0135, "ADX": 15.55, "Williams_%R": -66.04, "Parabolic_SAR": 104380.48, "Ichimoku_A": 104949.45, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104810.365, "VWAP": 104804.11402, "Moving_Average_Envelope_Upper": 106985.21022, "Moving_Average_Envelope_Lower": 102789.71178}, {"High": 104909.84, "Low": 104672.34, "Open": 104672.48, "Volume": 675, "Quote Asset Volume": 70712879, "Close": 104895.92, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 09:00:00", "Close Time": "2025-06-05 10:00:00", "RSI": 49.0, "MACD": -152.0, "MACD_signal": -152.0, "MACD_hist": 1.0, "OBV": 9722, "MA_20": 104894.1645, "MA_50": 105282.6398, "MA_100": 105079.061, "MA_200": null, "ATR": 368, "Stochastic_Oscillator": 60.0, "Bollinger_Middle": 104894.1645, "Bollinger_Upper": 105389.26939, "Bollinger_Lower": 104399.05961, "ADX": 15.13, "Williams_%R": -40.05, "Parabolic_SAR": 104414.8708, "Ichimoku_A": 104949.45, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104810.365, "VWAP": 104792.02651, "Moving_Average_Envelope_Upper": 106992.04779, "Moving_Average_Envelope_Lower": 102796.28121}, {"High": 104895.92, "Low": 104514.79, "Open": 104895.92, "Volume": 963, "Quote Asset Volume": 100846784, "Close": 104651.77, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 10:00:00", "Close Time": "2025-06-05 11:00:00", "RSI": 45.0, "MACD": -153.0, "MACD_signal": -153.0, "MACD_hist": -0.0, "OBV": 8759, "MA_20": 104875.1355, "MA_50": 105274.0152, "MA_100": 105082.9414, "MA_200": null, "ATR": 369, "Stochastic_Oscillator": 32.0, "Bollinger_Middle": 104875.1355, "Bollinger_Upper": 105376.74532, "Bollinger_Lower": 104373.52568, "ADX": 15.19, "Williams_%R": -68.45, "Parabolic_SAR": 104425.63, "Ichimoku_A": 104949.45, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104810.365, "VWAP": 104800.2639, "Moving_Average_Envelope_Upper": 106972.63821, "Moving_Average_Envelope_Lower": 102777.63279}, {"High": 104843.29, "Low": 104549.85, "Open": 104651.77, "Volume": 846, "Quote Asset Volume": 88547669, "Close": 104819.59, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 11:00:00", "Close Time": "2025-06-05 12:00:00", "RSI": 48.0, "MACD": -139.0, "MACD_signal": -150.0, "MACD_hist": 11.0, "OBV": 9604, "MA_20": 104851.162, "MA_50": 105266.5764, "MA_100": 105088.3433, "MA_200": null, "ATR": 363, "Stochastic_Oscillator": 51.0, "Bollinger_Middle": 104851.162, "Bollinger_Upper": 105313.75054, "Bollinger_Lower": 104388.57346, "ADX": 15.24, "Williams_%R": -48.93, "Parabolic_SAR": 104458.2148, "Ichimoku_A": 104946.0175, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105088.535, "Ichimoku_Conversion_Line": 104803.5, "VWAP": 104793.10016, "Moving_Average_Envelope_Upper": 106948.18524, "Moving_Average_Envelope_Lower": 102754.13876}, {"High": 105772.37, "Low": 104783.28, "Open": 104819.59, "Volume": 3109, "Quote Asset Volume": 327686782, "Close": 105646.01, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 12:00:00", "Close Time": "2025-06-05 13:00:00", "RSI": 60.0, "MACD": -60.0, "MACD_signal": -132.0, "MACD_hist": 72.0, "OBV": 12713, "MA_20": 104861.237, "MA_50": 105273.9324, "MA_100": 105100.9919, "MA_200": null, "ATR": 408, "Stochastic_Oscillator": 91.0, "Bollinger_Middle": 104861.237, "Bollinger_Upper": 105380.39635, "Bollinger_Lower": 104342.07765, "ADX": 15.66, "Williams_%R": -9.08, "Parabolic_SAR": 104489.49621, "Ichimoku_A": 105035.16, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 104993.895, "Ichimoku_Conversion_Line": 105076.425, "VWAP": 104901.5512, "Moving_Average_Envelope_Upper": 106958.46174, "Moving_Average_Envelope_Lower": 102764.01226}, {"High": 105906.02, "Low": 104322.09, "Open": 105646.01, "Volume": 4262, "Quote Asset Volume": 448367696, "Close": 104518.11, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 13:00:00", "Close Time": "2025-06-05 14:00:00", "RSI": 45.0, "MACD": -88.0, "MACD_signal": -123.0, "MACD_hist": 35.0, "OBV": 8451, "MA_20": 104834.7615, "MA_50": 105258.5524, "MA_100": 105106.7915, "MA_200": null, "ATR": 492, "Stochastic_Oscillator": 12.0, "Bollinger_Middle": 104834.7615, "Bollinger_Upper": 105367.04162, "Bollinger_Lower": 104302.48138, "ADX": 14.79, "Williams_%R": -87.62, "Parabolic_SAR": 105772.37, "Ichimoku_A": 105081.1, "Ichimoku_B": 105486.965, "Ichimoku_Base_Line": 105048.145, "Ichimoku_Conversion_Line": 105114.055, "VWAP": 104913.38504, "Moving_Average_Envelope_Upper": 106931.45673, "Moving_Average_Envelope_Lower": 102738.06627}, {"High": 104896.25, "Low": 103905.27, "Open": 104518.11, "Volume": 5616, "Quote Asset Volume": 585785879, "Close": 104648.83, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 14:00:00", "Close Time": "2025-06-05 15:00:00", "RSI": 46.0, "MACD": -98.0, "MACD_signal": -118.0, "MACD_hist": 20.0, "OBV": 14067, "MA_20": 104819.7725, "MA_50": 105245.3882, "MA_100": 105113.958, "MA_200": null, "ATR": 528, "Stochastic_Oscillator": 37.0, "Bollinger_Middle": 104819.7725, "Bollinger_Upper": 105355.2585, "Bollinger_Lower": 104284.2865, "ADX": 14.4, "Williams_%R": -62.84, "Parabolic_SAR": 105772.37, "Ichimoku_A": 104905.645, "Ichimoku_B": 105344.465, "Ichimoku_Base_Line": 104905.645, "Ichimoku_Conversion_Line": 104905.645, "VWAP": 104817.13646, "Moving_Average_Envelope_Upper": 106916.16795, "Moving_Average_Envelope_Lower": 102723.37705}, {"High": 104863.11, "Low": 104337.98, "Open": 104648.83, "Volume": 2357, "Quote Asset Volume": 246623647, "Close": 104531.59, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 15:00:00", "Close Time": "2025-06-05 16:00:00", "RSI": 45.0, "MACD": -114.0, "MACD_signal": -117.0, "MACD_hist": 3.0, "OBV": 11710, "MA_20": 104800.385, "MA_50": 105227.5988, "MA_100": 105118.4768, "MA_200": null, "ATR": 528, "Stochastic_Oscillator": 31.0, "Bollinger_Middle": 104800.385, "Bollinger_Upper": 105347.98782, "Bollinger_Lower": 104252.78218, "ADX": 14.05, "Williams_%R": -68.7, "Parabolic_SAR": 105906.02, "Ichimoku_A": 104905.645, "Ichimoku_B": 105344.465, "Ichimoku_Base_Line": 104905.645, "Ichimoku_Conversion_Line": 104905.645, "VWAP": 104792.32076, "Moving_Average_Envelope_Upper": 106896.3927, "Moving_Average_Envelope_Lower": 102704.3773}, {"High": 104593.92, "Low": 103256.34, "Open": 104531.59, "Volume": 5233, "Quote Asset Volume": 543518174, "Close": 103265.18, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 16:00:00", "Close Time": "2025-06-05 17:00:00", "RSI": 34.0, "MACD": -227.0, "MACD_signal": -139.0, "MACD_hist": -88.0, "OBV": 6477, "MA_20": 104732.9545, "MA_50": 105161.9012, "MA_100": 105111.5763, "MA_200": null, "ATR": 585, "Stochastic_Oscillator": 0.0, "Bollinger_Middle": 104732.9545, "Bollinger_Upper": 105596.71876, "Bollinger_Lower": 103869.19024, "ADX": 15.48, "Williams_%R": -99.67, "Parabolic_SAR": 105825.99, "Ichimoku_A": 104581.18, "Ichimoku_B": 105020.0, "Ichimoku_Base_Line": 104581.18, "Ichimoku_Conversion_Line": 104581.18, "VWAP": 104588.31046, "Moving_Average_Envelope_Upper": 106827.61359, "Moving_Average_Envelope_Lower": 102638.29541}, {"High": 103585.46, "Low": 103152.55, "Open": 103265.18, "Volume": 3804, "Quote Asset Volume": 393214079, "Close": 103247.09, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 17:00:00", "Close Time": "2025-06-05 18:00:00", "RSI": 33.0, "MACD": -314.0, "MACD_signal": -174.0, "MACD_hist": -140.0, "OBV": 2673, "MA_20": 104648.6215, "MA_50": 105094.6472, "MA_100": 105101.4788, "MA_200": null, "ATR": 575, "Stochastic_Oscillator": 3.0, "Bollinger_Middle": 104648.6215, "Bollinger_Upper": 105721.53127, "Bollinger_Lower": 103575.71173, "ADX": 16.94, "Williams_%R": -96.57, "Parabolic_SAR": 105671.811, "Ichimoku_A": 104529.285, "Ichimoku_B": 104968.105, "Ichimoku_Base_Line": 104529.285, "Ichimoku_Conversion_Line": 104529.285, "VWAP": 104429.50639, "Moving_Average_Envelope_Upper": 106741.59393, "Moving_Average_Envelope_Lower": 102555.64907}, {"High": 103356.3, "Low": 102595.08, "Open": 103247.09, "Volume": 4986, "Quote Asset Volume": 513780136, "Close": 103010.51, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 18:00:00", "Close Time": "2025-06-05 19:00:00", "RSI": 32.0, "MACD": -397.0, "MACD_signal": -219.0, "MACD_hist": -179.0, "OBV": -2312, "MA_20": 104560.062, "MA_50": 105038.4584, "MA_100": 105085.5732, "MA_200": null, "ATR": 588, "Stochastic_Oscillator": 13.0, "Bollinger_Middle": 104560.062, "Bollinger_Upper": 105845.71519, "Bollinger_Lower": 103274.40881, "ADX": 18.91, "Williams_%R": -87.45, "Parabolic_SAR": 105470.27012, "Ichimoku_A": 104250.55, "Ichimoku_B": 104689.37, "Ichimoku_Base_Line": 104250.55, "Ichimoku_Conversion_Line": 104250.55, "VWAP": 104219.90868, "Moving_Average_Envelope_Upper": 106651.26324, "Moving_Average_Envelope_Lower": 102468.86076}, {"High": 103047.68, "Low": 101617.2, "Open": 103010.51, "Volume": 7537, "Quote Asset Volume": 770112621, "Close": 101912.8, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 19:00:00", "Close Time": "2025-06-05 20:00:00", "RSI": 25.0, "MACD": -546.0, "MACD_signal": -284.0, "MACD_hist": -262.0, "OBV": -9849, "MA_20": 104420.974, "MA_50": 104957.9348, "MA_100": 105057.5754, "MA_200": null, "ATR": 648, "Stochastic_Oscillator": 7.0, "Bollinger_Middle": 104420.974, "Bollinger_Upper": 106145.35896, "Bollinger_Lower": 102696.58904, "ADX": 21.56, "Williams_%R": -93.11, "Parabolic_SAR": 105182.75111, "Ichimoku_A": 103761.61, "Ichimoku_B": 104141.935, "Ichimoku_Base_Line": 103761.61, "Ichimoku_Conversion_Line": 103761.61, "VWAP": 103838.84496, "Moving_Average_Envelope_Upper": 106509.39348, "Moving_Average_Envelope_Lower": 102332.55452}, {"High": 102177.02, "Low": 101388.33, "Open": 101912.8, "Volume": 2069, "Quote Asset Volume": 210550054, "Close": 101457.51, "conversionType": "direct", "conversionSymbol": "", "Open Time": "2025-06-05 20:00:00", "Close Time": "2025-06-05 21:00:00", "RSI": 23.0, "MACD": -692.0, "MACD_signal": -366.0, "MACD_hist": -326.0, "OBV": -11919, "MA_20": 104244.848, "MA_50": 104866.9184, "MA_100": 105021.7604, "MA_200": null, "ATR": 658, "Stochastic_Oscillator": 2.0, "Bollinger_Middle": 104244.848, "Bollinger_Upper": 106376.35852, "Bollinger_Lower": 102113.33748, "ADX": 24.18, "Williams_%R": -98.47, "Parabolic_SAR": 104754.88498, "Ichimoku_A": 103647.175, "Ichimoku_B": 103907.16, "Ichimoku_Base_Line": 103647.175, "Ichimoku_Conversion_Line": 103647.175, "VWAP": 103716.07742, "Moving_Average_Envelope_Upper": 106329.74496, "Moving_Average_Envelope_Lower": 102159.95104}]
+
+Тебе переданы данные в формате JSON о свечах и значениях индикаторов, соответствующих каждой свече.
+Пожалуйста, проанализируй все данные о свечах и индикаторах, начиная с самой первой свечи и заканчивая последней доступной свечой. 
+Используйте все данные в диапазоне от первой до последней свечи. 
+Верни подробный анализ на русском в формате JSON. 
+Следуй ВСЕМ правилам биржевого технического анализа. 
+Используй только предоставленные данные и не генерируй вымышленных значений. 
+Убедись, что JSON валиден, без использования блоков кода, со всеми строками и ключами в двойных кавычках, а числовые значения представлены как числа.
+
+Удели **МНОГО** внимания точности ответа.
+Убедись перед отправкой, что ты проверил соответствие всех своих выводов предоставленным данным и инструкциям. 
+Главный приоритет - это **максимальная точность анализа**, поэтому можешь потратить в 10 раз больше времени на тщательную проверку ответа и полученных данных. 
+Можешь не ограничивать себя в формулировках, лимит токенов на ответ достаточно большой - более 14000.
+
+Заполни следующие разделы:
+
+1. **"primary_analysis"**: широкая оценка актива, согласно ВСЕМ правилам биржевого технического анализа с учётом индикаторов, аргументируй и подтверди свой вывод.
+2. **"confidence_in_trading_decisions"**: Оценка уверенности в торговых решениях, обоснование.
+3. **"support_resistance_levels"**: определи уровни поддержки и сопротивления, аргументируй.
+   - **Критерии:**
+     - Уровни должны быть протестированы (касались цены) минимум несколько раз, чтобы подтвердить их значимость.     
+     - Уровни должны совпадать с важными индикаторами, такими как уровни Фибоначчи, пивотные точки или скользящие средние, что добавляет дополнительную значимость.
+     - Наличие сильных ценовых баров (например, большие свечи с длинными тенями) на этих уровнях, что может указывать на активность покупателей или продавцов.
+     - Убедись, что предложенные уровни соответствуют ценам свечей, на которые ты ссылаешься, и что они были достигнуты в процессе анализа.
+   - **Методы:**
+     - Используй лучи, начинающиеся с экстремальной точки первой свечи и направленные вправо, чтобы визуализировать уровни поддержки и сопротивления.
+     - Подтверждай уровни с помощью объёмов: увеличение объёмов при касании уровня может указывать на его значимость и подтверждать его как уровень поддержки или сопротивления.
+     - При анализе уровней учитывай контекст рынка и текущие тренды, чтобы определить, являются ли уровни актуальными для текущей ситуации.
+4. **"trend_lines"**: найди и укажи начальные и конечные точки тренда (даты и цены). локальные и глобальные тренды.
+5. **"pivot_points"**: Анализ пивотных точек. для учета в анализе.
+6. **"unfinished_zones"**: Определи и опиши зоны: Bad High/Low, Weak High/Low, Poor High/Low, Sweep Levels. укажи если не выявлено.
+7. **"imbalances"**: Выяви и опиши Single Prints, Fair Value Gaps, Vector Candles.укажи если не выявлено.
+8. **"fibonacci_analysis"**: Проведи анализ уровней Фибоначчи, согласно правилам построения "от прошлой даты к будущей, от минимума цены до максимума, либо наоборот, в зависимости от текущего тренда". согласно актуальным трендам(локальным/глобальным), которые ты определил. аргументируй.
+    - **Привязка fibonacci к хвостам свечей:** Начальная и конечная точки уровней Фибоначчи должны быть привязаны к "High" и "Low" ценам свечей.
+    - **Автоматизированная идентификация:** Используй индикаторы, такие как MACD и ADX, для подтверждения силы тренда перед выбором точек Фибоначчи.
+9. **"elliott_wave_analysis"**: Используй предоставленные данные для идентификации текущих волн и прогнозирования следующих. Следуй правилам волнового анализа Эллиота, учитывая соотношения между длинами волн и временными интервалами. сделай предположение о дальнейших волнах с конкреными точками для визуализации(дата,цена). помни какие волны не могут быть выше других
+10. **"divergence_analysis"**: Определи наличие дивергенций RSI, СМВ и прочие если найдешь (бычья/медвежья дивергенция, скрытые, обычные, расширенные) и их значение. аргументируй и укажи о чем свидетельствует.
+11. **"structural_edge"**: найди, выяви и опиши Swing Fail и Failed Auction. укажи если не выявлено
+12. **Идентификация паттернов и аномалий:**: 
+   - Ищи классические свечные паттерны (например, поглощение, молот, падающая звезда, прочие) и графические паттерны (например, голова и плечи, треугольники, прочие).
+   - Определи аномалии, такие как резкие скачки объёма или необычные движения цены, которые могут указывать на события или изменения в настроениях рынка.
+13. **"indicators_analysis"**: Детальный анализ ключевых индикаторов (RSI, MACD, объём, OBV, Williams %R, Parabolic SAR, Ichimoku Cloud, VWAP, Moving Average Envelopes и другие).
+14. **"volatility_analysis"**: Оценка текущей волатильности для понимания уровня риска.
+15. **"volume_analysis"**: Проведи детальный анализ объёмов торгов, включая изменения объёмов при достижении ключевых уровней поддержки и сопротивления, а также соотношение объёма с движением цены.
+16. **"indicator_correlations"**: Исследуй корреляции между различными техническими индикаторами, а также анализируй связь между ATR и уровнем волатильности.
+17. **"gap_analysis"**: Выяви и проанализируй Gaps, оцени их влияние на рыночные настроения и тренды. аргументируй.
+18. **"psychological_levels"**: Определи психологически значимые уровни поддержки и сопротивления (круглые числа, уровни с большими объёмами), а также свободные зоны (Fair Value Gaps), которые могут служить уровнями для будущих движений цены. аргументируй.
+19. **"extended_ichimoku_analysis"**: Проведи расширенный анализ облаков Ichimoku, включая пересечения линий Conversion Line и Base Line, а также оцени положение цены относительно облака для подтверждения тренда.
+20. **"anomalous_candles": Выяви аномальные свечи с необычными размерами тел или теней и проанализируй последовательности свечей для прогнозирования смены тренда.
+21. **"market_cycles_identification"**: Идентификация текущего рыночного цикла и его влияние на прогнозирование.
+22. **"price_prediction"**: Гипотеза о движении цены в следующие 24 часа с данными для визуализации (виртуальные свечи). Это единственный раздел, где ты можешь генерировать виртуальные данные и предполагать реальное движение цены с ростом и коррекциями. Количество виртуальных свечей должно соответствовать количеству свечей, необходимых для прогнозирования движения цены в следующие 24 часа, в зависимости от таймфрейма (например, 24 свечи для часового таймфрейма, 6 свечей для 4-часового и т.д.). Виртуальные свечи должны быть расположены в будущем относительно последней свечи, виртуальные свечи должны включать как падения, так и подъемы, чтобы отразить типичное поведение рынка. Убедитесь, что все данные, используемые для создания виртуальных свечей, соответствуют проведенному анализу и рекомендациям.
+    **Требования**
+                -Проверь, что даты виртуальных свечей находятся в будущем относительно даты последней свечи.-Убедись, что виртуальные свечи создаются на основе анализа текущих трендов и уровней поддержки и сопротивления.
+                -Симулируй рыночное движение, которое может быть неравномерным, с коррекциями и импульсами, чтобы отразить реальную динамику рынка.
+                - При создании виртуальных свечей необходимо использовать только последовательные временные метки.
+23. **"risk_management"**: Выявление потенциальных рисков и рекомендации по их снижению.
+24. **"explanations"**: Объяснения ко всем разделам анализа.
+25. **"recommendations"**: Рекомендации по торговым стратегиям с деталями (стратегия, short/long, точка входа, стоп, риск, прибыль и прочее). Каждая стратегия должна содержать цену входа, цену выхода, уровень стоп-лосса и тейк-профита, а также обоснование выбора этих уровней. Этот раздел должен коррелироваться со всем анализом и особенно с 'price_prediction'. Убедитесь, что все рекомендации основаны на предыдущем анализе и поддерживаются данными из раздела 'price_prediction'.
+    **Требования**
+                - Убедись, что даты в рекомендациях являются будущими датами относительно даты последней свечи.
+                - Проверь, что каждая стратегия имеет четкую связь с анализом, включая уровни поддержки и сопротивления, а также прогнозируемое движение цены.
+                - Обоснуй каждую стратегию, ссылаясь на данные из анализа, чтобы обеспечить согласованность и логичность.
+26. **"feedback"**: ты абсолютно уверен в своих выводах? почему? Замечания для внимания и улучшения текущего промпта. укажи свои Model configuration: Temperature, Top P, Frequency penalty, Presence penalty. Какой временной период ты проанализировал? какие данные ты пропустил и не использовал в анализе? почему? с какими проблемами столкнулся: в ходе формирования ответа? заполнения раздела с данными для визуализации?  инструкции промпта тебе были понятны? ответь подробно, как улучшить этот промпт, повысить для тебя понятность промпта, инструкций, определений и точность анализа?
+
+**Важно:**
+- Заполняя каждый раздел используй **только предоставленные данные** или делай обоснованные предположения на их основе.
+- Избегай придумывать или генерировать данные, не основанные на исходной информации.
+- Избегай использовать круглые числа.
+- Обеспечь полные данные для визуализации: Все данные ("price","date"), необходимые для отрисовки элементов (уровни Фибоначчи, уровни поддержки и сопротивления, паттерны, волны Эллиота, трендовые линии и индикаторы), должны быть включены в соответствующие разделы.
+- При построении уровней Фибоначчи используй **точные экстремумы** (High и Low) из предоставленных данных. Убедись, что начальная и конечная точки уровней Фибоначчи соответствуют реальным максимумам и минимумам свечей.
+- Проводи **точные расчёты** для всех параметров.
+- Убедись, что все данные, необходимые для визуализации, включены в соответствующие разделы с правильной структурой.
+- Убедись, что числовые значения в JSON представлены без разделителей тысяч и десятичных запятых. Используй точку в качестве десятичного разделителя, а разделители тысяч не используй.
+- Убедитесь, что анализ охватывает все ключевые аспекты технического анализа, включая тренды, уровни поддержки и сопротивления, объемы, волатильность и другие индикаторы.
+- Все даты должны быть в формате 'YYYY-MM-DD HH:MM:SS', где часы должны быть от 00 до 23.
+- Включить проверку на корректность формата даты и времени перед генерацией виртуальных свечей, чтобы гарантировать, что все временные метки соответствуют реальному времени.
+
+Структура каждого раздела, где требуется предоставление данных для визуализации:
+
+{
+    "primary_analysis": {
+        "global_trend": "Описание глобального тренда на основе предоставленных данных и индикаторов.",
+        "local_trend": "Описание локального тренда за более короткий период.",
+        "patterns": "Описание обнаруженных паттернов в ценовом движении.",
+        "anomalies": "Описание выявленных аномалий или необычных событий."
+    },
+    "confidence_in_trading_decisions": {
+        "confidence": "confidence_type",
+        "reason": "Обоснование уровня уверенности в торговых решениях."
+    },
+    "unfinished_zones": [
+        {
+            "type": "zone_type_1",
+            "level": level_price_number_1,
+            "date": "YYYY-MM-DD HH:MM:SS",
+            "line_style": "solid", // Или "dashed", "dotted"
+            "line_color": "color_description",
+            "explanation": "Объяснение данной незавершённой зоны."
+        }
+        // Добавьте минимум 3, максимум n зон
+    ],
+    "imbalances": [
+        {
+            "type": "imbalance_type_1",
+            "start_point": {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "price": start_price_number_1
+            },
+            "end_point": {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "price": end_price_number_1
+            },
+            "price_range": [low_price_number_1, high_price_number_1],
+            "explanation": "Объяснение данного дисбаланса."
+        }
+        // Добавьте минимум 3, максимум n дисбалансов
+    ],
+    "support_resistance_levels": {
+    "supports": [
+        {
+            "level": price_number,
+            "date": "YYYY-MM-DD HH:MM:SS",
+            "explanation": "Почему данный уровень считается поддержкой.",
+            "ray_slope": "угол наклона луча, если требуется" // Опционально
+        }
+        // Добавьте минимум 3, максимум n уровней
+    ],
+    "resistances": [
+            {
+               "level": price_number,
+               "date": "YYYY-MM-DD HH:MM:SS",
+               "explanation": "Почему данный уровень считается сопротивлением.",
+               "ray_slope": "угол наклона луча, если требуется" // Опционально
+            }
+            // Добавьте минимум 3, максимум n уровней
+        ]
+    },
+    "trend_lines": {
+        "lines": [
+            {
+                "type": "восходящая или нисходящая",
+                "start_point": {
+                    "date": "YYYY-MM-DD HH:MM:SS",
+                    "price": start_price_number_1
+                },
+                "end_point": {
+                    "date": "YYYY-MM-DD HH:MM:SS",
+                    "price": end_price_number_1
+                },
+                "slope_angle": "угол наклона линии" // Опционально
+            }
+            // Добавьте необходимые трендовые линии минимум 3, максимум n линий 
+        ]
+    },
+        "fair_value_gaps": [
+            {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "price_range": [low_price_number, high_price_number],
+                "explanation": "Описание свободной зоны и её потенциального влияния."
+            }
+            // Добавьте минимум 1, максимум n линий
+        ],
+    "fibonacci_analysis": {
+        "based_on_local_trend": {
+            "levels": {
+                "0%": level_value_number_0_local,
+                "23.6%": level_value_number_23_6_local,
+                "50%": level_value_number_50_local,
+                "61.8%": level_value_number_61_8_local,
+                "75%": level_value_number_75_local,
+                "86,6%": level_value_number_86_6_local,
+                "100%": level_value_number_100_local
+            },
+            "start_point": {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "price": start_price_number_local
+            },
+            "end_point": {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "price": end_price_number_local
+            },
+            "explanation": "Объяснение уровней Фибоначчи на основе локального тренда. аргументы. проверка соответствия цен start_pointи end_point данным свечи. Проверка соответствия правилам построения"
+        },
+        "based_on_global_trend": {
+            "levels": {
+                "0%": level_value_number_0_global,
+                "23.6%": level_value_number_23_6_global,
+                "50%": level_value_number_50_global,
+                "61.8%": level_value_number_61_8_global,
+                "75%": level_value_number_75_global,
+                "86,6%": level_value_number_86_6_global,
+                "100%": level_value_number_100_global
+            },
+            "start_point": {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "price": start_price_number_global
+            },
+            "end_point": {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "price": end_price_number_global
+            },
+            "explanation": "Объяснение уровней Фибоначчи на основе локального тренда. аргументы. проверка соответствия цен start_pointи end_point данным свечи. Проверка соответствия правилам построения"
+        }
+    },
+    "elliott_wave_analysis": {
+        "current_wave": "Описание текущей волны Эллиота.",
+        "wave_count": wave_count_number,
+        "forecast": "Прогноз на основе волн Эллиота. Проверка соответствия правилам построения",
+        "waves": [
+            {
+                "wave_number": wave_number_integer_1,
+                "start_point": {
+                    "date": "YYYY-MM-DD HH:MM:SS",
+                    "price": start_price_number_1
+                },
+                "end_point": {
+                    "date": "YYYY-MM-DD HH:MM:SS",
+                    "price": end_price_number_1
+                }
+            }
+            // Добавьте волны при необходимости (минимум 3, максимум 7)
+        ],
+        "explanation": "Объяснение анализа волн Эллиота. аргументы. Проверка соответствия правилам построения"
+    },
+    "divergence_analysis": [
+        {
+            "indicator": "RSI",
+            "type": "bullish_or_bearish_divergence",
+            "date": "YYYY-MM-DD HH:MM:SS",
+            "explanation": "Объяснение дивергенции и её значимости. аргументы."
+        }
+        // Добавьте минимум 3, максимум 7 дивергенций
+    ],
+    "structural_edge": [
+        {
+            "type": "Swing Fail",
+            "date": "YYYY-MM-DD HH:MM:SS",
+            "price": price_number_1,
+            "explanation": "Описание и значение данного явления. аргументы."
+        }
+        // Добавьте дополнительные элементы при необходимости (максимум до 7)
+    ],
+    "candlestick_patterns": [
+        {
+            "date": "YYYY-MM-DD HH:MM:SS",
+            "type": "pattern_type_1",
+            "price":price_number_1,
+            "explanation": "Краткое объяснение значимости паттерна. аргументы."
+        }
+        // Добавьте минимум 3, максимум 7 паттернов
+    ],
+    "indicators_analysis": {
+        "RSI": {
+            "current_value": rsi_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по RSI."
+        },
+        "MACD": {
+            "current_value": macd_value,
+            "signal": macd_signal_value,
+            "histogram": macd_histogram_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по MACD."
+        },
+        "OBV": {
+            "current_value": obv_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по OBV."
+        },
+        "ATR": {
+            "current_value": atr_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по ATR."
+        },
+        "Stochastic_Oscillator": {
+            "current_value": stochastic_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по стохастическому осцилятору."
+        },
+        "Bollinger_Bands": {
+            "upper_band": bollinger_upper_value,
+            "middle_band": bollinger_middle_value,
+            "lower_band": bollinger_lower_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по полосам Боллинджера."
+        },
+        "Ichimoku_Cloud": {
+            "ichimoku_a": ichimoku_a_value,
+            "ichimoku_b": ichimoku_b_value,
+            "base_line": ichimoku_base_line_value,
+            "conversion_line": ichimoku_conversion_line_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по облакам Ichimoku."
+        },
+        "ADX": {
+            "current_value": adx_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по ADX."
+        },
+        "Parabolic_SAR": {
+            "current_value": parabolic_sar_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по Parabolic SAR."
+        },
+        "VWAP": {
+            "current_value": vwap_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по VWAP."
+        },
+        "Moving_Average_Envelopes": {
+            "upper_envelope": upper_envelope_value,
+            "lower_envelope": lower_envelope_value,
+            "trend": "trend_description",
+            "comment": "Комментарий по Moving Average Envelopes."
+        }
+        // Добавьте другие индикаторы по необходимости или предложите в рекомендациях
+    },
+    "volume_analysis": {
+        "volume_trends": "Анализ изменений объёмов при достижении ключевых уровней и соотношения объёма с движением цены.",
+        "significant_volume_changes": [
+            {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "price": price_number,
+                "volume": volume_number,
+                "explanation": "Описание значительного изменения объёма и его влияния."
+            }
+            // Добавьте минимум 3, максимум 7 записей
+        ]
+    },
+    "indicator_correlations": {
+        "macd_rsi_correlation": "Анализ корреляции между MACD и RSI.",
+        "atr_volatility_correlation": "Анализ связи между ATR и уровнем волатильности.",
+        "explanation": "Объяснение значимости выявленных корреляций. Проверка соответствия правильности выводов"
+    },
+    "gap_analysis": {
+        "gaps": [
+            {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "gap_type": "Common Gap, Breakaway Gap, Runaway Gap или Exhaustion Gap",
+                "price_range": [low_price_number, high_price_number],
+                "explanation": "Описание пробела и его влияние на рынок."
+            }
+            // Добавьте минимум 1, максимум 5 пробелов
+        ],
+        "comment": "Общий комментарий по анализу пробелов. Проверка соответствия правилам определения"
+    },
+    "psychological_levels": {
+        "levels": [
+            {
+                "level": price_number,
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "type": "Support или Resistance",
+                "explanation": "Почему данный уровень считается психологическим."
+            }
+            // Добавьте минимум 3, максимум 7 уровней
+        ]
+    },
+    "fair_value_gaps": [
+            {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "price_range": [low_price_number, high_price_number],
+                "explanation": "Описание свободной зоны и её потенциального влияния. Проверка соответствия правилам определения"
+            }
+            // Добавьте минимум 1, максимум 5 записей
+        ],
+    "extended_ichimoku_analysis": {
+        "conversion_base_line_cross": {
+            "date": "YYYY-MM-DD HH:MM:SS",
+            "signal": "Bullish Cross или Bearish Cross",
+            "explanation": "Описание пересечения линий и его значимости."
+        },
+        "price_vs_cloud": {
+            "position": "Above, Below или Within the Cloud",
+            "explanation": "Положение цены относительно облака и его значение."
+        },
+        "comment": "Общий комментарий по расширенному анализу Ichimoku."
+    },
+    "volatility_by_intervals": {
+        "morning_volatility": {
+            "average_volatility": volatility_value_morning,
+            "comment": "Комментарий по волатильности в утренние часы."
+        },
+        "evening_volatility": {
+            "average_volatility": volatility_value_evening,
+            "comment": "Комментарий по волатильности в вечерние часы."
+        },
+        "comparison": "Сравнение волатильности между разными временными интервалами."
+    },
+    "anomalous_candles": [
+        {
+            "date": "YYYY-MM-DD HH:MM:SS",
+            "type": "Anomalous Candle Type",
+            "price": price_number,
+            "explanation": "Описание аномалии и её возможного влияния."
+        }
+        // Добавьте минимум 3, максимум 7 аномальных свечей
+    },
+    "price_prediction": {
+        "forecast": "Описание прогнозируемого движения цены в следующие 24 часа. аргументы. Проверка соответствия правилам построения!",
+        "virtual_candles": [
+            {
+                "date": "YYYY-MM-DD HH:MM:SS",
+                "open": open_price_number_1,
+                "high": high_price_number_1,
+                "low": low_price_number_1,
+                "close": close_price_number_1
+            }
+            // Добавьте необходимое количество виртуальных свечей
+        ]
+    },
+    "recommendations": {
+        "trading_strategies": [
+            {
+                "strategy": "Описание торговой стратегии.",
+                "entry_point": {
+                    "Price": entry_price_number_1,
+                    "Date": "YYYY-MM-DD HH:MM:SS"
+                },
+                "exit_point": {
+                    "Price": exit_price_number_1,
+                    "Date": "YYYY-MM-DD HH:MM:SS"
+                },
+                "stop_loss": stop_loss_price_number_1,
+                "take_profit": take_profit_price_number_1,
+                "risk": "Описание уровня риска.",
+                "profit": "Описание потенциальной прибыли.",
+                "other_details": "Дополнительные детали о стратегии. аргументы. Проверка соответствия правилам построения"
+            }
+            // Добавьте минимум 4, максимум n стратегий
+        ]
+    },
+    "feedback": {
+        "note": "Любые дополнительные замечания или области, требующие внимания. проверка выводов анализа."
+    }
+}
+
+Перед отправкой анализа проверьте соответствие всех упоминаемых цен фактическим данным, а так же соответствие ответа **ВСЕМ** инструкциям.
