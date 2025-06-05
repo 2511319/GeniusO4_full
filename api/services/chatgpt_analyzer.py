@@ -3,7 +3,7 @@
 import json
 from typing import Dict, Any
 from config.config import OPENAI_API_KEY, logger
-import openai
+from openai import OpenAI
 import re
 import os
 import time
@@ -18,7 +18,7 @@ class ChatGPTAnalyzer:
         Инициализирует ChatGPTAnalyzer с API ключом и моделью.
         """
         self.api_key = OPENAI_API_KEY
-        openai.api_key = self.api_key
+        self.client = OpenAI(api_key=self.api_key)
         self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
     def construct_prompt(self, analysis_results: Dict[str, Any]) -> str:
@@ -79,7 +79,7 @@ class ChatGPTAnalyzer:
                 return {}
 
             # Отправка запроса в модель
-            response = openai.ChatCompletion.create(
+            response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": "You are an...erienced trader and a top-tier expert in predictive analysis."},
@@ -93,14 +93,14 @@ class ChatGPTAnalyzer:
                 ts = int(time.time())
                 raw_file = f"dev_logs/chatgpt_raw_response_{ts}.json"
                 try:
-                    resp_dict = response.to_dict()
+                    resp_dict = response.model_dump()
                 except Exception:
                     resp_dict = json.loads(str(response))
                 with open(raw_file, "w", encoding="utf-8") as rf:
                     json.dump(resp_dict, rf, ensure_ascii=False, indent=4)
                 logger.info(f"Сырый ответ ChatGPT сохранён в {raw_file}.")
 
-            answer = response.choices[0].message["content"].strip()
+            answer = response.choices[0].message.content.strip()
 
             # Извлечение JSON из ответа
             json_str = self.extract_json(answer)
