@@ -1,15 +1,20 @@
 # api/services/crypto_compare_provider.py
 
 import os
+import re
 import time
 import pandas as pd
 import httpx
 
+# API key для CryptoCompare
 API_KEY = os.getenv("CRYPTOCOMPARE_API_KEY", "")
+# базовый URL для исторических данных
 BASE_URL = "https://min-api.cryptocompare.com/data/v2/histo"
 
 # Тикер по умолчанию
 DEFAULT_SYMBOL = os.getenv("DEFAULT_SYMBOL", "BTCUSDT")
+# Валюта по умолчанию для котируемой части
+DEFAULT_QUOTE = os.getenv("DEFAULT_QUOTE", "USD")
 # Флаг логирования
 DEBUG = os.getenv("DEBUG_LOGGING", "false").lower() == "true"
 DEV_LOG_DIR = os.path.join(os.getcwd(), "api", "dev_logs")
@@ -22,7 +27,26 @@ async def fetch_ohlcv(symbol: str, interval: str, limit: int) -> pd.DataFrame:
       Open Time, Close Time, Open, High, Low, Close, Volume, Quote Asset Volume
     """
     # 1) Подготовка параметров
-    symbol = (symbol or "").strip().upper() or DEFAULT_SYMBOL
+    pair = (symbol or "").strip().upper() or DEFAULT_SYMBOL
+    base, quote = pair, DEFAULT_QUOTE
+
+    if any(sep in pair for sep in ["-", "_", "/"]):
+        parts = re.split(r"[-_/]", pair)
+        if len(parts) >= 2:
+            base, quote = parts[0], parts[1]
+    else:
+        known_quotes = [
+            "USDT", "USDC", "BUSD", "BTC", "ETH", "BNB",
+            "USD", "EUR", "TRY",
+        ]
+        for q in known_quotes:
+            if pair.endswith(q) and len(pair) > len(q):
+                base, quote = pair[:-len(q)], q
+                break
+
+    if base == pair:
+        quote = DEFAULT_QUOTE
+
     period = {
         "1m": "minute", "5m": "minute", "15m": "minute",
         "1h": "hour", "4h": "hour", "1d": "day"
@@ -31,8 +55,8 @@ async def fetch_ohlcv(symbol: str, interval: str, limit: int) -> pd.DataFrame:
 
     url = f"{BASE_URL}{period}"
     params = {
-        "fsym": symbol,
-        "tsym": "USD",
+        "fsym": base,
+        "tsym": quote,
         "limit": limit,
         "aggregate": agg,
         "api_key": API_KEY
@@ -52,7 +76,7 @@ async def fetch_ohlcv(symbol: str, interval: str, limit: int) -> pd.DataFrame:
     if DEBUG:
         os.makedirs(DEV_LOG_DIR, exist_ok=True)
         ts = int(time.time())
-        cols_file = os.path.join(DEV_LOG_DIR, f"raw_cols_{symbol}_{interval}_{ts}.txt")
+        cols_file = os.path.join(DEV_LOG_DIR, f"raw_cols_{base}_{quote}_{interval}_{ts}.txt")
         with open(cols_file, "w", encoding="utf-8") as f:
             f.write("Columns:\n" + "\n".join(df.columns) + "\n\n")
             f.write("First rows:\n" + df.head(5).to_string())
