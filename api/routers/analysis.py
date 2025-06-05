@@ -71,7 +71,7 @@ async def analyze(req: AnalyzeRequest):
     fig = create_chart(layers, df_ind, analysis)
 
     return AnalyzeResponse(
-        figure=fig.to_dict(),
+        figure=fig.to_plotly_json(),
         analysis=analysis,
         ohlc=ohlc,
         indicators=indicator_cols
