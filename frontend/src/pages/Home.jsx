@@ -40,8 +40,10 @@ export default function Home() {
         alert(json.detail || 'Request error');
         return;
       }
-      setData(json.ohlc || []);
+      const ohlc = json.ohlc || [];
+      setData(ohlc);
       setAvailableIndicators(json.indicators || []);
+      console.log('Данных получено:', ohlc.length);
     } catch (err) {
       console.error(err);
       alert('Network error');
