@@ -9,7 +9,11 @@ export default function TradingViewChart({ data = [], layers = [] }) {
     console.log('Отрисовка графика. Длина данных:', data.length, 'слои:', layers);
     if (!data.length) return;
     if (chartRef.current) {
-      chartRef.current.remove();
+      try {
+        chartRef.current.remove();
+      } catch (err) {
+        console.warn('Ошибка удаления старого графика', err);
+      }
     }
     const chart = createChart(ref.current, { height: 500 });
     chartRef.current = chart;
@@ -40,7 +44,17 @@ export default function TradingViewChart({ data = [], layers = [] }) {
       vol.setData(data.map(c => ({ time: c['Open Time'].slice(0, 10), value: c.Volume })));
     }
 
-    return () => chart.remove();
+    return () => {
+      if (chartRef.current) {
+        try {
+          chartRef.current.remove();
+        } catch (err) {
+          console.warn('Ошибка очистки графика', err);
+        } finally {
+          chartRef.current = null;
+        }
+      }
+    };
   }, [data, layers]);
 
   return <div ref={ref} className="chart" />;
