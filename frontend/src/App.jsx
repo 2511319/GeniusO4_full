@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import TradingViewChart from './TradingViewChart';
+import './App.css';
 
 export default function App() {
   const [symbol, setSymbol] = useState('BTCUSDT');
@@ -7,7 +8,8 @@ export default function App() {
   const [limit, setLimit] = useState(144);
   const [token, setToken] = useState(localStorage.getItem('jwt') || '');
   const [data, setData] = useState([]);
-  const [layers, setLayers] = useState(['volume']);
+  const [layers, setLayers] = useState([]);
+  const [availableIndicators, setAvailableIndicators] = useState([]);
 
   const toggleLayer = (layer) => {
     setLayers((prev) =>
@@ -16,16 +18,27 @@ export default function App() {
   };
 
   const loadData = async () => {
-    const body = { symbol, interval, limit, indicators: [] };
+    const body = { symbol, interval, limit, indicators: layers };
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    const res = await fetch('/api/analyze', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    });
-    const json = await res.json();
-    setData(json.ohlc || []);
+    try {
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        console.error(json);
+        alert(json.detail || 'Request error');
+        return;
+      }
+      setData(json.ohlc || []);
+      setAvailableIndicators(json.indicators || []);
+    } catch (err) {
+      console.error(err);
+      alert('Network error');
+    }
   };
 
   const saveToken = (val) => {
@@ -34,8 +47,8 @@ export default function App() {
   };
 
   return (
-    <div>
-      <div style={{ marginBottom: '10px' }}>
+    <div className="container">
+      <div className='form-group'>
         <input value={symbol} onChange={(e) => setSymbol(e.target.value)} placeholder="Symbol" />
         <select value={interval} onChange={(e) => setInterval(e.target.value)}>
           <option value="1h">1h</option>
@@ -51,33 +64,21 @@ export default function App() {
         />
         <button onClick={loadData}>Load</button>
       </div>
-      <div style={{ marginBottom: '10px' }}>
-        <label>
-          <input
-            type="checkbox"
-            checked={layers.includes('volume')}
-            onChange={() => toggleLayer('volume')}
-          />
-          Volume
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={layers.includes('ma50')}
-            onChange={() => toggleLayer('ma50')}
-          />
-          MA 50
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={layers.includes('ma200')}
-            onChange={() => toggleLayer('ma200')}
-          />
-          MA 200
-        </label>
+      <div className="form-group">
+        {availableIndicators.map((ind) => (
+          <label key={ind} style={{ marginRight: '10px' }}>
+            <input
+              type="checkbox"
+              checked={layers.includes(ind)}
+              onChange={() => toggleLayer(ind)}
+            />
+            {ind}
+          </label>
+        ))}
       </div>
-      <TradingViewChart data={data} layers={layers} />
+      <div className="chart-container">
+        <TradingViewChart data={data} layers={layers} />
+      </div>
     </div>
   );
 }
