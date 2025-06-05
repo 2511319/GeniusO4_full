@@ -122,6 +122,11 @@ class DataProcessor:
             self.df['Moving_Average_Envelope_Upper'] = sma_envelope * (1 + envelope_percentage)
             self.df['Moving_Average_Envelope_Lower'] = sma_envelope * (1 - envelope_percentage)
 
+            # Заменяем бесконечные значения, которые могут возникнуть при расчёте индикаторов
+            if np.isinf(self.df.select_dtypes(include=[float, int])).values.any():
+                logger.info("Обнаружены бесконечные значения, выполняется замена на NaN")
+                self.df.replace([np.inf, -np.inf], np.nan, inplace=True)
+
             logger.info("Индикаторы успешно рассчитаны.")
             return self.df
         except ImportError:
@@ -268,6 +273,7 @@ class DataProcessor:
             ohlc_data[col] = ohlc_data[col].astype(str)
 
         # Убедимся, что столбцы с индикаторами не содержат NaN
+        ohlc_data = ohlc_data.replace([np.inf, -np.inf], np.nan)
         ohlc_data = ohlc_data.ffill().bfill()
         # Заменяем NaN и NaT на None для корректной сериализации в JSON
         ohlc_data = ohlc_data.where(pd.notnull(ohlc_data), None)
