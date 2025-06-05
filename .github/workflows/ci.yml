@@ -18,6 +18,15 @@ jobs:
         run: |
           pip install flake8
           flake8 ui
+      - name: Run API tests
+        run: |
+          pip install -r api/requirements.txt pytest
+          pytest
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm install
+          npm test -- --run
       - name: Build API image
         run: |
           docker build -t geniuso4-api:latest api
