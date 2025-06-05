@@ -7,6 +7,7 @@ from openai import OpenAI
 import re
 import os
 import time
+import math
 
 class ChatGPTAnalyzer:
     """
@@ -34,10 +35,25 @@ class ChatGPTAnalyzer:
                 prompt_template = f.read()
             ohlc_data = analysis_results.get("ohlc", [])
 
+            def _sanitize(val):
+                if isinstance(val, float):
+                    if math.isnan(val) or math.isinf(val):
+                        return None
+                    return float(val)
+                if isinstance(val, dict):
+                    return {k: _sanitize(v) for k, v in val.items()}
+                if isinstance(val, list):
+                    return [_sanitize(v) for v in val]
+                return val
+
+            safe_data = _sanitize(ohlc_data)
+            if safe_data != ohlc_data:
+                logger.debug("Данные содержали NaN/inf, выполнена очистка")
+
             # Подстановка данных в шаблон промпта
             prompt = prompt_template.replace(
                 "{{ ohlc_data | tojson | default([]) }}",
-                json.dumps(ohlc_data, ensure_ascii=False, allow_nan=False)
+                json.dumps(safe_data, ensure_ascii=False, allow_nan=False)
             )
 
             # Сохраняем сформированный промпт в режиме отладки

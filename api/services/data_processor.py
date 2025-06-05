@@ -122,6 +122,11 @@ class DataProcessor:
             self.df['Moving_Average_Envelope_Upper'] = sma_envelope * (1 + envelope_percentage)
             self.df['Moving_Average_Envelope_Lower'] = sma_envelope * (1 - envelope_percentage)
 
+            # Заменяем бесконечные значения, которые могут возникнуть при расчёте индикаторов
+            if np.isinf(self.df.select_dtypes(include=[float, int])).values.any():
+                logger.info("Обнаружены бесконечные значения, выполняется замена на NaN")
+                self.df.replace([np.inf, -np.inf], np.nan, inplace=True)
+
             logger.info("Индикаторы успешно рассчитаны.")
             return self.df
         except ImportError:
@@ -237,6 +242,21 @@ class DataProcessor:
             logger.error(f"Ошибка при удалении свечей с null индикаторами: {e}")
             return self.df
 
+    def sanitize(self) -> pd.DataFrame:
+        """Удаляет бесконечные значения и заполняет NaN."""
+        try:
+            if np.isinf(self.df.select_dtypes(include=[float, int])).values.any():
+                logger.warning("Найдены бесконечные значения после обработки, выполняется замена")
+                self.df.replace([np.inf, -np.inf], np.nan, inplace=True)
+            nulls = self.df.isna().sum().sum()
+            if nulls:
+                logger.warning(f"Обнаружено {nulls} NaN значений, выполняется заполнение")
+                self.df = self.df.ffill().bfill()
+            return self.df
+        except Exception as e:
+            logger.error(f"Ошибка при очистке данных: {e}")
+            return self.df
+
     def save_to_json(self, filename: str):
         """
         Сохраняет обработанные данные в JSON файл.
@@ -267,8 +287,16 @@ class DataProcessor:
         for col in datetime_cols:
             ohlc_data[col] = ohlc_data[col].astype(str)
 
-        # Убедимся, что столбцы с индикаторами не содержат NaN
+        # Убедимся, что столбцы с индикаторами не содержат NaN/inf
+        if np.isinf(ohlc_data.select_dtypes(include=[float, int])).values.any():
+            logger.debug(
+                "Бесконечные значения в OHLC данных, заменяем на NaN"
+            )  # конфликтных маркеров не осталось
+        ohlc_data = ohlc_data.replace([np.inf, -np.inf], np.nan)
         ohlc_data = ohlc_data.ffill().bfill()
+        nulls = ohlc_data.isna().sum().sum()
+        if nulls:
+            logger.debug(f"После очистки осталось {nulls} NaN, заменяем на None")
         # Заменяем NaN и NaT на None для корректной сериализации в JSON
         ohlc_data = ohlc_data.where(pd.notnull(ohlc_data), None)
 
@@ -283,4 +311,5 @@ class DataProcessor:
         self.calculate_indicators()
         self.apply_rounding()  # Применяем округление
         self.drop_null_indicators()
+        self.sanitize()
         return self.df
