@@ -50,6 +50,24 @@ export default function Home() {
     }
   };
 
+  const loadTestData = async () => {
+    try {
+      console.log('Загрузка последнего ответа из dev_logs');
+      const res = await fetch('/api/testdata');
+      if (!res.ok) {
+        alert('Нет сохранённых данных');
+        return;
+      }
+      const json = await res.json();
+      setData(json.ohlc || []);
+      setAvailableIndicators(json.indicators || []);
+      console.log('Test data loaded', json);
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка чтения тестовых данных');
+    }
+  };
+
   const saveToken = (val) => {
     dispatch(setToken(val));
   };
@@ -71,6 +89,7 @@ export default function Home() {
           onChange={(e) => saveToken(e.target.value)}
         />
         <Button variant="contained" onClick={loadData} type="button">Load</Button>
+        <Button variant="outlined" onClick={loadTestData} type="button">Test</Button>
       </Box>
       <Box className="form-group">
         {availableIndicators.map((ind) => (
