@@ -1,8 +1,11 @@
 # api/routers/analysis.py
 
 import os
+from typing import List
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+
 from services.crypto_compare_provider import fetch_ohlcv
 from services.data_processor import DataProcessor
 from services.chatgpt_analyzer import ChatGPTAnalyzer
@@ -14,13 +17,27 @@ router = APIRouter()
 DEFAULT_SYMBOL = os.getenv("DEFAULT_SYMBOL", "BTCUSDT")
 
 class AnalyzeRequest(BaseModel):
-    symbol:   str
+    symbol: str
     interval: str
-    limit:    int
+    limit: int
+    indicators: List[str] = []
 
 class AnalyzeResponse(BaseModel):
-    figure:   dict
+    figure: dict
     analysis: dict
+    ohlc: List[dict]
+    indicators: List[str]
+
+ALL_LAYERS = [
+    'MACD', 'RSI', 'OBV', 'ATR', 'ADX', 'Stochastic_Oscillator', 'Volume',
+    'Bollinger_Bands', 'Ichimoku_Cloud', 'Parabolic_SAR', 'VWAP',
+    'Moving_Average_Envelopes', 'support_resistance_levels', 'trend_lines',
+    'unfinished_zones', 'imbalances', 'fibonacci_analysis',
+    'elliott_wave_analysis', 'structural_edge', 'candlestick_patterns',
+    'divergence_analysis', 'fair_value_gaps', 'gap_analysis',
+    'psychological_levels', 'anomalous_candles', 'price_prediction',
+    'recommendations'
+]
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze(req: AnalyzeRequest):
@@ -34,16 +51,28 @@ async def analyze(req: AnalyzeRequest):
 
     # 2. Расчёт всех индикаторов
     processor = DataProcessor(df)
-    df_ind   = processor.perform_full_processing()
+    df_ind = processor.perform_full_processing()
+    ohlc = processor.get_ohlc_data(req.limit)
+
+    # список вычисленных индикаторов
+    base_cols = [
+        'Open Time', 'Close Time', 'Open', 'High', 'Low', 'Close',
+        'Volume', 'Quote Asset Volume', 'Number of Trades', 'Ignore',
+        'Taker Buy Base Asset Volume', 'Taker Buy Quote Asset Volume'
+    ]
+    indicator_cols = [c for c in df_ind.columns if c not in base_cols]
 
     # 3. Анализ ChatGPT
     analyzer = ChatGPTAnalyzer()
-    analysis = analyzer.analyze(df_ind)
+    analysis = analyzer.analyze({"ohlc": ohlc})
 
-    # 4. Визуализация (рисуем всё, что посчитали)
-    fig = create_chart(df_ind, analysis)
+    # 4. Визуализация (рисуем выбранные слои)
+    layers = req.indicators or ALL_LAYERS
+    fig = create_chart(layers, df_ind, analysis)
 
     return AnalyzeResponse(
         figure=fig.to_dict(),
-        analysis=analysis
+        analysis=analysis,
+        ohlc=ohlc,
+        indicators=indicator_cols
     )

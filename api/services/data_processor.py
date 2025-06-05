@@ -245,9 +245,9 @@ class DataProcessor:
         ohlc_data = self.df.tail(num_candles).copy()
 
         # Преобразуем все столбцы с датами и временем в строки
-        datetime_cols = ohlc_data.select_dtypes(include=['datetime64[ns]', 'datetime64[ns, UTC]', 'object']).columns
+        datetime_cols = ohlc_data.select_dtypes(include=['datetime64[ns]', 'datetime64[ns, UTC]']).columns
         for col in datetime_cols:
-            self.df[col] = self.df[col].astype(str)
+            ohlc_data[col] = ohlc_data[col].astype(str)
 
         # Убедимся, что столбцы с индикаторами не содержат NaN
         ohlc_data = ohlc_data.ffill().bfill()
