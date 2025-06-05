@@ -7,8 +7,29 @@ function apiLogger() {
   return {
     name: 'api-logger',
     configureServer(server) {
+      // возврат последнего сохранённого ответа
+      server.middlewares.use('/api/testdata', (req, res) => {
+        const dir = path.join(process.cwd(), 'dev_logs');
+        fs.mkdirSync(dir, { recursive: true });
+        const files = fs
+          .readdirSync(dir)
+          .filter((f) => f.startsWith('api_'))
+          .sort();
+        if (!files.length) {
+          res.statusCode = 404;
+          res.end('No log files');
+          return;
+        }
+        const file = files[files.length - 1];
+        const data = fs.readFileSync(path.join(dir, file));
+        res.setHeader('Content-Type', 'application/json');
+        res.end(data);
+      });
+
       server.middlewares.use((req, res, next) => {
-        if (!req.url.startsWith('/api')) return next();
+        if (!req.url.startsWith('/api') || req.url === '/api/testdata') {
+          return next();
+        }
         const chunks = [];
         const origWrite = res.write.bind(res);
         const origEnd = res.end.bind(res);
@@ -27,7 +48,7 @@ function apiLogger() {
         };
         next();
       });
-    }
+    },
   };
 }
 
