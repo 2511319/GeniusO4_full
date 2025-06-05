@@ -6,6 +6,7 @@ export default function TradingViewChart({ data = [], layers = [] }) {
   const chartRef = useRef();
 
   useEffect(() => {
+    console.log('Отрисовка графика. Длина данных:', data.length, 'слои:', layers);
     if (!data.length) return;
     if (chartRef.current) {
       chartRef.current.remove();
