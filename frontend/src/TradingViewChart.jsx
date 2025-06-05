@@ -39,5 +39,5 @@ export default function TradingViewChart({ data = [], layers = [] }) {
     return () => chart.remove();
   }, [data, layers]);
 
-  return <div ref={ref} />;
+  return <div ref={ref} className="chart" />;
 }
