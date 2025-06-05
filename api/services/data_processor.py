@@ -208,12 +208,29 @@ class DataProcessor:
                 # Новые индикаторы
                 "VWAP", "Moving_Average_Envelope_Upper", "Moving_Average_Envelope_Lower"
             ]
-            initial_count = len(self.df)
-            # Используем .loc для предотвращения SettingWithCopyWarning
-            self.df = self.df.dropna(subset=indicators).copy()
-            final_count = len(self.df)
-            removed = initial_count - final_count
-            logger.info(f"Удалено {removed} свечей с пропущенными индикаторами.")
+
+            # Оставляем только те индикаторы, которые существуют в датафрейме
+            # и не полностью состоят из NaN значений
+            valid_cols = [
+                col for col in indicators
+                if col in self.df.columns and not self.df[col].isna().all()
+            ]
+
+            if valid_cols:
+                initial_count = len(self.df)
+                # Используем .loc для предотвращения SettingWithCopyWarning
+                self.df = self.df.dropna(subset=valid_cols).copy()
+                final_count = len(self.df)
+                removed = initial_count - final_count
+                logger.info(
+                    f"Удалено {removed} свечей с пропущенными индикаторами "
+                    f"по столбцам: {', '.join(valid_cols)}"
+                )
+            else:
+                logger.info(
+                    "Нет индикаторов с непустыми значениями для проверки. "
+                    "Свечи не удалялись."
+                )
             return self.df
         except Exception as e:
             logger.error(f"Ошибка при удалении свечей с null индикаторами: {e}")
