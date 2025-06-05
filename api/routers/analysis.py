@@ -1,6 +1,7 @@
 # api/routers/analysis.py
 
 import os
+import json
 from typing import List
 
 from fastapi import APIRouter, HTTPException
@@ -71,7 +72,8 @@ async def analyze(req: AnalyzeRequest):
     fig = create_chart(layers, df_ind, analysis)
 
     return AnalyzeResponse(
-        figure=fig.to_plotly_json(),
+        # Преобразуем JSON-строку фигуры в dict, иначе Pydantic не сможет сериализовать
+        figure=json.loads(fig.to_json()),
         analysis=analysis,
         ohlc=ohlc,
         indicators=indicator_cols
