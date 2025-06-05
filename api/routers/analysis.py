@@ -21,6 +21,7 @@ class AnalyzeRequest(BaseModel):
 class AnalyzeResponse(BaseModel):
     figure:   dict
     analysis: dict
+    ohlc:     list
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze(req: AnalyzeRequest):
@@ -35,15 +36,17 @@ async def analyze(req: AnalyzeRequest):
     # 2. Расчёт всех индикаторов
     processor = DataProcessor(df)
     df_ind   = processor.perform_full_processing()
+    ohlc_data = processor.get_ohlc_data(req.limit)
 
     # 3. Анализ ChatGPT
     analyzer = ChatGPTAnalyzer()
     analysis = analyzer.analyze(df_ind)
 
     # 4. Визуализация (рисуем всё, что посчитали)
-    fig = create_chart(df_ind, analysis)
+    fig = create_chart([], df_ind, analysis)
 
     return AnalyzeResponse(
         figure=fig.to_dict(),
-        analysis=analysis
+        analysis=analysis,
+        ohlc=ohlc_data
     )
