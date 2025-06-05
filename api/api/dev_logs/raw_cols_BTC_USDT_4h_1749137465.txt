@@ -1,0 +1,18 @@
+Columns:
+time
+high
+low
+open
+volumefrom
+volumeto
+close
+conversionType
+conversionSymbol
+
+First rows:
+         time       high        low       open  volumefrom      volumeto      close conversionType conversionSymbol
+0  1749099600  105188.43  104577.87  105177.43     1631.09  1.710170e+08  104649.78         direct                 
+1  1749103200  104698.78  104380.48  104649.78     1264.98  1.322374e+08  104454.39         direct                 
+2  1749106800  104621.69  104426.41  104454.39     1043.51  1.090851e+08  104517.11         direct                 
+3  1749110400  104674.52  104425.63  104517.11      909.21  9.509905e+07  104672.48         direct                 
+4  1749114000  104909.84  104672.34  104672.48      674.77  7.071288e+07  104895.92         direct                 
