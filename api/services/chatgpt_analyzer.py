@@ -37,7 +37,7 @@ class ChatGPTAnalyzer:
             # Подстановка данных в шаблон промпта
             prompt = prompt_template.replace(
                 "{{ ohlc_data | tojson | default([]) }}",
-                json.dumps(ohlc_data, ensure_ascii=False)
+                json.dumps(ohlc_data, ensure_ascii=False, allow_nan=False)
             )
 
             # Сохраняем сформированный промпт в режиме отладки

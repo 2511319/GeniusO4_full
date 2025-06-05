@@ -1,6 +1,7 @@
 # src/data/data_processor.py
 
 import pandas as pd
+import numpy as np
 import json
 from typing import Dict, Any, List
 import math
@@ -268,6 +269,8 @@ class DataProcessor:
 
         # Убедимся, что столбцы с индикаторами не содержат NaN
         ohlc_data = ohlc_data.ffill().bfill()
+        # Заменяем NaN и NaT на None для корректной сериализации в JSON
+        ohlc_data = ohlc_data.where(pd.notnull(ohlc_data), None)
 
         ohlc_data = ohlc_data.to_dict(orient='records')
         return ohlc_data
