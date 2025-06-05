@@ -6,3 +6,5 @@ __pycache__/
 .env.prod
 
 venv/
+frontend/node_modules/
+frontend/dist/
