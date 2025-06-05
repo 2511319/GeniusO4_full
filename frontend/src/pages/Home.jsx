@@ -26,19 +26,24 @@ export default function Home() {
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
     try {
+      console.log('Запрос к /api/analyze', body);
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
       });
+      console.log('Код ответа', res.status);
       const json = await res.json();
+      console.log('Ответ API', json);
       if (!res.ok) {
-        console.error(json);
+        console.error('Ошибка API', json);
         alert(json.detail || 'Request error');
         return;
       }
-      setData(json.ohlc || []);
+      const ohlc = json.ohlc || [];
+      setData(ohlc);
       setAvailableIndicators(json.indicators || []);
+      console.log('Данных получено:', ohlc.length);
     } catch (err) {
       console.error(err);
       alert('Network error');
