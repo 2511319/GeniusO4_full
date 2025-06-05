@@ -65,7 +65,7 @@ export default function Home() {
           value={token}
           onChange={(e) => saveToken(e.target.value)}
         />
-        <Button variant="contained" onClick={loadData}>Load</Button>
+        <Button variant="contained" onClick={loadData} type="button">Load</Button>
       </Box>
       <Box className="form-group">
         {availableIndicators.map((ind) => (
