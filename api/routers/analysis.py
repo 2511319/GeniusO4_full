@@ -22,6 +22,7 @@ class AnalyzeRequest(BaseModel):
     interval: str
     limit: int
     indicators: List[str] = []
+    drop_na: bool = True
 
 class AnalyzeResponse(BaseModel):
     figure: dict
@@ -54,7 +55,7 @@ async def analyze(req: AnalyzeRequest):
 
     # 2. Расчёт всех индикаторов
     processor = DataProcessor(df)
-    df_ind = processor.perform_full_processing()
+    df_ind = processor.perform_full_processing(drop_na=req.drop_na)
     ohlc = processor.get_ohlc_data(req.limit)
 
     # список вычисленных индикаторов
