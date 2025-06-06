@@ -26,6 +26,7 @@ def main():
     # создаём папки логов
     os.makedirs("api/dev_logs", exist_ok=True)
     os.makedirs("ui/dev_logs", exist_ok=True)
+    os.makedirs("frontend/dev_logs", exist_ok=True)
 
     python = sys.executable
     api_port = os.getenv("API_PORT", "8000")
