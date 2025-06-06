@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { TextField, Button, Select, MenuItem, Box, FormControlLabel, Checkbox } from '@mui/material';
+import { TextField, Button, Select, MenuItem, Box } from '@mui/material';
 import TradingViewChart from '../TradingViewChart';
+import TechnicalIndicators from '../TechnicalIndicators';
+import AdvancedIndicators from '../AdvancedIndicators';
+import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
+import AnalysisBlock from '../AnalysisBlock';
 import { setToken } from '../store';
 import '../App.css';
 
@@ -14,6 +18,8 @@ export default function Home() {
   const [data, setData] = useState([]);
   const [layers, setLayers] = useState([]);
   const [availableIndicators, setAvailableIndicators] = useState([]);
+  const [analysis, setAnalysis] = useState(null);
+  const [showAnalysis, setShowAnalysis] = useState(true);
 
   const toggleLayer = (layer) => {
     setLayers((prev) =>
@@ -43,6 +49,7 @@ export default function Home() {
       const ohlc = json.ohlc || [];
       setData(ohlc);
       setAvailableIndicators(json.indicators || []);
+      setAnalysis(json.analysis || null);
       console.log('Данных получено:', ohlc.length);
     } catch (err) {
       console.error(err);
@@ -61,6 +68,7 @@ export default function Home() {
       const json = await res.json();
       setData(json.ohlc || []);
       setAvailableIndicators(json.indicators || []);
+      setAnalysis(json.analysis || null);
       console.log('Test data loaded', json);
     } catch (err) {
       console.error(err);
@@ -92,17 +100,29 @@ export default function Home() {
         <Button variant="outlined" onClick={loadTestData} type="button">Test</Button>
       </Box>
       <Box className="form-group">
-        {availableIndicators.map((ind) => (
-          <FormControlLabel
-            key={ind}
-            control={<Checkbox checked={layers.includes(ind)} onChange={() => toggleLayer(ind)} />}
-            label={ind}
-          />
-        ))}
+        <TechnicalIndicators
+          available={availableIndicators}
+          layers={layers}
+          toggleLayer={toggleLayer}
+        />
+        <AdvancedIndicators
+          available={availableIndicators}
+          layers={layers}
+          toggleLayer={toggleLayer}
+        />
+        <ModelAnalysisIndicators
+          available={availableIndicators}
+          layers={layers}
+          toggleLayer={toggleLayer}
+        />
       </Box>
       <Box className="chart-container">
         <TradingViewChart data={data} layers={layers} />
       </Box>
+      <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setShowAnalysis(!showAnalysis)}>
+        {showAnalysis ? 'Скрыть анализ' : 'Показать анализ'}
+      </Button>
+      {showAnalysis && <AnalysisBlock analysis={analysis} />}
     </Box>
   );
 }
