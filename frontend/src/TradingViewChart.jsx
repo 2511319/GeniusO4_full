@@ -15,68 +15,86 @@ export default function TradingViewChart({ data = [], layers = [] }) {
         console.warn('Ошибка удаления старого графика', err);
       }
     }
+
+    const toUnix = (d) => {
+      const t = Math.floor(new Date(d).getTime() / 1000);
+      return !t || Number.isNaN(t) ? null : t;
+    };
+
+    const buildSeriesData = (field) => {
+      const seen = new Set();
+      return data
+        .map((c) => {
+          const t = toUnix(c['Open Time']);
+          if (t === null || c[field] === undefined) return null;
+          return { time: t, value: c[field] };
+        })
+        .filter((c) => c && !seen.has(c.time) && seen.add(c.time))
+        .sort((a, b) => a.time - b.time);
+    };
+
+    const addLine = (field, color) => {
+      const series = chart.addLineSeries({ color });
+      series.setData(buildSeriesData(field));
+    };
+
+    const addHistogram = (field, color) => {
+      const series = chart.addHistogramSeries({ color, priceFormat: { type: 'volume' } });
+      series.setData(buildSeriesData(field));
+    };
+
     const chart = createChart(ref.current, { height: 500 });
     chartRef.current = chart;
     const candleSeries = chart.addCandlestickSeries();
-    const seen = new Set();
+    const seenCandles = new Set();
     const candleData = data
       .map((c) => {
-        const time = Math.floor(new Date(c['Open Time']).getTime() / 1000);
-        if (!time || Number.isNaN(time)) return null;
+        const time = toUnix(c['Open Time']);
+        if (time === null) return null;
         return { time, open: c.Open, high: c.High, low: c.Low, close: c.Close };
       })
-      .filter((c) => c && !seen.has(c.time) && seen.add(c.time))
+      .filter((c) => c && !seenCandles.has(c.time) && seenCandles.add(c.time))
       .sort((a, b) => a.time - b.time);
-    console.log('Данные свечей', candleData.slice(0, 3));
-    try {
-      candleSeries.setData(candleData);
-    } catch (err) {
-      console.error('Ошибка setData', err);
-    }
+    candleSeries.setData(candleData);
 
-    if (layers.includes('MA_50') && data[0].MA_50 !== undefined) {
-      console.log('Добавление индикатора MA50');
-      const ma50 = chart.addLineSeries({ color: 'orange' });
-      ma50.setData(data.map(c => ({ time: c['Open Time'].slice(0, 10), value: c.MA_50 })));
-      const seen50 = new Set();
-      const seriesData = data
-        .map((c) => {
-          const t = Math.floor(new Date(c['Open Time']).getTime() / 1000);
-          if (!t || Number.isNaN(t)) return null;
-          return { time: t, value: c.MA_50 };
-        })
-        .filter((c) => c && !seen50.has(c.time) && seen50.add(c.time))
-        .sort((a, b) => a.time - b.time);
-      ma50.setData(seriesData);
-    }
-    if (layers.includes('MA_200') && data[0].MA_200 !== undefined) {
-      console.log('Добавление индикатора MA200');
-      const ma200 = chart.addLineSeries({ color: 'purple' });
-      const seen200 = new Set();
-      const seriesData = data
-        .map((c) => {
-          const t = Math.floor(new Date(c['Open Time']).getTime() / 1000);
-          if (!t || Number.isNaN(t)) return null;
-          return { time: t, value: c.MA_200 };
-        })
-        .filter((c) => c && !seen200.has(c.time) && seen200.add(c.time))
-        .sort((a, b) => a.time - b.time);
-      ma200.setData(seriesData);
-    }
-    if (layers.includes('Volume')) {
-      console.log('Добавление гистограммы объёма');
-      const vol = chart.addHistogramSeries({ priceFormat: { type: 'volume' }, color: '#26a69a' });
-      const seenVol = new Set();
-      const volData = data
-        .map((c) => {
-          const t = Math.floor(new Date(c['Open Time']).getTime() / 1000);
-          if (!t || Number.isNaN(t)) return null;
-          return { time: t, value: c.Volume };
-        })
-        .filter((c) => c && !seenVol.has(c.time) && seenVol.add(c.time))
-        .sort((a, b) => a.time - b.time);
-      vol.setData(volData);
-    }
+    const colors = {
+      MA_20: 'blue',
+      MA_50: 'orange',
+      MA_100: 'teal',
+      MA_200: 'purple',
+      RSI: '#ff9800',
+      MACD: '#03a9f4',
+      MACD_signal: '#e91e63',
+      MACD_hist: '#9e9e9e',
+      OBV: '#009688',
+      ATR: '#795548',
+      Stochastic_Oscillator: '#4caf50',
+      Bollinger_Middle: '#795548',
+      Bollinger_Upper: '#2196f3',
+      Bollinger_Lower: '#f44336',
+      ADX: '#9c27b0',
+      "Williams_%R": '#673ab7',
+      Parabolic_SAR: '#3f51b5',
+      Ichimoku_A: '#00bcd4',
+      Ichimoku_B: '#009688',
+      Ichimoku_Base_Line: '#ff5722',
+      Ichimoku_Conversion_Line: '#e91e63',
+      VWAP: '#607d8b',
+      Moving_Average_Envelope_Upper: '#8bc34a',
+      Moving_Average_Envelope_Lower: '#8bc34a',
+      Volume: '#26a69a',
+    };
+
+    layers.forEach((layer) => {
+      if (data[0][layer] === undefined && layer !== 'Volume') return;
+      if (layer === 'Volume') {
+        addHistogram('Volume', colors.Volume);
+      } else if (layer === 'MACD_hist') {
+        addHistogram('MACD_hist', colors.MACD_hist);
+      } else {
+        addLine(layer, colors[layer] || 'black');
+      }
+    });
 
     return () => {
       if (chartRef.current) {
