@@ -15,17 +15,22 @@
 
 .chart {
   width: 100%;
-  height: 500px;
 }
 
 .chart-panel {
   width: 100%;
-  height: 200px;
 }
 
 .chart-panels {
   display: flex;
   flex-direction: column;
+  height: 700px;
+}
+
+.resize-handle {
+  height: 6px;
+  cursor: row-resize;
+  background: #ccc;
 }
 
 .legend {
