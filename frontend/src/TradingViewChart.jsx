@@ -37,6 +37,7 @@ export default function TradingViewChart({ data = [], layers = [] }) {
     if (layers.includes('ma50') && data[0].MA_50 !== undefined) {
       console.log('Добавление индикатора MA50');
       const ma50 = chart.addLineSeries({ color: 'orange' });
+      ma50.setData(data.map(c => ({ time: c['Open Time'].slice(0, 10), value: c.MA_50 })));
       const seen50 = new Set();
       const seriesData = data
         .map((c) => {
