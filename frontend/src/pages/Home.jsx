@@ -5,7 +5,7 @@ import TradingViewChart from '../TradingViewChart';
 import TechnicalIndicators from '../TechnicalIndicators';
 import AdvancedIndicators from '../AdvancedIndicators';
 import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
-import AnalysisBlock from '../AnalysisBlock';
+import AnalysisSections from '../AnalysisSections';
 import { setToken } from '../store';
 import '../App.css';
 
@@ -122,7 +122,7 @@ export default function Home() {
       <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setShowAnalysis(!showAnalysis)}>
         {showAnalysis ? 'Скрыть анализ' : 'Показать анализ'}
       </Button>
-      {showAnalysis && <AnalysisBlock analysis={analysis} />}
+      {showAnalysis && <AnalysisSections analysis={analysis} />}
     </Box>
   );
 }
