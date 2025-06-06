@@ -2,19 +2,50 @@ import React, { useEffect, useRef } from 'react';
 import { createChart } from 'lightweight-charts';
 
 export default function TradingViewChart({ data = [], layers = [] }) {
-  const ref = useRef(null);
-  const chartRef = useRef();
+  const mainRef = useRef(null);
+  const panelRefs = useRef({});
+  const chartRef = useRef({});
+
+  const colors = {
+    MA_20: 'blue',
+    MA_50: 'orange',
+    MA_100: 'teal',
+    MA_200: 'purple',
+    RSI: '#ff9800',
+    MACD: '#03a9f4',
+    MACD_signal: '#e91e63',
+    MACD_hist: '#9e9e9e',
+    OBV: '#009688',
+    ATR: '#795548',
+    Stochastic_Oscillator: '#4caf50',
+    Bollinger_Middle: '#795548',
+    Bollinger_Upper: '#2196f3',
+    Bollinger_Lower: '#f44336',
+    ADX: '#9c27b0',
+    "Williams_%R": '#673ab7',
+    Parabolic_SAR: '#3f51b5',
+    Ichimoku_A: '#00bcd4',
+    Ichimoku_B: '#009688',
+    Ichimoku_Base_Line: '#ff5722',
+    Ichimoku_Conversion_Line: '#e91e63',
+    VWAP: '#607d8b',
+    Moving_Average_Envelope_Upper: '#8bc34a',
+    Moving_Average_Envelope_Lower: '#8bc34a',
+    Volume: '#26a69a'
+  };
 
   useEffect(() => {
     console.log('Отрисовка графика. Длина данных:', data.length, 'слои:', layers);
     if (!data.length) return;
-    if (chartRef.current) {
+    // очистка старых графиков
+    Object.values(chartRef.current).forEach((ch) => {
       try {
-        chartRef.current.remove();
+        ch.remove();
       } catch (err) {
-        console.warn('Ошибка удаления старого графика', err);
+        console.warn('Ошибка удаления графика', err);
       }
-    }
+    });
+    chartRef.current = {};
 
     const toUnix = (d) => {
       const t = Math.floor(new Date(d).getTime() / 1000);
@@ -33,19 +64,19 @@ export default function TradingViewChart({ data = [], layers = [] }) {
         .sort((a, b) => a.time - b.time);
     };
 
-    const addLine = (field, color) => {
+    const addLine = (chart, field, color) => {
       const series = chart.addLineSeries({ color });
       series.setData(buildSeriesData(field));
     };
 
-    const addHistogram = (field, color) => {
+    const addHistogram = (chart, field, color) => {
       const series = chart.addHistogramSeries({ color, priceFormat: { type: 'volume' } });
       series.setData(buildSeriesData(field));
     };
 
-    const chart = createChart(ref.current, { height: 500 });
-    chartRef.current = chart;
-    const candleSeries = chart.addCandlestickSeries();
+    const mainChart = createChart(mainRef.current, { height: 500 });
+    chartRef.current.main = mainChart;
+    const candleSeries = mainChart.addCandlestickSeries();
     const seenCandles = new Set();
     const candleData = data
       .map((c) => {
@@ -57,57 +88,81 @@ export default function TradingViewChart({ data = [], layers = [] }) {
       .sort((a, b) => a.time - b.time);
     candleSeries.setData(candleData);
 
-    const colors = {
-      MA_20: 'blue',
-      MA_50: 'orange',
-      MA_100: 'teal',
-      MA_200: 'purple',
-      RSI: '#ff9800',
-      MACD: '#03a9f4',
-      MACD_signal: '#e91e63',
-      MACD_hist: '#9e9e9e',
-      OBV: '#009688',
-      ATR: '#795548',
-      Stochastic_Oscillator: '#4caf50',
-      Bollinger_Middle: '#795548',
-      Bollinger_Upper: '#2196f3',
-      Bollinger_Lower: '#f44336',
-      ADX: '#9c27b0',
-      "Williams_%R": '#673ab7',
-      Parabolic_SAR: '#3f51b5',
-      Ichimoku_A: '#00bcd4',
-      Ichimoku_B: '#009688',
-      Ichimoku_Base_Line: '#ff5722',
-      Ichimoku_Conversion_Line: '#e91e63',
-      VWAP: '#607d8b',
-      Moving_Average_Envelope_Upper: '#8bc34a',
-      Moving_Average_Envelope_Lower: '#8bc34a',
-      Volume: '#26a69a',
-    };
 
-    layers.forEach((layer) => {
-      if (data[0][layer] === undefined && layer !== 'Volume') return;
-      if (layer === 'Volume') {
-        addHistogram('Volume', colors.Volume);
-      } else if (layer === 'MACD_hist') {
-        addHistogram('MACD_hist', colors.MACD_hist);
+    const panelIndicators = new Set([
+      'RSI',
+      'MACD',
+      'OBV',
+      'ATR',
+      'ADX',
+      'Stochastic_Oscillator',
+      'Volume'
+    ]);
+
+    const overlayLayers = layers.filter((l) => !panelIndicators.has(l));
+    const panelLayers = layers.filter((l) => panelIndicators.has(l));
+
+    overlayLayers.forEach((layer) => {
+      if (data[0][layer] === undefined) return;
+      if (layer === 'Bollinger_Bands') {
+        addLine(mainChart, 'Bollinger_Middle', colors.Bollinger_Middle);
+        addLine(mainChart, 'Bollinger_Upper', colors.Bollinger_Upper);
+        addLine(mainChart, 'Bollinger_Lower', colors.Bollinger_Lower);
+      } else if (layer === 'Ichimoku_Cloud') {
+        addLine(mainChart, 'Ichimoku_A', colors.Ichimoku_A);
+        addLine(mainChart, 'Ichimoku_B', colors.Ichimoku_B);
+        addLine(mainChart, 'Ichimoku_Base_Line', colors.Ichimoku_Base_Line);
+        addLine(mainChart, 'Ichimoku_Conversion_Line', colors.Ichimoku_Conversion_Line);
+      } else if (layer === 'Moving_Average_Envelopes') {
+        addLine(mainChart, 'Moving_Average_Envelope_Upper', colors.Moving_Average_Envelope_Upper);
+        addLine(mainChart, 'Moving_Average_Envelope_Lower', colors.Moving_Average_Envelope_Lower);
       } else {
-        addLine(layer, colors[layer] || 'black');
+        addLine(mainChart, layer, colors[layer] || 'black');
+      }
+    });
+
+    panelLayers.forEach((layer) => {
+      const container = panelRefs.current[layer];
+      if (!container) return;
+      const ch = createChart(container, { height: 200 });
+      chartRef.current[layer] = ch;
+      if (layer === 'Volume') {
+        addHistogram(ch, 'Volume', colors.Volume);
+      } else if (layer === 'MACD') {
+        addLine(ch, 'MACD', colors.MACD);
+        addLine(ch, 'MACD_signal', colors.MACD_signal);
+        addHistogram(ch, 'MACD_hist', colors.MACD_hist);
+      } else {
+        addLine(ch, layer, colors[layer] || 'black');
       }
     });
 
     return () => {
-      if (chartRef.current) {
+      Object.values(chartRef.current).forEach((ch) => {
         try {
-          chartRef.current.remove();
+          ch.remove();
         } catch (err) {
           console.warn('Ошибка очистки графика', err);
-        } finally {
-          chartRef.current = null;
         }
-      }
+      });
+      chartRef.current = {};
     };
   }, [data, layers]);
 
-  return <div ref={ref} className="chart" />;
+  const panelLayers = layers.filter((l) => ['RSI','MACD','OBV','ATR','ADX','Stochastic_Oscillator','Volume'].includes(l));
+
+  return (
+    <div className="chart-panels">
+      <div className="legend">
+        <span className="legend-item"><span className="legend-color" style={{background:'gray'}}></span>Свечи</span>
+        {layers.map((l) => (
+          <span key={l} className="legend-item"><span className="legend-color" style={{background:colors[l]||'black'}}></span>{l}</span>
+        ))}
+      </div>
+      <div ref={mainRef} className="chart" />
+      {panelLayers.map((l) => (
+        <div key={l} ref={(el) => (panelRefs.current[l] = el)} className="chart-panel" />
+      ))}
+    </div>
+  );
 }
