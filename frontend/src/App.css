@@ -17,3 +17,31 @@
   width: 100%;
   height: 500px;
 }
+
+.chart-panel {
+  width: 100%;
+  height: 200px;
+}
+
+.chart-panels {
+  display: flex;
+  flex-direction: column;
+}
+
+.legend {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.legend-item {
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  margin-right: 4px;
+}

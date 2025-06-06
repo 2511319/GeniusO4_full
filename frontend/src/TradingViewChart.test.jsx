@@ -7,13 +7,15 @@ const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn() }));
 const mockAddHistogramSeries = vi.fn(() => ({ setData: vi.fn() }));
 const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn() }));
 
-vi.mock('lightweight-charts', () => ({
-  createChart: vi.fn(() => ({
-    addLineSeries: mockAddLineSeries,
-    addHistogramSeries: mockAddHistogramSeries,
-    addCandlestickSeries: mockAddCandlestickSeries
-  }))
-}));
+vi.mock('lightweight-charts', () => {
+  return {
+    createChart: vi.fn(() => ({
+      addLineSeries: mockAddLineSeries,
+      addHistogramSeries: mockAddHistogramSeries,
+      addCandlestickSeries: mockAddCandlestickSeries
+    }))
+  };
+});
 
 describe('TradingViewChart', () => {
   beforeEach(() => {
@@ -30,5 +32,11 @@ describe('TradingViewChart', () => {
     const data = [{ 'Open Time': '2021-01-01', Open: 1, High: 1, Low: 1, Close: 1, Volume: 5 }];
     render(<TradingViewChart data={data} layers={['Volume']} />);
     await waitFor(() => expect(mockAddHistogramSeries).toHaveBeenCalled());
+  });
+
+  it('creates line series for panel indicator', async () => {
+    const data = [{ 'Open Time': '2021-01-01', Open: 1, High: 1, Low: 1, Close: 1, RSI: 50 }];
+    render(<TradingViewChart data={data} layers={['RSI']} />);
+    await waitFor(() => expect(mockAddLineSeries).toHaveBeenCalled());
   });
 });
