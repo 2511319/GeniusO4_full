@@ -45,8 +45,10 @@ async def analyze(req: AnalyzeRequest):
     # если пользователь оставил пустой символ — подставляем дефолт
     symbol = req.symbol.strip().upper() or DEFAULT_SYMBOL
 
-    # 1. Получаем OHLCV
-    df = await fetch_ohlcv(symbol, req.interval, req.limit)
+    # 1. Получаем OHLCV с небольшим запасом, чтобы индикаторы успели "разогнаться"
+    extra_candles = 200
+    fetch_limit = req.limit + extra_candles
+    df = await fetch_ohlcv(symbol, req.interval, fetch_limit)
     if df.empty:
         raise HTTPException(404, f"No data for symbol {symbol}")
 

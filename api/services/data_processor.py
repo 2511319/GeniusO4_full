@@ -303,13 +303,14 @@ class DataProcessor:
         ohlc_data = ohlc_data.to_dict(orient='records')
         return ohlc_data
 
-    def perform_full_processing(self) -> pd.DataFrame:
+    def perform_full_processing(self, drop_na: bool = True) -> pd.DataFrame:
         """
         Полный процесс предобработки данных.
         """
         self.preprocess()
         self.calculate_indicators()
         self.apply_rounding()  # Применяем округление
-        self.drop_null_indicators()
+        if drop_na:
+            self.drop_null_indicators()
         self.sanitize()
         return self.df
