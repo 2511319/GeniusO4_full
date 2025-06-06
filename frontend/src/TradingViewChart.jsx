@@ -34,7 +34,7 @@ export default function TradingViewChart({ data = [], layers = [] }) {
       console.error('Ошибка setData', err);
     }
 
-    if (layers.includes('ma50') && data[0].MA_50 !== undefined) {
+    if (layers.includes('MA_50') && data[0].MA_50 !== undefined) {
       console.log('Добавление индикатора MA50');
       const ma50 = chart.addLineSeries({ color: 'orange' });
       ma50.setData(data.map(c => ({ time: c['Open Time'].slice(0, 10), value: c.MA_50 })));
@@ -49,7 +49,7 @@ export default function TradingViewChart({ data = [], layers = [] }) {
         .sort((a, b) => a.time - b.time);
       ma50.setData(seriesData);
     }
-    if (layers.includes('ma200') && data[0].MA_200 !== undefined) {
+    if (layers.includes('MA_200') && data[0].MA_200 !== undefined) {
       console.log('Добавление индикатора MA200');
       const ma200 = chart.addLineSeries({ color: 'purple' });
       const seen200 = new Set();
@@ -63,7 +63,7 @@ export default function TradingViewChart({ data = [], layers = [] }) {
         .sort((a, b) => a.time - b.time);
       ma200.setData(seriesData);
     }
-    if (layers.includes('volume')) {
+    if (layers.includes('Volume')) {
       console.log('Добавление гистограммы объёма');
       const vol = chart.addHistogramSeries({ priceFormat: { type: 'volume' }, color: '#26a69a' });
       const seenVol = new Set();
