@@ -15,13 +15,12 @@
    ```
    или воспользуйтесь `python run.py --mode dev` либо `docker-compose up --build`.
 3. Откройте:
-   - UI: http://localhost:8050
+   - React UI: http://localhost:5173
    - Health: http://localhost:8000/health
 
 ## Структура
 
 - api/       — FastAPI + сервисы
-- ui/        — Dash-интерфейс (Python)
 - frontend/  — прототип React-клиента
 - configs/   — настройки
 - docker-compose.yml
@@ -40,10 +39,9 @@ npm run dev
 
 ### Типовой сценарий
 
-1. Запустите `python run.py --mode dev` для одновременного старта FastAPI и Dash-интерфейса.
-2. В другой вкладке запустите `npm run dev` в каталоге `frontend`.
-3. Откройте `http://localhost:5173`, введите тикер и JWT‑токен и нажмите `Load`.
-4. Выбирайте нужные индикаторы на графике чекбоксами.
+1. Запустите `python run.py --mode dev` для одновременного старта FastAPI и React-клиента.
+2. Откройте `http://localhost:5173`, введите тикер и JWT‑токен и нажмите `Load`.
+3. Выбирайте нужные индикаторы на графике чекбоксами.
 
 ## Работа с API `/api/analyze`
 
@@ -137,7 +135,7 @@ python run.py --mode docker      # локально через Docker
 ./deploy.sh
 ```
 
-После деплоя UI доступен по адресу, указанному в выводе `gcloud run deploy`.
+После деплоя фронтенд доступен по адресу, указанному в выводе `gcloud run deploy`.
 
 При клонировании репозитория не используйте опцию `--depth`, чтобы сохранялась полная история коммитов.
 

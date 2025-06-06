@@ -12,15 +12,13 @@ services:
     volumes:
       - ./api/dev_logs:/app/api/dev_logs
 
-  ui:
+  frontend:
     build:
       context: .
-      dockerfile: ui/Dockerfile
+      dockerfile: frontend/Dockerfile
     depends_on:
       - api
     ports:
-      - "${DASH_PORT:-8050}:8050"
+      - "${FRONTEND_PORT:-5173}:80"
     environment:
       - ENV_FILE=.env.docker
-    volumes:
-      - ./ui/dev_logs:/app/ui/dev_logs
