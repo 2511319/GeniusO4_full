@@ -1,10 +1,22 @@
 import React, { useEffect, useRef } from 'react';
 import { createChart } from 'lightweight-charts';
+import { indicatorColumnMap } from './indicatorGroups';
 
 export default function TradingViewChart({ data = [], layers = [] }) {
   const mainRef = useRef(null);
-  const panelRefs = useRef({});
+  const panelRef = useRef(null);
   const chartRef = useRef({});
+
+  const panelIndicators = new Set([
+    'RSI',
+    'MACD',
+    'OBV',
+    'ATR',
+    'ADX',
+    'Stochastic_Oscillator',
+    "Williams_%R",
+    'Volume'
+  ]);
 
   const colors = {
     MA_20: 'blue',
@@ -89,21 +101,12 @@ export default function TradingViewChart({ data = [], layers = [] }) {
     candleSeries.setData(candleData);
 
 
-    const panelIndicators = new Set([
-      'RSI',
-      'MACD',
-      'OBV',
-      'ATR',
-      'ADX',
-      'Stochastic_Oscillator',
-      'Volume'
-    ]);
-
     const overlayLayers = layers.filter((l) => !panelIndicators.has(l));
     const panelLayers = layers.filter((l) => panelIndicators.has(l));
 
     overlayLayers.forEach((layer) => {
-      if (data[0][layer] === undefined) return;
+      const cols = indicatorColumnMap[layer] || [layer];
+      if (!cols.some((c) => data[0][c] !== undefined)) return;
       if (layer === 'Bollinger_Bands') {
         addLine(mainChart, 'Bollinger_Middle', colors.Bollinger_Middle);
         addLine(mainChart, 'Bollinger_Upper', colors.Bollinger_Upper);
@@ -121,19 +124,33 @@ export default function TradingViewChart({ data = [], layers = [] }) {
       }
     });
 
+    let panelChart = null;
+    if (panelLayers.length) {
+      panelChart = createChart(panelRef.current, { height: 200 });
+      chartRef.current.panel = panelChart;
+    }
+
+    const times = data
+      .map((c) => toUnix(c['Open Time']))
+      .filter((t) => t !== null);
+    const buildConstData = (val) => times.map((time) => ({ time, value: val }));
+
     panelLayers.forEach((layer) => {
-      const container = panelRefs.current[layer];
-      if (!container) return;
-      const ch = createChart(container, { height: 200 });
-      chartRef.current[layer] = ch;
+      if (!panelChart) return;
       if (layer === 'Volume') {
-        addHistogram(ch, 'Volume', colors.Volume);
+        addHistogram(panelChart, 'Volume', colors.Volume);
       } else if (layer === 'MACD') {
-        addLine(ch, 'MACD', colors.MACD);
-        addLine(ch, 'MACD_signal', colors.MACD_signal);
-        addHistogram(ch, 'MACD_hist', colors.MACD_hist);
+        addLine(panelChart, 'MACD', colors.MACD);
+        addLine(panelChart, 'MACD_signal', colors.MACD_signal);
+        addHistogram(panelChart, 'MACD_hist', colors.MACD_hist);
+      } else if (layer === 'RSI') {
+        addLine(panelChart, 'RSI', colors.RSI);
+        const over = panelChart.addLineSeries({ color: 'rgba(255,0,0,0.5)', lineStyle: 2 });
+        over.setData(buildConstData(70));
+        const under = panelChart.addLineSeries({ color: 'rgba(0,128,0,0.5)', lineStyle: 2 });
+        under.setData(buildConstData(30));
       } else {
-        addLine(ch, layer, colors[layer] || 'black');
+        addLine(panelChart, layer, colors[layer] || 'black');
       }
     });
 
@@ -149,7 +166,7 @@ export default function TradingViewChart({ data = [], layers = [] }) {
     };
   }, [data, layers]);
 
-  const panelLayers = layers.filter((l) => ['RSI','MACD','OBV','ATR','ADX','Stochastic_Oscillator','Volume'].includes(l));
+  const panelLayers = layers.filter((l) => panelIndicators.has(l));
 
   return (
     <div className="chart-panels">
@@ -160,9 +177,9 @@ export default function TradingViewChart({ data = [], layers = [] }) {
         ))}
       </div>
       <div ref={mainRef} className="chart" />
-      {panelLayers.map((l) => (
-        <div key={l} ref={(el) => (panelRefs.current[l] = el)} className="chart-panel" />
-      ))}
+      {panelLayers.length > 0 && (
+        <div ref={panelRef} className="chart-panel" />
+      )}
     </div>
   );
 }

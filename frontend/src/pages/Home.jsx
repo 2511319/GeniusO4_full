@@ -16,7 +16,7 @@ export default function Home() {
   const [interval, setInterval] = useState('4h');
   const [limit, setLimit] = useState(144);
   const [data, setData] = useState([]);
-  const [layers, setLayers] = useState([]);
+  const [layers, setLayers] = useState(['RSI']);
   const [availableIndicators, setAvailableIndicators] = useState([]);
   const [analysis, setAnalysis] = useState(null);
   const [showAnalysis, setShowAnalysis] = useState(true);
