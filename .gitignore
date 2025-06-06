@@ -5,5 +5,4 @@ venv/
 frontend/node_modules/
 frontend/dist/
 api/dev_logs/
-ui/dev_logs/
 frontend/dev_logs/

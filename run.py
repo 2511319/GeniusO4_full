@@ -25,12 +25,10 @@ def main():
 
     # создаём папки логов
     os.makedirs("api/dev_logs", exist_ok=True)
-    os.makedirs("ui/dev_logs", exist_ok=True)
     os.makedirs("frontend/dev_logs", exist_ok=True)
 
     python = sys.executable
     api_port = os.getenv("API_PORT", "8000")
-    dash_port = os.getenv("DASH_PORT", "8050")
 
     if mode == "dev":
         backend_cmd = [
@@ -38,7 +36,7 @@ def main():
             "app:app",  # запускаем из cwd=api
             "--reload", "--port", api_port
         ]
-        frontend_cmd = [python, "app.py"]  # запускаем из cwd=ui
+        frontend_cmd = ["npm", "run", "dev"]  # запускаем из cwd=frontend
 
         # старт бекенда
         print("🚀 Backend:", " ".join(backend_cmd))
@@ -50,19 +48,19 @@ def main():
 
         # старт фронтенда
         print("🚀 Frontend:", " ".join(frontend_cmd))
-        p_ui = subprocess.Popen(
+        p_frontend = subprocess.Popen(
             frontend_cmd,
-            cwd=os.path.join(os.getcwd(), "ui"),
+            cwd=os.path.join(os.getcwd(), "frontend"),
             env=os.environ.copy()
         )
 
         try:
             p_api.wait()
-            p_ui.wait()
+            p_frontend.wait()
         except KeyboardInterrupt:
             print("\n🛑 Остановка сервисов...")
             p_api.terminate()
-            p_ui.terminate()
+            p_frontend.terminate()
 
     elif mode == "docker":
         os.execvp("docker-compose", ["docker-compose", "up", "--build"])
