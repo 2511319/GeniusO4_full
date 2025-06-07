@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
-  Container, Grid, Paper, Box,
-  TextField, Select, MenuItem, Button, Typography,
-  Divider, FormGroup, FormControlLabel, Checkbox,
-  Accordion, AccordionSummary, AccordionDetails
+  Box, Paper, TextField, Select, MenuItem, Button,
+  Typography, Divider, FormGroup, FormControlLabel,
+  Checkbox, IconButton, CircularProgress,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronLeftIcon  from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import SplitPane from 'react-split-pane';
 
 import TradingViewChart       from '../TradingViewChart';
 import AnalysisSections        from '../AnalysisSections';
@@ -15,7 +16,7 @@ import AdvancedIndicators      from '../AdvancedIndicators';
 import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
 
 export default function Home() {
-  const token = useSelector((state) => state.auth.token);
+  const token = useSelector((s) => s.auth.token);
 
   const [symbol,  setSymbol]  = useState('BTCUSDT');
   const [interval,setInterval]= useState('4h');
@@ -23,164 +24,176 @@ export default function Home() {
   const [layers,  setLayers]  = useState(['RSI']);
   const [data,    setData]    = useState([]);
   const [analysis,setAnalysis]= useState(null);
-  const [available,setAvailable]= useState([]);
+  const [loading, setLoading] = useState(false);
+  const [hideL,   setHideL]   = useState(false);
+  const [hideR,   setHideR]   = useState(false);
 
   const toggleLayer = (name) =>
     setLayers((prev) =>
       prev.includes(name) ? prev.filter((l) => l !== name) : [...prev, name]);
 
-  const loadTestData = async () => {
-    try {
-      const res = await fetch('/api/testdata');
-      if (!res.ok) {
-        alert('Нет сохранённых данных');
-        return;
-      }
-      const json = await res.json();
-      setAnalysis(json.analysis);
-      setData(json.ohlc || []);
-      setAvailable(json.indicators || []);
-    } catch (err) {
-      console.error(err);
-      alert('Ошибка чтения тестовых данных');
-    }
-  };
-
   const loadData = async () => {
+    setLoading(true);
     const body = { symbol, interval, limit, indicators: layers };
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
-
-    const res   = await fetch('/api/analyze', {
-      method:'POST', headers, body:JSON.stringify(body),
-    });
-    const json  = await res.json();
+    const res  = await fetch('/api/analyze', { method:'POST', headers, body:JSON.stringify(body) });
+    const json = await res.json();
     setAnalysis(json.analysis);
     setData(json.ohlc);
-    setAvailable(json.indicators || []);
+    setLoading(false);
   };
 
+  /* ───────────────────────────── helpers */
+  const leftPane = hideL ? 0 : 310;
+  const rightPane= hideR ? 0 : 360;
+
+  /* ───────────────────────────── UI */
   return (
-    <Container maxWidth="xl" sx={{ mt: 2 }}>
-      <Grid container spacing={2}>
-        {/* левая панель */}
-        <Grid item xs={12} md={3}>
-          <Accordion defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="h6">Параметры запроса</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
+    <Box sx={{ height: 'calc(100vh - 64px)', width: '100%' }}>
+      <SplitPane
+        split="vertical"
+        minSize={hideL ? 0 : 220}
+        size={leftPane}
+        onChange={(size) => size < 80 && setHideL(true)}
+      >
+        {/* ───────────── левая колонка ───────────── */}
+        <Paper
+          square
+          sx={{
+            display: hideL ? 'none' : 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            p: 1,
+            overflow: 'auto',
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <IconButton size="small" onClick={() => setHideL(true)}>
+              <ChevronLeftIcon fontSize="inherit" />
+            </IconButton>
+          </Box>
 
-            <TextField
-              fullWidth label="Тикер"
-              value={symbol} onChange={(e) => setSymbol(e.target.value)}
-              sx={{ mb: 2 }}
-            />
+          <Typography variant="h6" gutterBottom>Параметры запроса</Typography>
+          <TextField
+            fullWidth label="Тикер" sx={{ mb: 2 }}
+            value={symbol} onChange={(e) => setSymbol(e.target.value)}
+          />
+          <TextField
+            fullWidth type="number" label="Количество свечей" sx={{ mb: 2 }}
+            value={limit} onChange={(e) => setLimit(+e.target.value)}
+          />
+          <Select
+            fullWidth value={interval} label="Таймфрейм" sx={{ mb: 2 }}
+            onChange={(e) => setInterval(e.target.value)}
+          >
+            {['1m','5m','15m','1h','4h','1d'].map((tf) => (
+              <MenuItem key={tf} value={tf}>{tf}</MenuItem>
+            ))}
+          </Select>
 
-            <TextField
-              fullWidth type="number" label="Количество свечей"
-              value={limit} onChange={(e) => setLimit(+e.target.value)}
-              sx={{ mb: 2 }}
-            />
+          <Button variant="contained" fullWidth onClick={loadData}>
+            Запустить анализ
+          </Button>
 
-            <Select
-              fullWidth value={interval} label="Таймфрейм"
-              onChange={(e) => setInterval(e.target.value)}
-              sx={{ mb: 2 }}
-            >
-              {['1m','5m','15m','1h','4h','1d'].map((tf) => (
-                <MenuItem key={tf} value={tf}>{tf}</MenuItem>
-              ))}
-            </Select>
+          <Divider sx={{ my: 2 }} />
 
-            <Button variant="contained" fullWidth onClick={loadData}>
-              Запустить анализ
-            </Button>
-            <Button variant="outlined" fullWidth sx={{ mt: 1 }} onClick={loadTestData}>
-              Test
-            </Button>
-            </AccordionDetails>
-          </Accordion>
+          <Typography variant="subtitle1">Индикаторы графика</Typography>
+          <FormGroup>
+            {['RSI','MACD','OBV','ATR','VWAP'].map((ind) => (
+              <FormControlLabel
+                key={ind}
+                control={
+                  <Checkbox
+                    checked={layers.includes(ind)}
+                    onChange={() => toggleLayer(ind)}
+                  />
+                }
+                label={ind}
+              />
+            ))}
+          </FormGroup>
 
-          <Accordion defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
-              <Typography variant="subtitle1">Индикаторы графика</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Divider sx={{ mb: 2 }} />
+          <TechnicalIndicators layers={layers} toggleLayer={toggleLayer} />
+          <AdvancedIndicators layers={layers} toggleLayer={toggleLayer} />
+          <ModelAnalysisIndicators layers={layers} toggleLayer={toggleLayer} />
+        </Paper>
 
-              <FormGroup>
-              {['RSI','MACD','OBV','ATR','VWAP'].map((ind) => (
-                <FormControlLabel
-                  key={ind}
-                  control={
-                    <Checkbox
-                      checked={layers.includes(ind)}
-                      onChange={() => toggleLayer(ind)}
-                    />
-                  }
-                  label={ind}
-                />
-              ))}
-              </FormGroup>
-            </AccordionDetails>
-          </Accordion>
+        {/* ───────────── центральный + правый блок ───────────── */}
+        <SplitPane
+          split="vertical"
+          primary="second"
+          minSize={hideR ? 0 : 260}
+          size={rightPane}
+          onChange={(size) => size < 80 && setHideR(true)}
+        >
+          {/* ───────────── график ───────────── */}
+          <Box sx={{ height: '100%', position: 'relative' }}>
+            {loading && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 10,
+                }}
+              >
+                <CircularProgress />
+              </Box>
+            )}
+            {!loading && (
+              <TradingViewChart data={data} layers={layers} />
+            )}
+          </Box>
 
-          <Accordion defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
-              <Typography variant="subtitle1">Технические</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-            <TechnicalIndicators
-              available={available}
-              layers={layers}
-              toggleLayer={toggleLayer}
-            />
-            </AccordionDetails>
-          </Accordion>
-
-          <Accordion defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
-              <Typography variant="subtitle1">Продвинутые</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-            <AdvancedIndicators
-              available={available}
-              layers={layers}
-              toggleLayer={toggleLayer}
-            />
-            </AccordionDetails>
-          </Accordion>
-
-          <Accordion defaultExpanded>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
-              <Typography variant="subtitle1">Модельный анализ</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-            <ModelAnalysisIndicators
-              available={available}
-              layers={layers}
-              toggleLayer={toggleLayer}
-            />
-            </AccordionDetails>
-          </Accordion>
-        </Grid>
-
-        {/* график */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 1 }}>
-            <TradingViewChart data={data} layers={layers} analysis={analysis} />
-          </Paper>
-        </Grid>
-
-        {/* результаты */}
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 2, maxHeight: '82vh', overflow: 'auto' }}>
+          {/* ───────────── правая колонка ───────────── */}
+          <Paper
+            square
+            sx={{
+              display: hideR ? 'none' : 'flex',
+              flexDirection: 'column',
+              height: '100%',
+              overflow: 'auto',
+              p: 1,
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <IconButton size="small" onClick={() => setHideR(true)}>
+                <ChevronRightIcon fontSize="inherit" />
+              </IconButton>
+            </Box>
             <AnalysisSections analysis={analysis} />
           </Paper>
-        </Grid>
-      </Grid>
-    </Container>
+        </SplitPane>
+      </SplitPane>
+
+      {/* ───────────── кнопки вернуть панели ───────────── */}
+      {hideL && (
+        <IconButton
+          size="small"
+          sx={{
+            position: 'absolute', top: 8, left: 8, zIndex: 20,
+            backgroundColor: 'background.paper',
+          }}
+          onClick={() => setHideL(false)}
+        >
+          <ChevronRightIcon fontSize="inherit" />
+        </IconButton>
+      )}
+      {hideR && (
+        <IconButton
+          size="small"
+          sx={{
+            position: 'absolute', top: 8, right: 8, zIndex: 20,
+            backgroundColor: 'background.paper',
+          }}
+          onClick={() => setHideR(false)}
+        >
+          <ChevronLeftIcon fontSize="inherit" />
+        </IconButton>
+      )}
+    </Box>
   );
 }
-
