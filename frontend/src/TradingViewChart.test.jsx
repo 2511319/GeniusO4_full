@@ -5,7 +5,8 @@ import TradingViewChart from './TradingViewChart';
 
 const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn() }));
 const mockAddHistogramSeries = vi.fn(() => ({ setData: vi.fn() }));
-const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn() }));
+const mockSetMarkers = vi.fn();
+const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), setMarkers: mockSetMarkers }));
 const mockSubscribeVisibleTimeRangeChange = vi.fn();
 const mockSubscribeVisibleLogicalRangeChange = vi.fn();
 const mockSubscribeCrosshairMove = vi.fn();
@@ -41,26 +42,33 @@ describe('TradingViewChart', () => {
 
   it('creates line series when indicator is selected', async () => {
     const data = [{ 'Open Time': '2021-01-01', Open: 1, High: 1, Low: 1, Close: 1, MA_20: 1 }];
-    render(<TradingViewChart data={data} layers={['MA_20']} />);
+    render(<TradingViewChart data={data} layers={['MA_20']} analysis={{}} />);
     await waitFor(() => expect(mockAddLineSeries).toHaveBeenCalled());
   });
 
   it('creates histogram series for Volume', async () => {
     const data = [{ 'Open Time': '2021-01-01', Open: 1, High: 1, Low: 1, Close: 1, Volume: 5 }];
-    render(<TradingViewChart data={data} layers={['Volume']} />);
+    render(<TradingViewChart data={data} layers={['Volume']} analysis={{}} />);
     await waitFor(() => expect(mockAddHistogramSeries).toHaveBeenCalled());
   });
 
   it('creates line series for panel indicator', async () => {
     const data = [{ 'Open Time': '2021-01-01', Open: 1, High: 1, Low: 1, Close: 1, RSI: 50 }];
-    render(<TradingViewChart data={data} layers={['RSI']} />);
+    render(<TradingViewChart data={data} layers={['RSI']} analysis={{}} />);
     await waitFor(() => expect(mockAddLineSeries).toHaveBeenCalled());
   });
 
   it('subscribes to time range changes for synchronization', async () => {
     const data = [{ 'Open Time': '2021-01-01', Open: 1, High: 1, Low: 1, Close: 1, RSI: 50 }];
-    render(<TradingViewChart data={data} layers={['RSI']} />);
+    render(<TradingViewChart data={data} layers={['RSI']} analysis={{}} />);
     await waitFor(() => expect(mockSubscribeVisibleTimeRangeChange).toHaveBeenCalled());
     await waitFor(() => expect(mockSubscribeCrosshairMove).toHaveBeenCalled());
+  });
+
+  it('adds markers for gap analysis', async () => {
+    const data = [{ 'Open Time': '2021-01-01', Open: 1, High: 1, Low: 1, Close: 1 }];
+    const analysis = { gap_analysis: { gaps: [{ date: '2021-01-01', gap_type: 'Breakaway', price_range: [1,2] }] } };
+    render(<TradingViewChart data={data} layers={['gap_analysis']} analysis={analysis} />);
+    await waitFor(() => expect(mockSetMarkers).toHaveBeenCalled());
   });
 });
