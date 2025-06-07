@@ -4,7 +4,7 @@ import { Box } from '@mui/material';
 import ChartControls from './ChartControls';
 import { computeHeikinAshi, computeRenko, findSRLevels } from './chartUtils';
 
-export default function TradingViewChart({ data, layers }) {
+export default function TradingViewChart({ data, layers, showSR = false }) {
   const containerRef = useRef();
   const chartRef     = useRef();
   const seriesRef    = useRef();
@@ -87,15 +87,19 @@ export default function TradingViewChart({ data, layers }) {
     seriesRef.current = series;
 
     /* support/resistance */
-    const levels = findSRLevels(processed);
-    levels.forEach(({ price, type }) =>
-      series.createPriceLine({
-        price,
-        lineWidth: 1,
-        color: type === 'support' ? '#4caf50' : '#f44336',
-        lineStyle: 2,
-      }),
-    );
+    if (showSR) {
+      const levels = findSRLevels(processed);
+      levels.forEach(({ price, type, time }) => {
+        series.createRay({
+          price,
+          time,
+          extend: 'right',
+          lineWidth: 1,
+          color: type === 'support' ? '#4caf50' : '#f44336',
+          lineStyle: 2,
+        });
+      });
+    }
 
     /* tooltip */
     chart.subscribeCrosshairMove((param) => {

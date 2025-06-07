@@ -3,8 +3,8 @@ import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TradingViewChart from './TradingViewChart';
 
-const mockCreatePriceLine = vi.fn();
-const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createPriceLine: mockCreatePriceLine }));
+const mockCreateRay = vi.fn();
+const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay }));
 const mockSubscribeCrosshairMove = vi.fn();
 
 vi.mock('lightweight-charts', () => ({
@@ -35,7 +35,7 @@ describe('TradingViewChart', () => {
       low: 0,
       close: 0
     }));
-    render(<TradingViewChart data={data} layers={[]} />);
-    await waitFor(() => expect(mockCreatePriceLine).toHaveBeenCalled());
+    render(<TradingViewChart data={data} layers={[]} showSR />);
+    await waitFor(() => expect(mockCreateRay).toHaveBeenCalled());
   });
 });

@@ -46,9 +46,9 @@ export function findSRLevels(data, depth = 14) {
     const curH  = data[i].high;
     const curL  = data[i].low;
     if (curH === Math.max(...highs))
-      out.push({ price: curH, type: 'resistance' });
+      out.push({ price: curH, type: 'resistance', time: data[i].time });
     if (curL === Math.min(...lows))
-      out.push({ price: curL, type: 'support' });
+      out.push({ price: curL, type: 'support', time: data[i].time });
   }
   /* фильтр дублей ±0.1% */
   return out.reduce((acc, lvl) => {
