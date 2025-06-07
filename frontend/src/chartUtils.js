@@ -57,3 +57,18 @@ export function findSRLevels(data, depth = 14) {
     return acc;
   }, []);
 }
+
+export function parseOhlc(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((d) => {
+    const { 'Open Time': openTime, Open, High, Low, Close, ...rest } = d;
+    return {
+      time: Math.floor(new Date(openTime).getTime() / 1000),
+      open: Number(Open),
+      high: Number(High),
+      low: Number(Low),
+      close: Number(Close),
+      ...rest,
+    };
+  });
+}

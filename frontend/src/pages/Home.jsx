@@ -15,6 +15,7 @@ import AnalysisSections        from '../AnalysisSections';
 import TechnicalIndicators     from '../TechnicalIndicators';
 import AdvancedIndicators      from '../AdvancedIndicators';
 import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
+import { parseOhlc } from '../chartUtils';
 
 export default function Home() {
   const token = useSelector((s) => s.auth.token);
@@ -42,7 +43,7 @@ export default function Home() {
     const res  = await fetch('/api/analyze', { method:'POST', headers, body:JSON.stringify(body) });
     const json = await res.json();
     setAnalysis(json.analysis);
-    setData(json.ohlc);
+    setData(parseOhlc(json.ohlc));
     setLoading(false);
   };
 
