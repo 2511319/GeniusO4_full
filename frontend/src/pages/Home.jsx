@@ -35,6 +35,26 @@ export default function Home() {
     setLayers((prev) =>
       prev.includes(name) ? prev.filter((l) => l !== name) : [...prev, name]);
 
+  const loadTestData = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/testdata');
+      if (!res.ok) {
+        alert('Нет сохранённых данных');
+        setLoading(false);
+        return;
+      }
+      const json = await res.json();
+      setAnalysis(json.analysis || null);
+      setData(parseOhlc(json.ohlc));
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка чтения тестовых данных');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
     const body = { symbol, interval, limit, indicators: layers };
@@ -97,6 +117,9 @@ export default function Home() {
 
           <Button variant="contained" fullWidth onClick={loadData}>
             Запустить анализ
+          </Button>
+          <Button variant="outlined" fullWidth sx={{ mt: 1 }} onClick={loadTestData}>
+            Test
           </Button>
 
           <Divider sx={{ my: 2 }} />
