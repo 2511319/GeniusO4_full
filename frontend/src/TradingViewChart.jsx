@@ -45,7 +45,15 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     VWAP: '#607d8b',
     Moving_Average_Envelope_Upper: '#8bc34a',
     Moving_Average_Envelope_Lower: '#8bc34a',
-    Volume: '#26a69a'
+    Volume: '#26a69a',
+    trend_lines: '#2196f3',
+    fibonacci_analysis: 'purple',
+    elliott_wave_analysis: '#00ff00',
+    structural_edge: '#00ffff',
+    candlestick_patterns: '#ff00ff',
+    divergence_analysis: '#ff0000',
+    fair_value_gaps: '#00ffff',
+    recommendations: '#ffa500'
   };
 
   useEffect(() => {
@@ -257,6 +265,133 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
           ]);
           chartRef.current.overlays.push(series, series2);
         }
+      });
+    }
+
+    if (layers.includes('trend_lines')) {
+      const lines = analysis.trend_lines?.lines || [];
+      lines.forEach((ln) => {
+        const series = mainChart.addLineSeries({ color: colors.trend_lines, lineStyle: 2 });
+        series.setData([
+          { time: toUnix(ln.start_point?.date), value: ln.start_point?.price },
+          { time: toUnix(ln.end_point?.date), value: ln.end_point?.price },
+        ]);
+        chartRef.current.overlays.push(series);
+      });
+    }
+
+    if (layers.includes('fibonacci_analysis')) {
+      const fib = analysis.fibonacci_analysis || {};
+      const drawFib = (obj, color) => {
+        if (!obj) return;
+        const { levels = {}, start_point = {}, end_point = {} } = obj;
+        Object.values(levels).forEach((price) => {
+          const series = mainChart.addLineSeries({ color, lineStyle: 2 });
+          series.setData([
+            { time: toUnix(start_point.date), value: price },
+            { time: toUnix(end_point.date), value: price },
+          ]);
+          chartRef.current.overlays.push(series);
+        });
+      };
+      drawFib(fib.based_on_global_trend, 'purple');
+      drawFib(fib.based_on_local_trend, 'green');
+    }
+
+    if (layers.includes('elliott_wave_analysis')) {
+      const waves = analysis.elliott_wave_analysis?.waves || [];
+      waves.forEach((w) => {
+        const series = mainChart.addLineSeries({ color: colors.elliott_wave_analysis });
+        series.setData([
+          { time: toUnix(w.start_point?.date), value: w.start_point?.price },
+          { time: toUnix(w.end_point?.date), value: w.end_point?.price },
+        ]);
+        chartRef.current.overlays.push(series);
+        markers.push({
+          time: toUnix(w.end_point?.date),
+          position: 'aboveBar',
+          color: colors.elliott_wave_analysis,
+          shape: 'circle',
+          text: String(w.wave_number),
+        });
+      });
+    }
+
+    if (layers.includes('structural_edge')) {
+      const edges = analysis.structural_edge || [];
+      edges.forEach((e) => {
+        markers.push({
+          time: toUnix(e.date),
+          position: 'aboveBar',
+          color: colors.structural_edge,
+          shape: 'diamond',
+          text: e.type,
+        });
+      });
+    }
+
+    if (layers.includes('candlestick_patterns')) {
+      const patterns = analysis.candlestick_patterns || [];
+      patterns.forEach((p) => {
+        markers.push({
+          time: toUnix(p.date),
+          position: 'aboveBar',
+          color: colors.candlestick_patterns,
+          shape: 'xCross',
+          text: p.type,
+        });
+      });
+    }
+
+    if (layers.includes('divergence_analysis')) {
+      const divs = analysis.divergence_analysis || [];
+      divs.forEach((d) => {
+        markers.push({
+          time: toUnix(d.date),
+          position: 'aboveBar',
+          color: colors.divergence_analysis,
+          shape: 'diamond',
+          text: d.type,
+        });
+      });
+    }
+
+    if (layers.includes('fair_value_gaps')) {
+      const gaps = analysis.fair_value_gaps || [];
+      gaps.forEach((g) => {
+        const time = toUnix(g.date);
+        if (time && g.price_range?.length === 2) {
+          const series1 = mainChart.addAreaSeries({
+            lineColor: 'rgba(0,255,255,0.3)',
+            topColor: 'rgba(0,255,255,0.1)',
+            bottomColor: 'rgba(0,255,255,0.1)',
+          });
+          series1.setData([
+            { time, value: g.price_range[0] },
+            { time, value: g.price_range[1] },
+          ]);
+          chartRef.current.overlays.push(series1);
+        }
+      });
+    }
+
+    if (layers.includes('recommendations')) {
+      const recs = analysis.recommendations?.trading_strategies || [];
+      recs.forEach((r) => {
+        markers.push({
+          time: toUnix(r.entry_point?.Date),
+          position: 'belowBar',
+          color: 'green',
+          shape: 'arrowUp',
+          text: 'Entry',
+        });
+        markers.push({
+          time: toUnix(r.exit_point?.Date),
+          position: 'aboveBar',
+          color: 'red',
+          shape: 'arrowDown',
+          text: 'Exit',
+        });
       });
     }
 
