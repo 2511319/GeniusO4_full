@@ -182,7 +182,8 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
             low: c.low,
             close: c.close,
           }))
-          .filter((c) => c.time);
+          .filter((c) => c.time)
+          .sort((a, b) => a.time - b.time);
         series.setData(predData);
         chartRef.current.overlays.push(series);
       }
@@ -273,7 +274,11 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     }
 
     if (markers.length) {
-      candleSeries.setMarkers(markers.filter((m) => m.time));
+      candleSeries.setMarkers(
+        markers
+          .filter((m) => m.time)
+          .sort((a, b) => a.time - b.time)
+      );
     }
 
     let panelChart = null;
@@ -296,7 +301,8 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
     const times = data
       .map((c) => toUnix(c['Open Time']))
-      .filter((t) => t !== null);
+      .filter((t) => t !== null)
+      .sort((a, b) => a - b);
     const buildConstData = (val) => times.map((time) => ({ time, value: val }));
 
     panelLayers.forEach((layer) => {
