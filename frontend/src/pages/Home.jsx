@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import ChevronLeftIcon  from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import SplitPane from 'react-split-pane';
+import { SplitPane } from '@rexxars/react-split-pane';
 
 import TradingViewChart       from '../TradingViewChart';
 import ChartControls          from '../ChartControls';
