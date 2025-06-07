@@ -15,6 +15,6 @@ describe('App', () => {
       </Provider>
     );
     expect(screen.getByText(/ChartGenius/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Load/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Запустить анализ/i })).toBeInTheDocument();
   });
 });
