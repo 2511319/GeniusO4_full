@@ -21,6 +21,7 @@ export default function Home() {
   const [layers,  setLayers]  = useState(['RSI']);
   const [data,    setData]    = useState([]);
   const [analysis,setAnalysis]= useState(null);
+  const [available,setAvailable]= useState([]);
 
   const toggleLayer = (name) =>
     setLayers((prev) =>
@@ -37,6 +38,7 @@ export default function Home() {
     const json  = await res.json();
     setAnalysis(json.analysis);
     setData(json.ohlc);
+    setAvailable(json.indicators || []);
   };
 
   return (
@@ -95,15 +97,27 @@ export default function Home() {
           </Paper>
 
           <Paper sx={{ p: 2, mb: 2 }}>
-            <TechnicalIndicators layers={layers} toggleLayer={toggleLayer} />
+            <TechnicalIndicators
+              available={available}
+              layers={layers}
+              toggleLayer={toggleLayer}
+            />
           </Paper>
 
           <Paper sx={{ p: 2, mb: 2 }}>
-            <AdvancedIndicators layers={layers} toggleLayer={toggleLayer} />
+            <AdvancedIndicators
+              available={available}
+              layers={layers}
+              toggleLayer={toggleLayer}
+            />
           </Paper>
 
           <Paper sx={{ p: 2 }}>
-            <ModelAnalysisIndicators layers={layers} toggleLayer={toggleLayer} />
+            <ModelAnalysisIndicators
+              available={available}
+              layers={layers}
+              toggleLayer={toggleLayer}
+            />
           </Paper>
         </Grid>
 
