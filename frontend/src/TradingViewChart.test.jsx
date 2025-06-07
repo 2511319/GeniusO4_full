@@ -7,6 +7,7 @@ const mockCreateRay = vi.fn();
 const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn() }));
 const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay }));
 const mockSubscribeCrosshairMove = vi.fn();
+const mockFitContent = vi.fn();
 
 vi.mock('lightweight-charts', () => ({
   createChart: vi.fn(() => ({
@@ -15,6 +16,7 @@ vi.mock('lightweight-charts', () => ({
     subscribeCrosshairMove: mockSubscribeCrosshairMove,
     removeSeries: vi.fn(),
     resize: vi.fn(),
+    timeScale: () => ({ fitContent: mockFitContent }),
   })),
 }));
 
@@ -45,5 +47,11 @@ describe('TradingViewChart', () => {
     const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1, RSI: 70 }];
     render(<TradingViewChart data={data} layers={['RSI']} />);
     await waitFor(() => expect(mockAddLineSeries).toHaveBeenCalled());
+  });
+
+  it('fits time scale to content', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
+    render(<TradingViewChart data={data} layers={[]} />);
+    await waitFor(() => expect(mockFitContent).toHaveBeenCalled());
   });
 });
