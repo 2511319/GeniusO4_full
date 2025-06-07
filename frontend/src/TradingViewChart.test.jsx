@@ -4,12 +4,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TradingViewChart from './TradingViewChart';
 
 const mockCreateRay = vi.fn();
+const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn() }));
 const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay }));
 const mockSubscribeCrosshairMove = vi.fn();
 
 vi.mock('lightweight-charts', () => ({
   createChart: vi.fn(() => ({
     addCandlestickSeries: mockAddCandlestickSeries,
+    addLineSeries: mockAddLineSeries,
     subscribeCrosshairMove: mockSubscribeCrosshairMove,
     removeSeries: vi.fn(),
     resize: vi.fn(),
@@ -37,5 +39,11 @@ describe('TradingViewChart', () => {
     }));
     render(<TradingViewChart data={data} layers={[]} showSR />);
     await waitFor(() => expect(mockCreateRay).toHaveBeenCalled());
+  });
+
+  it('renders indicator line series', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1, RSI: 70 }];
+    render(<TradingViewChart data={data} layers={['RSI']} />);
+    await waitFor(() => expect(mockAddLineSeries).toHaveBeenCalled());
   });
 });
