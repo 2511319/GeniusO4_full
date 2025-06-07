@@ -93,6 +93,7 @@ export default function TradingViewChart({ data, layers, showSR = false }) {
     }
     const series = chart.addCandlestickSeries();
     series.setData(processed);
+    chart.timeScale().fitContent();
     seriesRef.current = series;
 
     /* indicator lines */
