@@ -354,10 +354,12 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         });
       }
       Object.values(chartRef.current).forEach((ch) => {
-        try {
-          ch.remove();
-        } catch (err) {
-          console.warn('Ошибка очистки графика', err);
+        if (typeof ch?.remove === 'function') {
+          try {
+            ch.remove();
+          } catch (err) {
+            console.warn('Ошибка очистки графика', err);
+          }
         }
       });
       chartRef.current = {};

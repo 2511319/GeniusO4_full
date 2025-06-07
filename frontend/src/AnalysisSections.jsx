@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
 
 const TEXT_SECTIONS = [
@@ -9,23 +9,27 @@ const TEXT_SECTIONS = [
 ];
 
 export default function AnalysisSections({ analysis }) {
-  if (!analysis) return null;
-
-  const initialVisibility = TEXT_SECTIONS.reduce((acc, { key }) => {
-    acc[key] = true;
-    return acc;
-  }, {});
+  const initialVisibility = useMemo(
+    () =>
+      TEXT_SECTIONS.reduce((acc, { key }) => {
+        acc[key] = true;
+        return acc;
+      }, {}),
+    []
+  );
 
   const [visibility, setVisibility] = useState(initialVisibility);
 
   useEffect(() => {
     // сбрасываем видимость при получении нового анализа
     setVisibility(initialVisibility);
-  }, [analysis]);
+  }, [analysis, initialVisibility]);
 
   const toggle = (key) => {
     setVisibility((v) => ({ ...v, [key]: !v[key] }));
   };
+
+  if (!analysis) return null;
 
   return (
     <Box sx={{ mt: 2, whiteSpace: 'pre-wrap' }}>
