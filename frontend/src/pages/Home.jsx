@@ -1,128 +1,127 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { TextField, Button, Select, MenuItem, Box } from '@mui/material';
-import TradingViewChart from '../TradingViewChart';
-import TechnicalIndicators from '../TechnicalIndicators';
-import AdvancedIndicators from '../AdvancedIndicators';
+import { useSelector } from 'react-redux';
+import {
+  Container, Grid, Paper, Box,
+  TextField, Select, MenuItem, Button, Typography,
+  Divider, FormGroup, FormControlLabel, Checkbox,
+} from '@mui/material';
+
+import TradingViewChart       from '../TradingViewChart';
+import AnalysisSections        from '../AnalysisSections';
+import TechnicalIndicators     from '../TechnicalIndicators';
+import AdvancedIndicators      from '../AdvancedIndicators';
 import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
-import AnalysisSections from '../AnalysisSections';
-import { setToken } from '../store';
-import '../App.css';
 
 export default function Home() {
-  const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
-  const [symbol, setSymbol] = useState('BTCUSDT');
-  const [interval, setInterval] = useState('4h');
-  const [limit, setLimit] = useState(144);
-  const [data, setData] = useState([]);
-  const [layers, setLayers] = useState(['RSI']);
-  const [availableIndicators, setAvailableIndicators] = useState([]);
-  const [analysis, setAnalysis] = useState(null);
-  const [showAnalysis, setShowAnalysis] = useState(true);
 
-  const toggleLayer = (layer) => {
+  const [symbol,  setSymbol]  = useState('BTCUSDT');
+  const [interval,setInterval]= useState('4h');
+  const [limit,   setLimit]   = useState(144);
+  const [layers,  setLayers]  = useState(['RSI']);
+  const [data,    setData]    = useState([]);
+  const [analysis,setAnalysis]= useState(null);
+
+  const toggleLayer = (name) =>
     setLayers((prev) =>
-      prev.includes(layer) ? prev.filter((l) => l !== layer) : [...prev, layer]
-    );
-  };
+      prev.includes(name) ? prev.filter((l) => l !== name) : [...prev, name]);
 
   const loadData = async () => {
     const body = { symbol, interval, limit, indicators: layers };
     const headers = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    try {
-      console.log('Запрос к /api/analyze', body);
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body),
-      });
-      console.log('Код ответа', res.status);
-      const json = await res.json();
-      console.log('Ответ API', json);
-      if (!res.ok) {
-        console.error('Ошибка API', json);
-        alert(json.detail || 'Request error');
-        return;
-      }
-      const ohlc = json.ohlc || [];
-      setData(ohlc);
-      setAvailableIndicators(json.indicators || []);
-      setAnalysis(json.analysis || null);
-      console.log('Данных получено:', ohlc.length);
-    } catch (err) {
-      console.error(err);
-      alert('Network error');
-    }
-  };
+    if (token) headers.Authorization = `Bearer ${token}`;
 
-  const loadTestData = async () => {
-    try {
-      console.log('Загрузка последнего ответа из dev_logs');
-      const res = await fetch('/api/testdata');
-      if (!res.ok) {
-        alert('Нет сохранённых данных');
-        return;
-      }
-      const json = await res.json();
-      setData(json.ohlc || []);
-      setAvailableIndicators(json.indicators || []);
-      setAnalysis(json.analysis || null);
-      console.log('Test data loaded', json);
-    } catch (err) {
-      console.error(err);
-      alert('Ошибка чтения тестовых данных');
-    }
-  };
-
-  const saveToken = (val) => {
-    dispatch(setToken(val));
+    const res   = await fetch('/api/analyze', {
+      method:'POST', headers, body:JSON.stringify(body),
+    });
+    const json  = await res.json();
+    setAnalysis(json.analysis);
+    setData(json.ohlc);
   };
 
   return (
-    <Box className="container">
-      <Box className="form-group" sx={{ display: 'flex', gap: 1 }}>
-        <TextField label="Symbol" value={symbol} onChange={(e) => setSymbol(e.target.value)} />
-        <Select value={interval} onChange={(e) => setInterval(e.target.value)}>
-          <MenuItem value="1h">1h</MenuItem>
-          <MenuItem value="4h">4h</MenuItem>
-          <MenuItem value="1d">1d</MenuItem>
-        </Select>
-        <TextField type="number" label="Limit" value={limit} onChange={(e) => setLimit(Number(e.target.value))} />
-        <TextField
-          label="JWT token"
-          sx={{ width: 300 }}
-          value={token}
-          onChange={(e) => saveToken(e.target.value)}
-        />
-        <Button variant="contained" onClick={loadData} type="button">Load</Button>
-        <Button variant="outlined" onClick={loadTestData} type="button">Test</Button>
-      </Box>
-      <Box className="form-group">
-        <TechnicalIndicators
-          available={availableIndicators}
-          layers={layers}
-          toggleLayer={toggleLayer}
-        />
-        <AdvancedIndicators
-          available={availableIndicators}
-          layers={layers}
-          toggleLayer={toggleLayer}
-        />
-        <ModelAnalysisIndicators
-          available={availableIndicators}
-          layers={layers}
-          toggleLayer={toggleLayer}
-        />
-      </Box>
-      <Box className="chart-container">
-        <TradingViewChart data={data} layers={layers} analysis={analysis} />
-      </Box>
-      <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setShowAnalysis(!showAnalysis)}>
-        {showAnalysis ? 'Скрыть анализ' : 'Показать анализ'}
-      </Button>
-      {showAnalysis && <AnalysisSections analysis={analysis} />}
-    </Box>
+    <Container maxWidth="xl" sx={{ mt: 2 }}>
+      <Grid container spacing={2}>
+        {/* левая панель */}
+        <Grid item xs={12} md={3}>
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Typography variant="h6" gutterBottom>Параметры запроса</Typography>
+
+            <TextField
+              fullWidth label="Тикер"
+              value={symbol} onChange={(e) => setSymbol(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+
+            <TextField
+              fullWidth type="number" label="Количество свечей"
+              value={limit} onChange={(e) => setLimit(+e.target.value)}
+              sx={{ mb: 2 }}
+            />
+
+            <Select
+              fullWidth value={interval} label="Таймфрейм"
+              onChange={(e) => setInterval(e.target.value)}
+              sx={{ mb: 2 }}
+            >
+              {['1m','5m','15m','1h','4h','1d'].map((tf) => (
+                <MenuItem key={tf} value={tf}>{tf}</MenuItem>
+              ))}
+            </Select>
+
+            <Button variant="contained" fullWidth onClick={loadData}>
+              Запустить анализ
+            </Button>
+          </Paper>
+
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Typography variant="subtitle1">Индикаторы графика</Typography>
+            <Divider sx={{ mb: 2 }} />
+
+            <FormGroup>
+              {['RSI','MACD','OBV','ATR','VWAP'].map((ind) => (
+                <FormControlLabel
+                  key={ind}
+                  control={
+                    <Checkbox
+                      checked={layers.includes(ind)}
+                      onChange={() => toggleLayer(ind)}
+                    />
+                  }
+                  label={ind}
+                />
+              ))}
+            </FormGroup>
+          </Paper>
+
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <TechnicalIndicators layers={layers} toggleLayer={toggleLayer} />
+          </Paper>
+
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <AdvancedIndicators layers={layers} toggleLayer={toggleLayer} />
+          </Paper>
+
+          <Paper sx={{ p: 2 }}>
+            <ModelAnalysisIndicators layers={layers} toggleLayer={toggleLayer} />
+          </Paper>
+        </Grid>
+
+        {/* график */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 1 }}>
+            <TradingViewChart data={data} layers={layers} />
+          </Paper>
+        </Grid>
+
+        {/* результаты */}
+        <Grid item xs={12} md={3}>
+          <Paper sx={{ p: 2, maxHeight: '82vh', overflow: 'auto' }}>
+            <AnalysisSections analysis={analysis} />
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
+

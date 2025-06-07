@@ -98,7 +98,17 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       return series;
     };
 
-    const mainChart = createChart(mainRef.current, { height: 500 });
+    const mainChart = createChart(mainRef.current, {
+      height: 500,
+      layout: {
+        background: { color: '#121212' },
+        textColor:  '#c7c7c7',
+      },
+      grid: {
+        vertLines: { color: '#2a2a2a' },
+        horzLines: { color: '#2a2a2a' },
+      },
+    });
     chartRef.current.main = mainChart;
     mainChart.applyOptions({ rightPriceScale: { visible: true }, leftPriceScale: { visible: true } });
     const candleSeries = mainChart.addCandlestickSeries();
@@ -269,7 +279,17 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     let panelChart = null;
     let firstPanelSeries = null;
     if (panelLayers.length) {
-      panelChart = createChart(panelRef.current, { height: 200 });
+      panelChart = createChart(panelRef.current, {
+        height: 200,
+        layout: {
+          background: { color: '#121212' },
+          textColor:  '#c7c7c7',
+        },
+        grid: {
+          vertLines: { color: '#2a2a2a' },
+          horzLines: { color: '#2a2a2a' },
+        },
+      });
       chartRef.current.panel = panelChart;
       panelChart.applyOptions({ rightPriceScale: { visible: true }, leftPriceScale: { visible: true } });
     }
