@@ -71,4 +71,22 @@ describe('TradingViewChart', () => {
     render(<TradingViewChart data={data} layers={['gap_analysis']} analysis={analysis} />);
     await waitFor(() => expect(mockSetMarkers).toHaveBeenCalled());
   });
+
+  it('renders support and resistance lines', async () => {
+    const data = [{ 'Open Time': '2021-01-01', Open: 1, High: 1, Low: 1, Close: 1 }];
+    const analysis = {
+      support_resistance_levels: {
+        supports: [{ date: '2021-01-01', level: 1 }],
+        resistances: [{ date: '2021-01-01', level: 2 }],
+      },
+    };
+    render(
+      <TradingViewChart
+        data={data}
+        layers={['support_resistance_levels']}
+        analysis={analysis}
+      />
+    );
+    await waitFor(() => expect(mockAddLineSeries).toHaveBeenCalled());
+  });
 });

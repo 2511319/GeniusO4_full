@@ -62,8 +62,16 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     chartRef.current = {};
 
     const toUnix = (d) => {
-      const t = Math.floor(new Date(d).getTime() / 1000);
-      return !t || Number.isNaN(t) ? null : t;
+      if (!d) return null;
+      const parsed = new Date(
+        typeof d === 'string' ? d.replace(' ', 'T') + 'Z' : d
+      );
+      const t = Math.floor(parsed.getTime() / 1000);
+      if (!t || Number.isNaN(t)) {
+        console.warn('Не удалось распознать дату', d);
+        return null;
+      }
+      return t;
     };
 
     const buildSeriesData = (field) => {
