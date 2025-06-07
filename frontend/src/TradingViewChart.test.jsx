@@ -3,21 +3,18 @@ import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TradingViewChart from './TradingViewChart';
 
-const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn() }));
-const mockAddHorizontalLine = vi.fn();
+const mockCreatePriceLine = vi.fn();
+const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createPriceLine: mockCreatePriceLine }));
 const mockSubscribeCrosshairMove = vi.fn();
 
-vi.mock('lightweight-charts', () => {
-  return {
-    createChart: vi.fn(() => ({
-      addCandlestickSeries: mockAddCandlestickSeries,
-      addHorizontalLine: mockAddHorizontalLine,
-      subscribeCrosshairMove: mockSubscribeCrosshairMove,
-      removeSeries: vi.fn(),
-      resize: vi.fn()
-    }))
-  };
-});
+vi.mock('lightweight-charts', () => ({
+  createChart: vi.fn(() => ({
+    addCandlestickSeries: mockAddCandlestickSeries,
+    subscribeCrosshairMove: mockSubscribeCrosshairMove,
+    removeSeries: vi.fn(),
+    resize: vi.fn(),
+  })),
+}));
 
 describe('TradingViewChart', () => {
   beforeEach(() => {
@@ -39,6 +36,6 @@ describe('TradingViewChart', () => {
       close: 0
     }));
     render(<TradingViewChart data={data} layers={[]} />);
-    await waitFor(() => expect(mockAddHorizontalLine).toHaveBeenCalled());
+    await waitFor(() => expect(mockCreatePriceLine).toHaveBeenCalled());
   });
 });

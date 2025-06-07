@@ -89,7 +89,7 @@ export default function TradingViewChart({ data, layers }) {
     /* support/resistance */
     const levels = findSRLevels(processed);
     levels.forEach(({ price, type }) =>
-      chart.addHorizontalLine({
+      series.createPriceLine({
         price,
         lineWidth: 1,
         color: type === 'support' ? '#4caf50' : '#f44336',
