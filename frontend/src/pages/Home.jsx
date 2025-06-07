@@ -10,6 +10,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import SplitPane from 'react-split-pane';
 
 import TradingViewChart       from '../TradingViewChart';
+import ChartControls          from '../ChartControls';
 import AnalysisSections        from '../AnalysisSections';
 import TechnicalIndicators     from '../TechnicalIndicators';
 import AdvancedIndicators      from '../AdvancedIndicators';
@@ -27,6 +28,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hideL,   setHideL]   = useState(false);
   const [hideR,   setHideR]   = useState(false);
+  const [chartType, setChartType] = useState('candles');
 
   const toggleLayer = (name) =>
     setLayers((prev) =>
@@ -144,7 +146,10 @@ export default function Home() {
               </Box>
             )}
             {!loading && (
-              <TradingViewChart data={data} layers={layers} />
+              <>
+                <ChartControls type={chartType} onChange={setChartType} />
+                <TradingViewChart data={data} layers={layers} type={chartType} />
+              </>
             )}
           </Box>
 
