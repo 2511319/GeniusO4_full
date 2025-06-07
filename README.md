@@ -147,3 +147,9 @@ python run.py --mode docker      # локально через Docker
 
 При клонировании репозитория не используйте опцию `--depth`, чтобы сохранялась полная история коммитов.
 
+
+## Документация
+
+Подробности работы функций `computeHeikinAshi`, `computeRenko` и `findSRLevels`
+описаны в [docs/chart_utils.md](docs/chart_utils.md).
+
