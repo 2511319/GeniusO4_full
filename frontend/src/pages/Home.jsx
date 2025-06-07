@@ -117,7 +117,7 @@ export default function Home() {
         />
       </Box>
       <Box className="chart-container">
-        <TradingViewChart data={data} layers={layers} />
+        <TradingViewChart data={data} layers={layers} analysis={analysis} />
       </Box>
       <Button variant="outlined" sx={{ mt: 1 }} onClick={() => setShowAnalysis(!showAnalysis)}>
         {showAnalysis ? 'Скрыть анализ' : 'Показать анализ'}

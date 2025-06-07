@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createChart } from 'lightweight-charts';
 import { indicatorColumnMap } from './indicatorGroups';
 
-export default function TradingViewChart({ data = [], layers = [] }) {
+export default function TradingViewChart({ data = [], layers = [], analysis = {} }) {
   const mainRef = useRef(null);
   const panelRef = useRef(null);
   const containerRef = useRef(null);
@@ -129,6 +129,135 @@ export default function TradingViewChart({ data = [], layers = [] }) {
       }
     });
 
+    chartRef.current.overlays = [];
+
+    if (layers.includes('support_resistance_levels')) {
+      const levels = analysis.support_resistance_levels || {};
+      const lastTime = candleData[candleData.length - 1]?.time;
+      const addSR = (items, color) => {
+        items?.forEach((l) => {
+          const series = mainChart.addLineSeries({ color, lineStyle: 2 });
+          series.setData([
+            { time: toUnix(l.date), value: l.level },
+            { time: lastTime, value: l.level },
+          ]);
+          chartRef.current.overlays.push(series);
+        });
+      };
+      addSR(levels.supports, 'green');
+      addSR(levels.resistances, 'red');
+    }
+
+    if (layers.includes('price_prediction')) {
+      const candles = analysis.price_prediction?.virtual_candles || [];
+      if (candles.length) {
+        const series = mainChart.addCandlestickSeries({
+          upColor: 'purple',
+          downColor: 'purple',
+          borderVisible: false,
+        });
+        const predData = candles
+          .map((c) => ({
+            time: toUnix(c.date),
+            open: c.open,
+            high: c.high,
+            low: c.low,
+            close: c.close,
+          }))
+          .filter((c) => c.time);
+        series.setData(predData);
+        chartRef.current.overlays.push(series);
+      }
+    }
+
+    const markers = [];
+
+    if (layers.includes('psychological_levels')) {
+      const levels = analysis.psychological_levels?.levels || [];
+      const lastTime = candleData[candleData.length - 1]?.time;
+      levels.forEach((l) => {
+        const color = l.type === 'Support' ? 'blue' : 'orange';
+        const series = mainChart.addLineSeries({ color, lineStyle: 2 });
+        series.setData([
+          { time: toUnix(l.date), value: l.level },
+          { time: lastTime, value: l.level },
+        ]);
+        chartRef.current.overlays.push(series);
+      });
+    }
+
+    if (layers.includes('unfinished_zones')) {
+      const zones = analysis.unfinished_zones || [];
+      zones.forEach((z) => {
+        markers.push({
+          time: toUnix(z.date),
+          position: 'aboveBar',
+          color: z.line_color || 'purple',
+          shape: 'circle',
+          text: z.type,
+        });
+      });
+    }
+
+    if (layers.includes('gap_analysis')) {
+      const gaps = analysis.gap_analysis?.gaps || [];
+      gaps.forEach((g) => {
+        markers.push({
+          time: toUnix(g.date),
+          position: 'aboveBar',
+          color: 'red',
+          shape: 'arrowDown',
+          text: g.gap_type,
+        });
+      });
+    }
+
+    if (layers.includes('imbalances')) {
+      const imbs = analysis.imbalances || [];
+      imbs.forEach((im) => {
+        const from = toUnix(im.start_point?.date);
+        const to = toUnix(im.end_point?.date);
+        if (from && to) {
+          const series = mainChart.addAreaSeries({
+            lineColor: 'rgba(255,0,0,0.3)',
+            topColor: 'rgba(255,0,0,0.1)',
+            bottomColor: 'rgba(255,0,0,0.1)',
+          });
+          series.setData([
+            { time: from, value: im.price_range?.[0] || im.start_point.price },
+            { time: to, value: im.price_range?.[0] || im.start_point.price },
+          ]);
+          const series2 = mainChart.addAreaSeries({
+            lineColor: 'rgba(255,0,0,0.3)',
+            topColor: 'rgba(255,0,0,0.1)',
+            bottomColor: 'rgba(255,0,0,0.1)',
+          });
+          series2.setData([
+            { time: from, value: im.price_range?.[1] || im.end_point.price },
+            { time: to, value: im.price_range?.[1] || im.end_point.price },
+          ]);
+          chartRef.current.overlays.push(series, series2);
+        }
+      });
+    }
+
+    if (layers.includes('anomalous_candles')) {
+      const candles = analysis.anomalous_candles || [];
+      candles.forEach((c) => {
+        markers.push({
+          time: toUnix(c.date),
+          position: 'aboveBar',
+          color: 'yellow',
+          shape: 'square',
+          text: c.type,
+        });
+      });
+    }
+
+    if (markers.length) {
+      candleSeries.setMarkers(markers.filter((m) => m.time));
+    }
+
     let panelChart = null;
     let firstPanelSeries = null;
     if (panelLayers.length) {
@@ -215,6 +344,15 @@ export default function TradingViewChart({ data = [], layers = [] }) {
 
     return () => {
       cleanup();
+      if (chartRef.current.overlays) {
+        chartRef.current.overlays.forEach((s) => {
+          try {
+            s.remove();
+          } catch (err) {
+            console.warn('Ошибка очистки серии', err);
+          }
+        });
+      }
       Object.values(chartRef.current).forEach((ch) => {
         try {
           ch.remove();
@@ -224,7 +362,7 @@ export default function TradingViewChart({ data = [], layers = [] }) {
       });
       chartRef.current = {};
     };
-  }, [data, layers]);
+  }, [data, layers, analysis]);
 
   const startDrag = (e) => {
     e.preventDefault();
