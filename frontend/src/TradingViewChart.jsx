@@ -9,6 +9,8 @@ export default function TradingViewChart({ data, layers, showSR = false }) {
   const chartRef     = useRef();
   const seriesRef    = useRef();
   const tooltipRef   = useRef();
+  const indicatorSeriesRef = useRef({});
+  const crosshairHandlerRef = useRef();
   const [type, setType] = React.useState('candles');
 
   /* ───────── helpers for indicators tooltip ───────── */
@@ -60,7 +62,7 @@ export default function TradingViewChart({ data, layers, showSR = false }) {
     };
   }, []);
 
-  /* ───────── update series on data | type ───────── */
+  /* ───────── update series on data | type | layers ───────── */
   useEffect(() => {
     if (!chartRef.current) return;
 
@@ -69,6 +71,13 @@ export default function TradingViewChart({ data, layers, showSR = false }) {
       try {
         chart.removeSeries(seriesRef.current);
       } catch (_) {}
+    }
+    Object.values(indicatorSeriesRef.current).forEach((s) => {
+      try { chart.removeSeries(s); } catch (_) {}
+    });
+    indicatorSeriesRef.current = {};
+    if (crosshairHandlerRef.current) {
+      chart.unsubscribeCrosshairMove(crosshairHandlerRef.current);
     }
 
     const prepare = () => {
@@ -86,6 +95,21 @@ export default function TradingViewChart({ data, layers, showSR = false }) {
     series.setData(processed);
     seriesRef.current = series;
 
+    /* indicator lines */
+    const colorMap = {
+      RSI: '#ff9800',
+      MACD: '#2196f3',
+      OBV: '#9c27b0',
+      ATR: '#009688',
+      VWAP: '#795548'
+    };
+    layers.forEach((name, idx) => {
+      if (!processed[0] || processed[0][name] === undefined) return;
+      const line = chart.addLineSeries({ color: colorMap[name] || `hsl(${idx*60},70%,50%)` });
+      line.setData(processed.map((d) => ({ time: d.time, value: d[name] })));
+      indicatorSeriesRef.current[name] = line;
+    });
+
     /* support/resistance */
     if (showSR) {
       const levels = findSRLevels(processed);
@@ -102,7 +126,7 @@ export default function TradingViewChart({ data, layers, showSR = false }) {
     }
 
     /* tooltip */
-    chart.subscribeCrosshairMove((param) => {
+    const handler = (param) => {
       if (!param || !param.time || !param.seriesData.size) {
         tooltipRef.current.style.display = 'none';
         return;
@@ -110,19 +134,26 @@ export default function TradingViewChart({ data, layers, showSR = false }) {
       const datum = param.seriesData.get(series);
       if (!datum) return;
       const { value } = datum;
-      const { rsi, macd } = param.seriesData.values().next().value || {};
+      const indVals = Object.entries(indicatorSeriesRef.current)
+        .map(([name, s]) => {
+          const v = param.seriesData.get(s);
+          return v ? `${name}: ${Number(v.value).toFixed(2)}` : '';
+        })
+        .filter(Boolean)
+        .join(' ');
       tooltipRef.current.innerHTML = `
         <div><b>${new Date(param.time * 1000).toLocaleString()}</b></div>
         O: ${value.open.toFixed(2)} H: ${value.high.toFixed(2)}
         L: ${value.low.toFixed(2)} C: ${value.close.toFixed(2)}<br/>
-        ${rsi ? `RSI: ${rsi.toFixed(2)} ` : ''}
-        ${macd ? `MACD: ${macd.toFixed(2)}` : ''}
+        ${indVals}
       `;
       tooltipRef.current.style.display = 'block';
       tooltipRef.current.style.left = param.point.x + 10 + 'px';
       tooltipRef.current.style.top  = param.point.y + 10 + 'px';
-    });
-  }, [data, type]);
+    };
+    chart.subscribeCrosshairMove(handler);
+    crosshairHandlerRef.current = handler;
+  }, [data, type, layers]);
 
   return (
     <Box sx={{ height: '100%', position: 'relative' }}>
