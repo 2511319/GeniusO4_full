@@ -4,7 +4,9 @@ import {
   Container, Grid, Paper, Box,
   TextField, Select, MenuItem, Button, Typography,
   Divider, FormGroup, FormControlLabel, Checkbox,
+  Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import TradingViewChart       from '../TradingViewChart';
 import AnalysisSections        from '../AnalysisSections';
@@ -27,6 +29,23 @@ export default function Home() {
     setLayers((prev) =>
       prev.includes(name) ? prev.filter((l) => l !== name) : [...prev, name]);
 
+  const loadTestData = async () => {
+    try {
+      const res = await fetch('/api/testdata');
+      if (!res.ok) {
+        alert('Нет сохранённых данных');
+        return;
+      }
+      const json = await res.json();
+      setAnalysis(json.analysis);
+      setData(json.ohlc || []);
+      setAvailable(json.indicators || []);
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка чтения тестовых данных');
+    }
+  };
+
   const loadData = async () => {
     const body = { symbol, interval, limit, indicators: layers };
     const headers = { 'Content-Type': 'application/json' };
@@ -46,8 +65,11 @@ export default function Home() {
       <Grid container spacing={2}>
         {/* левая панель */}
         <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h6" gutterBottom>Параметры запроса</Typography>
+          <Accordion defaultExpanded sx={{ mb: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="h6">Параметры запроса</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
 
             <TextField
               fullWidth label="Тикер"
@@ -74,13 +96,20 @@ export default function Home() {
             <Button variant="contained" fullWidth onClick={loadData}>
               Запустить анализ
             </Button>
-          </Paper>
+            <Button variant="outlined" fullWidth sx={{ mt: 1 }} onClick={loadTestData}>
+              Test
+            </Button>
+            </AccordionDetails>
+          </Accordion>
 
-          <Paper sx={{ p: 2, mb: 2 }}>
-            <Typography variant="subtitle1">Индикаторы графика</Typography>
-            <Divider sx={{ mb: 2 }} />
+          <Accordion defaultExpanded sx={{ mb: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
+              <Typography variant="subtitle1">Индикаторы графика</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Divider sx={{ mb: 2 }} />
 
-            <FormGroup>
+              <FormGroup>
               {['RSI','MACD','OBV','ATR','VWAP'].map((ind) => (
                 <FormControlLabel
                   key={ind}
@@ -93,38 +122,54 @@ export default function Home() {
                   label={ind}
                 />
               ))}
-            </FormGroup>
-          </Paper>
+              </FormGroup>
+            </AccordionDetails>
+          </Accordion>
 
-          <Paper sx={{ p: 2, mb: 2 }}>
+          <Accordion defaultExpanded sx={{ mb: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
+              <Typography variant="subtitle1">Технические</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
             <TechnicalIndicators
               available={available}
               layers={layers}
               toggleLayer={toggleLayer}
             />
-          </Paper>
+            </AccordionDetails>
+          </Accordion>
 
-          <Paper sx={{ p: 2, mb: 2 }}>
+          <Accordion defaultExpanded sx={{ mb: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
+              <Typography variant="subtitle1">Продвинутые</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
             <AdvancedIndicators
               available={available}
               layers={layers}
               toggleLayer={toggleLayer}
             />
-          </Paper>
+            </AccordionDetails>
+          </Accordion>
 
-          <Paper sx={{ p: 2 }}>
+          <Accordion defaultExpanded>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
+              <Typography variant="subtitle1">Модельный анализ</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
             <ModelAnalysisIndicators
               available={available}
               layers={layers}
               toggleLayer={toggleLayer}
             />
-          </Paper>
+            </AccordionDetails>
+          </Accordion>
         </Grid>
 
         {/* график */}
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 1 }}>
-            <TradingViewChart data={data} layers={layers} />
+            <TradingViewChart data={data} layers={layers} analysis={analysis} />
           </Paper>
         </Grid>
 
