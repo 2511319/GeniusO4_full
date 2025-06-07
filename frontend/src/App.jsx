@@ -1,25 +1,44 @@
-import React from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import React, { useContext } from 'react';
+import { CssBaseline, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+import ColorModeProvider, { ColorModeContext } from './ColorModeContext';
 import Home from './pages/Home';
 import About from './pages/About';
 
-export default function App() {
+function InnerApp() {
+  const { mode, toggle } = useContext(ColorModeContext);
+
   return (
     <>
+      <CssBaseline />
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             ChartGenius
           </Typography>
-          <Button color="inherit" component={Link} to="/">Home</Button>
-          <Button color="inherit" component={Link} to="/about">About</Button>
+          <IconButton color="inherit" onClick={toggle}>
+            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
         </Toolbar>
       </AppBar>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-      </Routes>
+
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </BrowserRouter>
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <ColorModeProvider>
+      <InnerApp />
+    </ColorModeProvider>
   );
 }
