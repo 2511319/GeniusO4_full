@@ -54,7 +54,9 @@ export default function TradingViewChart({ data, layers }) {
 
     return () => {
       window.removeEventListener('resize', resize);
-      containerRef.current.innerHTML = '';
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
     };
   }, []);
 
@@ -63,7 +65,11 @@ export default function TradingViewChart({ data, layers }) {
     if (!chartRef.current) return;
 
     const chart = chartRef.current;
-    if (seriesRef.current) chart.removeSeries(seriesRef.current);
+    if (seriesRef.current) {
+      try {
+        chart.removeSeries(seriesRef.current);
+      } catch (_) {}
+    }
 
     const prepare = () => {
       if (type === 'heikin') return computeHeikinAshi(data);
@@ -71,7 +77,11 @@ export default function TradingViewChart({ data, layers }) {
       return data;
     };
 
-    const processed = prepare();
+    const processed = prepare() || [];
+    if (!processed.length) {
+      seriesRef.current = null;
+      return;
+    }
     const series = chart.addCandlestickSeries();
     series.setData(processed);
     seriesRef.current = series;
@@ -94,6 +104,7 @@ export default function TradingViewChart({ data, layers }) {
         return;
       }
       const datum = param.seriesData.get(series);
+      if (!datum) return;
       const { value } = datum;
       const { rsi, macd } = param.seriesData.values().next().value || {};
       tooltipRef.current.innerHTML = `
