@@ -30,6 +30,7 @@ export default function Home() {
   const [hideL,   setHideL]   = useState(false);
   const [hideR,   setHideR]   = useState(false);
   const [chartType, setChartType] = useState('candles');
+  const [showSR, setShowSR] = useState(false);
 
   const toggleLayer = (name) =>
     setLayers((prev) =>
@@ -138,6 +139,15 @@ export default function Home() {
                 label={ind}
               />
             ))}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showSR}
+                  onChange={(e) => setShowSR(e.target.checked)}
+                />
+              }
+              label="Algo-SRlevel"
+            />
           </FormGroup>
 
           <TechnicalIndicators layers={layers} toggleLayer={toggleLayer} />
@@ -172,7 +182,12 @@ export default function Home() {
             {!loading && (
               <>
                 <ChartControls type={chartType} onChange={setChartType} />
-                <TradingViewChart data={data} layers={layers} type={chartType} />
+                <TradingViewChart
+                  data={data}
+                  layers={layers}
+                  type={chartType}
+                  showSR={showSR}
+                />
               </>
             )}
           </Box>
