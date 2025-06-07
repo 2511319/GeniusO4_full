@@ -1,59 +1,43 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
+import React from 'react';
+import {
+  Accordion, AccordionSummary, AccordionDetails,
+  Typography, Box,
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-const TEXT_SECTIONS = [
-  { key: 'primary_analysis', title: 'Первичный анализ' },
-  { key: 'price_prediction', title: 'Прогноз цены' },
-  { key: 'recommendations', title: 'Рекомендации' },
-  { key: 'confidence_in_trading_decisions', title: 'Уверенность в решениях' },
+const SECTIONS = [
+  { key: 'primary_analysis',                 title: 'Первичный анализ' },
+  { key: 'price_prediction',                 title: 'Прогноз цены' },
+  { key: 'recommendations',                  title: 'Рекомендации' },
+  { key: 'confidence_in_trading_decisions',  title: 'Уверенность в решениях' },
 ];
 
 export default function AnalysisSections({ analysis }) {
-  const initialVisibility = useMemo(
-    () =>
-      TEXT_SECTIONS.reduce((acc, { key }) => {
-        acc[key] = true;
-        return acc;
-      }, {}),
-    []
-  );
-
-  const [visibility, setVisibility] = useState(initialVisibility);
-
-  useEffect(() => {
-    // сбрасываем видимость при получении нового анализа
-    setVisibility(initialVisibility);
-  }, [analysis, initialVisibility]);
-
-  const toggle = (key) => {
-    setVisibility((v) => ({ ...v, [key]: !v[key] }));
-  };
-
   if (!analysis) return null;
 
   return (
-    <Box sx={{ mt: 2, whiteSpace: 'pre-wrap' }}>
-      <Box sx={{ mb: 1 }}>
-        {TEXT_SECTIONS.map(({ key, title }) => (
-          <FormControlLabel
-            key={key}
-            control={<Checkbox checked={visibility[key]} onChange={() => toggle(key)} />}
-            label={title}
-          />
-        ))}
-      </Box>
-      {TEXT_SECTIONS.map(({ key, title }) => {
-        const val = analysis[key];
-        if (!val || !visibility[key]) return null;
+    <Box sx={{ width: '100%' }}>
+      {SECTIONS.map(({ key, title }) => {
+        const value = analysis[key];
+        if (!value) return null;
+
         return (
-          <Box key={key} sx={{ mb: 2 }}>
-            <Typography variant="h6">{title}</Typography>
-            <Typography variant="body2">
-              {typeof val === 'string' ? val : JSON.stringify(val, null, 2)}
-            </Typography>
-          </Box>
+          <Accordion key={key} defaultExpanded>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="subtitle1">{title}</Typography>
+            </AccordionSummary>
+
+            <AccordionDetails sx={{ whiteSpace: 'pre-wrap' }}>
+              <Typography variant="body2">
+                {typeof value === 'string'
+                  ? value
+                  : JSON.stringify(value, null, 2)}
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
         );
       })}
     </Box>
   );
 }
+
