@@ -9,14 +9,22 @@
    Аналогично создайте `.env.docker` и `.env.prod`, подставив свои значения.
    В файле окружения можно задать `DEFAULT_SYMBOL` и `DEFAULT_QUOTE` – базовую
    и котируемую валюту по умолчанию.
-2. Запустите сервер вручную (из каталога `api`):
+2. Установите зависимости Python и Node:
+   ```bash
+   pip install -r api/requirements.txt
+   cd frontend && npm install
+   ```
+3. Запустите сервер вручную (из каталога `api`):
    ```bash
    python -m uvicorn app:app --reload
    ```
    или воспользуйтесь `python run.py --mode dev` либо `docker-compose up --build`.
-3. Откройте:
+4. Откройте:
    - React UI: http://localhost:5173
    - Health: http://localhost:8000/health
+
+При работе без доступа к интернету храните нужные Python-`whl` и npm-пакеты локально или
+используйте зеркала PyPI и NPM.
 
 ## Структура
 
