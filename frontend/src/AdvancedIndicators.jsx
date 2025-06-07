@@ -3,7 +3,9 @@ import IndicatorGroup from './IndicatorGroup';
 import { advancedIndicators } from './indicatorGroups';
 
 export default function AdvancedIndicators({ available, layers, toggleLayer }) {
-  const indicators = advancedIndicators.filter((i) => available.includes(i));
+  // advancedIndicators не зависят от полученных колонок данных,
+  // поэтому показываем все доступные слои, игнорируя список `available`
+  const indicators = advancedIndicators;
   return (
     <IndicatorGroup
       title="Продвинутые"
