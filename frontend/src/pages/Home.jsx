@@ -15,7 +15,7 @@ import AnalysisSections        from '../AnalysisSections';
 import TechnicalIndicators     from '../TechnicalIndicators';
 import AdvancedIndicators      from '../AdvancedIndicators';
 import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
-import { parseOhlc } from '../chartUtils';
+import { parseOhlc, parsePatterns } from '../chartUtils';
 
 export default function Home() {
   const token = useSelector((s) => s.auth.token);
@@ -30,6 +30,7 @@ export default function Home() {
   const [hideL,   setHideL]   = useState(false);
   const [hideR,   setHideR]   = useState(false);
   const [chartType, setChartType] = useState('candles');
+  const [patterns, setPatterns] = useState([]);
   const [showSR, setShowSR] = useState(false);
   const [showTrends, setShowTrends] = useState(false);
 
@@ -49,6 +50,7 @@ export default function Home() {
       const json = await res.json();
       setAnalysis(json.analysis || null);
       setData(parseOhlc(json.ohlc));
+      setPatterns(parsePatterns(json.analysis?.candlestick_patterns));
     } catch (err) {
       console.error(err);
       alert('Ошибка чтения тестовых данных');
@@ -66,6 +68,7 @@ export default function Home() {
     const json = await res.json();
     setAnalysis(json.analysis);
     setData(parseOhlc(json.ohlc));
+    setPatterns(parsePatterns(json.analysis?.candlestick_patterns));
     setLoading(false);
   };
 
@@ -194,6 +197,7 @@ export default function Home() {
                 <ChartControls type={chartType} onChange={setChartType} />
                 <TradingViewChart
                   data={data}
+                  patterns={patterns}
                   layers={layers}
                   type={chartType}
                   showSR={showSR}

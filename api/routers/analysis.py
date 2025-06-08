@@ -63,6 +63,10 @@ async def analyze(req: AnalyzeRequest):
     divergences = []
     divergences.extend(stat_analyzer.find_divergences("RSI"))
     divergences.extend(stat_analyzer.find_divergences("MACD"))
+    if hasattr(processor, 'get_candlestick_patterns'):
+        patterns = processor.get_candlestick_patterns(req.limit)
+    else:
+        patterns = []
 
     # список вычисленных индикаторов
     base_cols = [
@@ -76,6 +80,7 @@ async def analyze(req: AnalyzeRequest):
     analyzer = ChatGPTAnalyzer()
     analysis = analyzer.analyze({"ohlc": ohlc}) or {}
     analysis["divergence_analysis"] = divergences
+    analysis["candlestick_patterns"] = patterns
 
     # 4. Визуализация (рисуем выбранные слои)
     layers = req.indicators or ALL_LAYERS
