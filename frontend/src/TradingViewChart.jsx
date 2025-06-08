@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { createChart } from 'lightweight-charts';
 import { Box } from '@mui/material';
 import ChartControls from './ChartControls';
+import Legend from './Legend';
 import { computeHeikinAshi, computeRenko, findSRLevels, findTrendLines } from './chartUtils';
 
 export default function TradingViewChart({ data, patterns = [], layers, showSR = false, showTrends = false }) {
@@ -10,8 +11,10 @@ export default function TradingViewChart({ data, patterns = [], layers, showSR =
   const seriesRef    = useRef();
   const tooltipRef   = useRef();
   const indicatorSeriesRef = useRef({});
+  const seriesInfoRef = useRef({});
   const crosshairHandlerRef = useRef();
   const [type, setType] = React.useState('candles');
+  const [legendItems, setLegendItems] = React.useState([]);
 
   /* ───────── helpers for indicators tooltip ───────── */
   const buildTooltip = () => {
@@ -76,6 +79,7 @@ export default function TradingViewChart({ data, patterns = [], layers, showSR =
       try { chart.removeSeries(s); } catch (_) {}
     });
     indicatorSeriesRef.current = {};
+    seriesInfoRef.current = {};
     if (crosshairHandlerRef.current) {
       chart.unsubscribeCrosshairMove(crosshairHandlerRef.current);
     }
@@ -106,30 +110,42 @@ export default function TradingViewChart({ data, patterns = [], layers, showSR =
     };
     layers.forEach((name, idx) => {
       if (!processed[0] || processed[0][name] === undefined) return;
-      const line = chart.addLineSeries({ color: colorMap[name] || `hsl(${idx*60},70%,50%)` });
+      const color = colorMap[name] || `hsl(${idx*60},70%,50%)`;
+      const line = chart.addLineSeries({ color });
       line.setData(processed.map((d) => ({ time: d.time, value: d[name] })));
       indicatorSeriesRef.current[name] = line;
+      seriesInfoRef.current[name] = { series: line, color, dashed: false };
     });
 
     /* support/resistance */
     if (showSR) {
       const levels = findSRLevels(processed);
+      let hasSupport = false;
+      let hasResistance = false;
       levels.forEach(({ price, type, time }) => {
+        const color = type === 'support' ? '#4caf50' : '#f44336';
+        if (type === 'support') hasSupport = true; else hasResistance = true;
         series.createRay({
           price,
           time,
           extend: 'right',
           lineWidth: 1,
-          color: type === 'support' ? '#4caf50' : '#f44336',
+          color,
           lineStyle: 2,
         });
       });
+      if (hasSupport) seriesInfoRef.current.support = { color: '#4caf50', dashed: true };
+      if (hasResistance) seriesInfoRef.current.resistance = { color: '#f44336', dashed: true };
     }
 
     /* trend lines */
     if (showTrends) {
       const tl = findTrendLines(processed);
+      let hasSupport = false;
+      let hasResistance = false;
       tl.forEach(({ from, to, type }) => {
+        const color = type === 'support' ? '#4caf50' : '#f44336';
+        if (type === 'support') hasSupport = true; else hasResistance = true;
         series.createRay({
           points: [
             { time: from.time, value: from.price },
@@ -137,10 +153,12 @@ export default function TradingViewChart({ data, patterns = [], layers, showSR =
           ],
           extend: 'right',
           lineWidth: 1,
-          color: type === 'support' ? '#4caf50' : '#f44336',
+          color,
           lineStyle: 0,
         });
       });
+      if (hasSupport) seriesInfoRef.current['trend-support'] = { color: '#4caf50', dashed: false };
+      if (hasResistance) seriesInfoRef.current['trend-resistance'] = { color: '#f44336', dashed: false };
     }
 
     if (layers.includes('candlestick_patterns') && patterns.length) {
@@ -152,6 +170,7 @@ export default function TradingViewChart({ data, patterns = [], layers, showSR =
         text: p.type || '',
       }));
       series.setMarkers(markers);
+      seriesInfoRef.current.patterns = { color: 'magenta', dashed: false };
     }
 
     /* tooltip */
@@ -182,10 +201,19 @@ export default function TradingViewChart({ data, patterns = [], layers, showSR =
     };
     chart.subscribeCrosshairMove(handler);
     crosshairHandlerRef.current = handler;
+
+    setLegendItems(
+      Object.entries(seriesInfoRef.current).map(([name, info]) => ({
+        name,
+        color: info.color,
+        dashed: info.dashed,
+      }))
+    );
   }, [data, type, layers, showSR, showTrends, patterns]);
 
   return (
     <Box sx={{ height: '100%', position: 'relative' }}>
+      <Legend items={legendItems} />
       <ChartControls type={type} onChange={setType} />
       <Box ref={containerRef} sx={{ height: '100%' }} />
     </Box>
