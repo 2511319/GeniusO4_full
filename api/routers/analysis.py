@@ -11,6 +11,7 @@ from services.crypto_compare_provider import fetch_ohlcv
 from services.data_processor import DataProcessor
 from services.chatgpt_analyzer import ChatGPTAnalyzer
 from services.viz import create_chart
+from services.statistical_analysis import StatisticalAnalyzer
 
 router = APIRouter()
 
@@ -58,6 +59,11 @@ async def analyze(req: AnalyzeRequest):
     df_ind = processor.perform_full_processing(drop_na=req.drop_na)
     ohlc = processor.get_ohlc_data(req.limit)
 
+    stat_analyzer = StatisticalAnalyzer(df_ind)
+    divergences = []
+    divergences.extend(stat_analyzer.find_divergences("RSI"))
+    divergences.extend(stat_analyzer.find_divergences("MACD"))
+
     # список вычисленных индикаторов
     base_cols = [
         'Open Time', 'Close Time', 'Open', 'High', 'Low', 'Close',
@@ -68,7 +74,8 @@ async def analyze(req: AnalyzeRequest):
 
     # 3. Анализ ChatGPT
     analyzer = ChatGPTAnalyzer()
-    analysis = analyzer.analyze({"ohlc": ohlc})
+    analysis = analyzer.analyze({"ohlc": ohlc}) or {}
+    analysis["divergence_analysis"] = divergences
 
     # 4. Визуализация (рисуем выбранные слои)
     layers = req.indicators or ALL_LAYERS

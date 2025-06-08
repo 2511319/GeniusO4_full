@@ -302,16 +302,18 @@ def create_chart(selected_elements: List[str], df: pd.DataFrame, analysis_data: 
             divergences = analysis_data.get('divergence_analysis', [])
             for divergence in divergences:
                 date = divergence['date']
+                dtype = divergence.get('type', '')
                 price = None
                 if date in df['Open Time'].values:
                     price = df.loc[df['Open Time'] == date, 'Close'].values[0]
                 else:
                     continue
+                symbol = 'arrow-up' if 'bullish' in dtype else 'arrow-down'
                 fig.add_trace(go.Scatter(
                     x=[date],
                     y=[price],
                     mode='markers',
-                    marker=dict(color='red', size=10, symbol='diamond'),
+                    marker=dict(color='red', size=12, symbol=symbol),
                     name='Divergence',
                     showlegend=False
                 ), row=1, col=1)

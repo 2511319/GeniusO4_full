@@ -6,6 +6,7 @@ from typing import Dict, Any, List
 from config.config import logger
 from statsmodels.tsa.seasonal import seasonal_decompose
 from scipy.stats import shapiro
+from scipy.signal import argrelextrema
 import math
 import numpy as np
 
@@ -259,3 +260,60 @@ class StatisticalAnalyzer:
             logger.info(f"Статистический анализ сохранён в {filepath}.")
         except Exception as e:
             logger.error(f"Ошибка при сохранении статистического анализа в файл: {e}")
+
+    def find_divergences(self, oscillator: str = "RSI", window: int = 5) -> List[Dict[str, Any]]:
+        """Ищет дивергенции между ценой и заданным осциллятором.
+
+        Параметры:
+            oscillator: Название столбца с осциллятором ("RSI" или "MACD").
+            window: Размер окна для поиска локальных экстремумов.
+
+        Возвращает:
+            Список словарей с найденными дивергенциями.
+        """
+        if oscillator not in self.df.columns:
+            logger.warning(f"Осциллятор {oscillator} отсутствует в данных")
+            return []
+
+        if len(self.df) < window * 2:
+            logger.warning("Недостаточно данных для поиска дивергенций")
+            return []
+
+        divergences = []
+        try:
+            close = self.df["Close"]
+            osc = self.df[oscillator]
+
+            lows = argrelextrema(close.values, np.less_equal, order=window)[0]
+            highs = argrelextrema(close.values, np.greater_equal, order=window)[0]
+            osc_lows = argrelextrema(osc.values, np.less_equal, order=window)[0]
+            osc_highs = argrelextrema(osc.values, np.greater_equal, order=window)[0]
+
+            for i in range(1, len(lows)):
+                p1, p2 = lows[i - 1], lows[i]
+                if p1 in osc_lows and p2 in osc_lows:
+                    if close.iloc[p2] < close.iloc[p1] and osc.iloc[p2] > osc.iloc[p1]:
+                        divergences.append({
+                            "date": str(self.df["Open Time"].iloc[p2]),
+                            "type": "bullish_divergence",
+                            "indicator": oscillator,
+                            "price": float(close.iloc[p2]),
+                            "oscillator": float(osc.iloc[p2]),
+                        })
+
+            for i in range(1, len(highs)):
+                p1, p2 = highs[i - 1], highs[i]
+                if p1 in osc_highs and p2 in osc_highs:
+                    if close.iloc[p2] > close.iloc[p1] and osc.iloc[p2] < osc.iloc[p1]:
+                        divergences.append({
+                            "date": str(self.df["Open Time"].iloc[p2]),
+                            "type": "bearish_divergence",
+                            "indicator": oscillator,
+                            "price": float(close.iloc[p2]),
+                            "oscillator": float(osc.iloc[p2]),
+                        })
+
+        except Exception as e:
+            logger.error(f"Ошибка при поиске дивергенций: {e}")
+
+        return divergences
