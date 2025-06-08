@@ -16,6 +16,7 @@ import TechnicalIndicators     from '../TechnicalIndicators';
 import AdvancedIndicators      from '../AdvancedIndicators';
 import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
 import { parseOhlc, parsePatterns } from '../chartUtils';
+import { validateAnalysis } from '../analysisValidator';
 
 export default function Home() {
   const token = useSelector((s) => s.auth.token);
@@ -49,6 +50,7 @@ export default function Home() {
         return;
       }
       const json = await res.json();
+      validateAnalysis(json.analysis);
       setAnalysis(json.analysis || null);
       setExplanations(json.explanations || []);
       setData(parseOhlc(json.ohlc));
@@ -68,6 +70,7 @@ export default function Home() {
     if (token) headers.Authorization = `Bearer ${token}`;
     const res  = await fetch('/api/analyze', { method:'POST', headers, body:JSON.stringify(body) });
     const json = await res.json();
+    validateAnalysis(json.analysis);
     setAnalysis(json.analysis);
     setExplanations(json.explanations || []);
     setData(parseOhlc(json.ohlc));
