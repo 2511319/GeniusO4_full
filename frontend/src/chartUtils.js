@@ -58,6 +58,39 @@ export function findSRLevels(data, depth = 14) {
   }, []);
 }
 
+export function findTrendLines(data, minPoints = 3) {
+  if (!Array.isArray(data) || data.length < minPoints) return [];
+  const lines = [];
+
+  const pushLine = (arr, type, start, end, key) => {
+    if (end - start + 1 >= minPoints) {
+      lines.push({
+        type,
+        from: { time: data[start].time, price: data[start][key] },
+        to: { time: data[end].time, price: data[end][key] }
+      });
+    }
+  };
+
+  let startLow = 0;
+  for (let i = 1; i < data.length; i++) {
+    if (data[i].low > data[i - 1].low) continue;
+    pushLine(lines, 'support', startLow, i - 1, 'low');
+    startLow = i;
+  }
+  pushLine(lines, 'support', startLow, data.length - 1, 'low');
+
+  let startHigh = 0;
+  for (let i = 1; i < data.length; i++) {
+    if (data[i].high < data[i - 1].high) continue;
+    pushLine(lines, 'resistance', startHigh, i - 1, 'high');
+    startHigh = i;
+  }
+  pushLine(lines, 'resistance', startHigh, data.length - 1, 'high');
+
+  return lines;
+}
+
 export function parseOhlc(raw) {
   if (!Array.isArray(raw)) return [];
   return raw.map((d) => {

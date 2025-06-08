@@ -31,6 +31,7 @@ export default function Home() {
   const [hideR,   setHideR]   = useState(false);
   const [chartType, setChartType] = useState('candles');
   const [showSR, setShowSR] = useState(false);
+  const [showTrends, setShowTrends] = useState(false);
 
   const toggleLayer = (name) =>
     setLayers((prev) =>
@@ -148,6 +149,15 @@ export default function Home() {
               }
               label="Algo-SRlevel"
             />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showTrends}
+                  onChange={(e) => setShowTrends(e.target.checked)}
+                />
+              }
+              label="Trend lines"
+            />
           </FormGroup>
 
           <TechnicalIndicators layers={layers} toggleLayer={toggleLayer} />
@@ -187,6 +197,7 @@ export default function Home() {
                   layers={layers}
                   type={chartType}
                   showSR={showSR}
+                  showTrends={showTrends}
                 />
               </>
             )}
