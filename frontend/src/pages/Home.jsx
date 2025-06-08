@@ -11,7 +11,7 @@ import { SplitPane } from '@rexxars/react-split-pane';
 
 import TradingViewChart       from '../TradingViewChart';
 import ChartControls          from '../ChartControls';
-import AnalysisSections        from '../AnalysisSections';
+import CommentsPanel           from '../CommentsPanel';
 import TechnicalIndicators     from '../TechnicalIndicators';
 import AdvancedIndicators      from '../AdvancedIndicators';
 import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
@@ -223,7 +223,7 @@ export default function Home() {
                 <ChevronRightIcon fontSize="inherit" />
               </IconButton>
             </Box>
-            <AnalysisSections analysis={analysis} />
+            <CommentsPanel analysis={analysis} layers={layers} />
           </Paper>
         </SplitPane>
       </SplitPane>
