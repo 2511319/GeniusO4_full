@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from services.crypto_compare_provider import fetch_ohlcv
 from services.data_processor import DataProcessor
 from services.chatgpt_analyzer import ChatGPTAnalyzer
-from services.viz import create_chart
+from services.viz import create_chart, prepare_explanations
 from services.statistical_analysis import StatisticalAnalyzer
 
 router = APIRouter()
@@ -30,6 +30,7 @@ class AnalyzeResponse(BaseModel):
     analysis: dict
     ohlc: List[dict]
     indicators: List[str]
+    explanations: List[dict]
 
 ALL_LAYERS = [
     'MACD', 'RSI', 'OBV', 'ATR', 'ADX', 'Stochastic_Oscillator', 'Volume',
@@ -86,10 +87,13 @@ async def analyze(req: AnalyzeRequest):
     layers = req.indicators or ALL_LAYERS
     fig = create_chart(layers, df_ind, analysis)
 
+    explanations = prepare_explanations(layers, analysis)
+
     return AnalyzeResponse(
         # Преобразуем JSON-строку фигуры в dict, иначе Pydantic не сможет сериализовать
         figure=json.loads(fig.to_json()),
         analysis=analysis,
         ohlc=ohlc,
-        indicators=indicator_cols
+        indicators=indicator_cols,
+        explanations=explanations
     )

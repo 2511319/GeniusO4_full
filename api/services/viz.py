@@ -545,13 +545,15 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                 text = analysis_data.get('primary_analysis', {})
                 explanations.append({
                     'Название': 'Первичный анализ',
-                    'Текст': '\n'.join(text.values())
+                    'Текст': '\n'.join(text.values()),
+                    'key': element,
                 })
             elif element == 'confidence_in_trading_decisions':
                 text = analysis_data.get('confidence_in_trading_decisions', {})
                 explanations.append({
                     'Название': 'Уверенность в торговых решениях',
-                    'Текст': '\n'.join(text.values())
+                    'Текст': '\n'.join(text.values()),
+                    'key': element,
                 })
             elif element == 'indicator_correlations':
                 correlations = analysis_data.get('indicator_correlations', {})
@@ -560,7 +562,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{value}\n"
                 explanations.append({
                     'Название': 'Indicator Correlations',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'volatility_by_intervals':
                 volatility = analysis_data.get('volatility_by_intervals', {})
@@ -572,7 +575,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                         text += f"{value}\n"
                 explanations.append({
                     'Название': 'Volatility By Intervals',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'market_cycles_identification':
                 cycles = analysis_data.get('market_cycles_identification', {})
@@ -581,7 +585,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{key}: {value}\n"
                 explanations.append({
                     'Название': 'Market Cycles Identification',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'extended_ichimoku_analysis':
                 ichimoku = analysis_data.get('extended_ichimoku_analysis', {})
@@ -592,7 +597,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                 text += f"Price_vs_cloud: {pvc.get('position', '')} {pvc.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Extended Ichimoku Analysis',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'support_resistance_levels':
                 levels = analysis_data.get('support_resistance_levels', {})
@@ -603,7 +609,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"resistances {resistance['level']} {resistance['date']} {resistance.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Уровни поддержки и сопротивления',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'fibonacci_analysis':
                 fib = analysis_data.get('fibonacci_analysis', {})
@@ -612,7 +619,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     explanation += fib[key].get('explanation', '') + '\n'
                 explanations.append({
                     'Название': 'Fibonacci Levels',
-                    'Текст': explanation
+                    'Текст': explanation,
+                    'key': element,
                 })
             elif element == 'elliott_wave_analysis':
                 ewa = analysis_data.get('elliott_wave_analysis', {})
@@ -622,7 +630,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                 text += f"explanation: {ewa.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Elliott Waves',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'imbalances':
                 imbalances = analysis_data.get('imbalances', [])
@@ -631,7 +640,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{imbalance.get('type', '')} {imbalance.get('start_point', {}).get('price', '')} {imbalance.get('start_point', {}).get('date', '')} {imbalance.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Imbalances',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'unfinished_zones':
                 zones = analysis_data.get('unfinished_zones', [])
@@ -640,7 +650,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{zone.get('type', '')} {zone.get('level', '')} {zone.get('date', '')} {zone.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Unfinished Zones',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'divergence_analysis':
                 divergences = analysis_data.get('divergence_analysis', [])
@@ -649,7 +660,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{divergence.get('indicator', '')} {divergence.get('type', '')} {divergence.get('date', '')} {divergence.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Divergence Analysis',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'structural_edge':
                 edges = analysis_data.get('structural_edge', [])
@@ -658,7 +670,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{edge.get('type', '')} {edge.get('date', '')} {edge.get('price', '')} {edge.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Structural Edge',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'candlestick_patterns':
                 patterns = analysis_data.get('candlestick_patterns', [])
@@ -667,7 +680,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{pattern.get('type', '')} {pattern.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Candlestick Patterns',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'gap_analysis':
                 gaps = analysis_data.get('gap_analysis', {}).get('gaps', [])
@@ -676,7 +690,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{gap.get('gap_type', '')} {gap.get('date', '')} {gap.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Gaps',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'fair_value_gaps':
                 fv_gaps = analysis_data.get('fair_value_gaps', [])
@@ -685,7 +700,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"Date: {fvg.get('date', '')} Explanation: {fvg.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Fair Value Gaps',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'psychological_levels':
                 levels = analysis_data.get('psychological_levels', {}).get('levels', [])
@@ -694,7 +710,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{level.get('level', '')} {level.get('date', '')} {level.get('type', '')} {level.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Psychological Levels',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'anomalous_candles':
                 candles = analysis_data.get('anomalous_candles', [])
@@ -703,14 +720,16 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{candle.get('date', '')} {candle.get('type', '')} {candle.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Anomalous Candles',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'price_prediction':
                 prediction = analysis_data.get('price_prediction', {})
                 text = prediction.get('forecast', '')
                 explanations.append({
                     'Название': 'Price Prediction',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'recommendations':
                 recommendations = analysis_data.get('recommendations', {}).get('trading_strategies', [])
@@ -727,7 +746,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"other_details: {rec.get('other_details', '')}\n\n"
                 explanations.append({
                     'Название': 'Recommendations',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             elif element == 'volume':
                 volume_analysis = analysis_data.get('volume_analysis', {})
@@ -737,7 +757,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                     text += f"{change.get('date', '')} {change.get('price', '')} {change.get('volume', '')} {change.get('explanation', '')}\n"
                 explanations.append({
                     'Название': 'Volume',
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             # Обработка базовых индикаторов
             elif element in ['RSI', 'MACD', 'OBV', 'ATR', 'ADX']:
@@ -748,7 +769,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                 text = f"{element} {current_value} {comment}"
                 explanations.append({
                     'Название': element,
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
             # Обработка продвинутых индикаторов
             elif element in ['Bollinger_Bands', 'Ichimoku_Cloud', 'Parabolic_SAR', 'VWAP', 'Moving_Average_Envelopes']:
@@ -759,7 +781,8 @@ def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, 
                 text = f"{element} {trend} {comment}"
                 explanations.append({
                     'Название': element,
-                    'Текст': text
+                    'Текст': text,
+                    'key': element,
                 })
 
             else:
