@@ -43,6 +43,17 @@ describe('TradingViewChart', () => {
     await waitFor(() => expect(mockCreateRay).toHaveBeenCalled());
   });
 
+  it('draws trend lines when enabled', async () => {
+    const data = [
+      { time: 1, open: 0, high: 5, low: 1, close: 0 },
+      { time: 2, open: 0, high: 4, low: 1.2, close: 0 },
+      { time: 3, open: 0, high: 3, low: 1.4, close: 0 },
+      { time: 4, open: 0, high: 2.5, low: 1.6, close: 0 }
+    ];
+    render(<TradingViewChart data={data} layers={[]} showTrends />);
+    await waitFor(() => expect(mockCreateRay).toHaveBeenCalled());
+  });
+
   it('renders indicator line series', async () => {
     const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1, RSI: 70 }];
     render(<TradingViewChart data={data} layers={['RSI']} />);

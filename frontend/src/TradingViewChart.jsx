@@ -2,9 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { createChart } from 'lightweight-charts';
 import { Box } from '@mui/material';
 import ChartControls from './ChartControls';
-import { computeHeikinAshi, computeRenko, findSRLevels } from './chartUtils';
+import { computeHeikinAshi, computeRenko, findSRLevels, findTrendLines } from './chartUtils';
 
-export default function TradingViewChart({ data, layers, showSR = false }) {
+export default function TradingViewChart({ data, layers, showSR = false, showTrends = false }) {
   const containerRef = useRef();
   const chartRef     = useRef();
   const seriesRef    = useRef();
@@ -126,6 +126,23 @@ export default function TradingViewChart({ data, layers, showSR = false }) {
       });
     }
 
+    /* trend lines */
+    if (showTrends) {
+      const tl = findTrendLines(processed);
+      tl.forEach(({ from, to, type }) => {
+        series.createRay({
+          points: [
+            { time: from.time, value: from.price },
+            { time: to.time, value: to.price },
+          ],
+          extend: 'right',
+          lineWidth: 1,
+          color: type === 'support' ? '#4caf50' : '#f44336',
+          lineStyle: 0,
+        });
+      });
+    }
+
     /* tooltip */
     const handler = (param) => {
       if (!param || !param.time || !param.seriesData.size) {
@@ -154,7 +171,7 @@ export default function TradingViewChart({ data, layers, showSR = false }) {
     };
     chart.subscribeCrosshairMove(handler);
     crosshairHandlerRef.current = handler;
-  }, [data, type, layers]);
+  }, [data, type, layers, showSR, showTrends]);
 
   return (
     <Box sx={{ height: '100%', position: 'relative' }}>
