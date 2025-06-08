@@ -4,9 +4,8 @@ import os
 import pandas as pd
 import jwt
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'api'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "api"))
 import app as app_module
-from app import app
 
 # Используем экземпляр приложения из модуля `app_module`, чтобы избежать
 # конфликтов версий библиотеки httpx, с которой работает FastAPI.
