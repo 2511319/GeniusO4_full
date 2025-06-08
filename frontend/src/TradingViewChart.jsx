@@ -4,7 +4,7 @@ import { Box } from '@mui/material';
 import ChartControls from './ChartControls';
 import { computeHeikinAshi, computeRenko, findSRLevels, findTrendLines } from './chartUtils';
 
-export default function TradingViewChart({ data, layers, showSR = false, showTrends = false }) {
+export default function TradingViewChart({ data, patterns = [], layers, showSR = false, showTrends = false }) {
   const containerRef = useRef();
   const chartRef     = useRef();
   const seriesRef    = useRef();
@@ -143,6 +143,17 @@ export default function TradingViewChart({ data, layers, showSR = false, showTre
       });
     }
 
+    if (layers.includes('candlestick_patterns') && patterns.length) {
+      const markers = patterns.map((p) => ({
+        time: p.time,
+        position: 'aboveBar',
+        color: 'magenta',
+        shape: 'cross',
+        text: p.type || '',
+      }));
+      series.setMarkers(markers);
+    }
+
     /* tooltip */
     const handler = (param) => {
       if (!param || !param.time || !param.seriesData.size) {
@@ -171,7 +182,7 @@ export default function TradingViewChart({ data, layers, showSR = false, showTre
     };
     chart.subscribeCrosshairMove(handler);
     crosshairHandlerRef.current = handler;
-  }, [data, type, layers, showSR, showTrends]);
+  }, [data, type, layers, showSR, showTrends, patterns]);
 
   return (
     <Box sx={{ height: '100%', position: 'relative' }}>

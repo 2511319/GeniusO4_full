@@ -289,11 +289,21 @@ def create_chart(selected_elements: List[str], df: pd.DataFrame, analysis_data: 
             for pattern in patterns:
                 date = pattern['date']
                 price = pattern['price']
+                ptype = pattern.get('type', '')
+                symbol = 'circle'
+                color = 'magenta'
+                if 'bullish' in ptype.lower() or ptype in ['Hammer']:
+                    symbol = 'triangle-up'
+                    color = 'green'
+                elif 'bearish' in ptype.lower() or ptype in ['Shooting Star']:
+                    symbol = 'triangle-down'
+                    color = 'red'
+
                 fig.add_trace(go.Scatter(
                     x=[date],
                     y=[price],
                     mode='markers',
-                    marker=dict(color='magenta', size=10, symbol='x'),
+                    marker=dict(color=color, size=10, symbol=symbol),
                     name='Candlestick Pattern',
                     showlegend=False
                 ), row=1, col=1)

@@ -105,3 +105,12 @@ export function parseOhlc(raw) {
     };
   });
 }
+
+export function parsePatterns(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(({ date, price, type }) => ({
+    time: Math.floor(new Date(date).getTime() / 1000),
+    price: Number(price),
+    type,
+  }));
+}

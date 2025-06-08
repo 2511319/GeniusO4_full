@@ -5,7 +5,7 @@ import TradingViewChart from './TradingViewChart';
 
 const mockCreateRay = vi.fn();
 const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn() }));
-const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay }));
+const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay, setMarkers: vi.fn() }));
 const mockSubscribeCrosshairMove = vi.fn();
 const mockFitContent = vi.fn();
 
@@ -58,6 +58,13 @@ describe('TradingViewChart', () => {
     const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1, RSI: 70 }];
     render(<TradingViewChart data={data} layers={['RSI']} />);
     await waitFor(() => expect(mockAddLineSeries).toHaveBeenCalled());
+  });
+
+  it('shows candlestick pattern markers', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
+    const patterns = [{ time: 1, price: 1, type: 'Doji' }];
+    render(<TradingViewChart data={data} patterns={patterns} layers={['candlestick_patterns']} />);
+    await waitFor(() => expect(mockAddCandlestickSeries.mock.results[0].value.setMarkers).toHaveBeenCalled());
   });
 
   it('fits time scale to content', async () => {

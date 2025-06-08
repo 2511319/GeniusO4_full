@@ -16,6 +16,7 @@ class DataProcessor:
 
     def __init__(self, df: pd.DataFrame):
         self.df = df
+        self.candlestick_patterns: List[Dict[str, Any]] = []
 
     def preprocess(self) -> pd.DataFrame:
         """
@@ -257,6 +258,61 @@ class DataProcessor:
             logger.error(f"Ошибка при очистке данных: {e}")
             return self.df
 
+    def find_candlestick_patterns(self) -> List[Dict[str, Any]]:
+        """Выявляет простые свечные паттерны."""
+        patterns = []
+        try:
+            df = self.df
+            for i in range(1, len(df)):
+                cur = df.iloc[i]
+                prev = df.iloc[i - 1]
+                open_, close = cur['Open'], cur['Close']
+                high, low = cur['High'], cur['Low']
+                body = abs(close - open_)
+                rng = high - low
+                if rng == 0:
+                    continue
+                lower = min(open_, close) - low
+                upper = high - max(open_, close)
+
+                date = str(cur['Open Time'])
+                price = float(close)
+
+                if body <= rng * 0.1:
+                    patterns.append({'type': 'Doji', 'date': date, 'price': price,
+                                     'explanation': 'Свеча с маленьким телом, возможный разворот.'})
+                if lower >= body * 2 and upper <= body * 0.1:
+                    patterns.append({'type': 'Hammer', 'date': date, 'price': price,
+                                     'explanation': 'Длинная нижняя тень, бычий сигнал.'})
+                if upper >= body * 2 and lower <= body * 0.1:
+                    patterns.append({'type': 'Shooting Star', 'date': date, 'price': price,
+                                     'explanation': 'Длинная верхняя тень, медвежий сигнал.'})
+
+                prev_open, prev_close = prev['Open'], prev['Close']
+                prev_body = abs(prev_close - prev_open)
+
+                if prev_close < prev_open and close > open_ and close >= prev_open and open_ <= prev_close:
+                    patterns.append({'type': 'Bullish Engulfing', 'date': date, 'price': price,
+                                     'explanation': 'Бычье поглощение предыдущей свечи.'})
+                if prev_close > prev_open and close < open_ and open_ >= prev_close and close <= prev_open:
+                    patterns.append({'type': 'Bearish Engulfing', 'date': date, 'price': price,
+                                     'explanation': 'Медвежье поглощение предыдущей свечи.'})
+
+            self.candlestick_patterns = patterns
+        except Exception as e:
+            logger.error(f"Ошибка при поиске свечных паттернов: {e}")
+            self.candlestick_patterns = []
+        return self.candlestick_patterns
+
+    def get_candlestick_patterns(self, num_candles: int = 144) -> List[Dict[str, Any]]:
+        """Возвращает найденные свечные паттерны за последний интервал."""
+        if not self.candlestick_patterns:
+            self.find_candlestick_patterns()
+        if not self.candlestick_patterns:
+            return []
+        times = set(self.df.tail(num_candles)['Open Time'].astype(str))
+        return [p for p in self.candlestick_patterns if p['date'] in times]
+
     def save_to_json(self, filename: str):
         """
         Сохраняет обработанные данные в JSON файл.
@@ -313,4 +369,5 @@ class DataProcessor:
         if drop_na:
             self.drop_null_indicators()
         self.sanitize()
+        self.find_candlestick_patterns()
         return self.df
