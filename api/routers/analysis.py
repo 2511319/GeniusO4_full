@@ -69,6 +69,10 @@ async def analyze(req: AnalyzeRequest):
     # 3. Анализ ChatGPT
     analyzer = ChatGPTAnalyzer()
     analysis = analyzer.analyze({"ohlc": ohlc})
+    analysis.setdefault(
+        "candlestick_patterns",
+        processor.find_candlestick_patterns()
+    )
 
     # 4. Визуализация (рисуем выбранные слои)
     layers = req.indicators or ALL_LAYERS

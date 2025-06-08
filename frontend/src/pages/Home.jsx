@@ -186,6 +186,7 @@ export default function Home() {
                   data={data}
                   layers={layers}
                   type={chartType}
+                  patterns={analysis?.candlestick_patterns || []}
                   showSR={showSR}
                 />
               </>

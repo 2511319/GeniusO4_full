@@ -285,7 +285,10 @@ def create_chart(selected_elements: List[str], df: pd.DataFrame, analysis_data: 
                 ), row=1, col=1)
 
         if 'candlestick_patterns' in selected_elements:
-            patterns = analysis_data.get('candlestick_patterns', [])
+            patterns = analysis_data.get('candlestick_patterns')
+            if not patterns:
+                from services.data_processor import DataProcessor
+                patterns = DataProcessor(df).find_candlestick_patterns()
             for pattern in patterns:
                 date = pattern['date']
                 price = pattern['price']

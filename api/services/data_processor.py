@@ -314,3 +314,53 @@ class DataProcessor:
             self.drop_null_indicators()
         self.sanitize()
         return self.df
+
+    def find_candlestick_patterns(self) -> List[Dict[str, Any]]:
+        """Простое обнаружение свечных паттернов."""
+        patterns: List[Dict[str, Any]] = []
+        df = self.df.reset_index(drop=True)
+        for i in range(1, len(df)):
+            row = df.iloc[i]
+            prev = df.iloc[i - 1]
+            o, c, h, l = row['Open'], row['Close'], row['High'], row['Low']
+            body = abs(c - o)
+            rng = h - l if h != l else 1e-9
+            upper = h - max(o, c)
+            lower = min(o, c) - l
+            date = str(row['Open Time'])
+            price = float(c)
+
+            if body / rng <= 0.1:
+                patterns.append({
+                    'date': date,
+                    'type': 'doji',
+                    'price': price,
+                    'explanation': 'Свеча Doji может указывать на нерешительность'
+                })
+
+            if body / rng <= 0.3 and lower >= 2 * body and upper <= body:
+                p_type = 'hammer' if c > o else 'hanging man'
+                patterns.append({
+                    'date': date,
+                    'type': p_type,
+                    'price': price,
+                    'explanation': 'Возможный разворот тренда'
+                })
+
+            if c > o and prev['Close'] < prev['Open'] and c >= prev['Open'] and o <= prev['Close']:
+                patterns.append({
+                    'date': date,
+                    'type': 'bullish engulfing',
+                    'price': price,
+                    'explanation': 'Бычье поглощение'
+                })
+
+            if c < o and prev['Close'] > prev['Open'] and c <= prev['Open'] and o >= prev['Close']:
+                patterns.append({
+                    'date': date,
+                    'type': 'bearish engulfing',
+                    'price': price,
+                    'explanation': 'Медвежье поглощение'
+                })
+
+        return patterns

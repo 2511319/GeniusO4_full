@@ -4,7 +4,7 @@ import { Box } from '@mui/material';
 import ChartControls from './ChartControls';
 import { computeHeikinAshi, computeRenko, findSRLevels } from './chartUtils';
 
-export default function TradingViewChart({ data, layers, showSR = false }) {
+export default function TradingViewChart({ data, layers, patterns = [], showSR = false }) {
   const containerRef = useRef();
   const chartRef     = useRef();
   const seriesRef    = useRef();
@@ -93,6 +93,18 @@ export default function TradingViewChart({ data, layers, showSR = false }) {
     }
     const series = chart.addCandlestickSeries();
     series.setData(processed);
+    if (layers.includes('candlestick_patterns') && patterns.length) {
+      const markers = patterns.map((p) => ({
+        time: Math.floor(new Date(p.date).getTime() / 1000),
+        position: 'aboveBar',
+        color: '#e91e63',
+        shape: 'arrowDown',
+        text: p.type
+      }));
+      series.setMarkers(markers);
+    } else {
+      series.setMarkers([]);
+    }
     chart.timeScale().fitContent();
     seriesRef.current = series;
 

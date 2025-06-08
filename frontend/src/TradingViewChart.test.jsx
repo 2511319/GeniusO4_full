@@ -4,8 +4,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TradingViewChart from './TradingViewChart';
 
 const mockCreateRay = vi.fn();
+const mockSetMarkers = vi.fn();
 const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn() }));
-const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay }));
+const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay, setMarkers: mockSetMarkers }));
 const mockSubscribeCrosshairMove = vi.fn();
 const mockFitContent = vi.fn();
 
@@ -53,5 +54,18 @@ describe('TradingViewChart', () => {
     const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
     render(<TradingViewChart data={data} layers={[]} />);
     await waitFor(() => expect(mockFitContent).toHaveBeenCalled());
+  });
+
+  it('sets markers for candlestick patterns', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
+    const patterns = [{ date: '2024-01-01 00:00:00', type: 'doji', price: 1 }];
+    render(
+      <TradingViewChart
+        data={data}
+        layers={['candlestick_patterns']}
+        patterns={patterns}
+      />
+    );
+    await waitFor(() => expect(mockSetMarkers).toHaveBeenCalled());
   });
 });

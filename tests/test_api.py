@@ -99,6 +99,8 @@ def test_analyze_returns_limit_candles(monkeypatch):
             return self.df
         def get_ohlc_data(self, num_candles):
             return self.df.tail(num_candles).to_dict(orient='records')
+        def find_candlestick_patterns(self):
+            return []
 
     monkeypatch.setattr('routers.analysis.fetch_ohlcv', fake_fetch)
     monkeypatch.setattr('routers.analysis.DataProcessor', DummyProcessor)
