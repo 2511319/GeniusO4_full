@@ -26,6 +26,7 @@ export default function Home() {
   const [layers,  setLayers]  = useState(['RSI']);
   const [data,    setData]    = useState([]);
   const [analysis,setAnalysis]= useState(null);
+  const [explanations, setExplanations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hideL,   setHideL]   = useState(false);
   const [hideR,   setHideR]   = useState(false);
@@ -49,6 +50,7 @@ export default function Home() {
       }
       const json = await res.json();
       setAnalysis(json.analysis || null);
+      setExplanations(json.explanations || []);
       setData(parseOhlc(json.ohlc));
       setPatterns(parsePatterns(json.analysis?.candlestick_patterns));
     } catch (err) {
@@ -67,6 +69,7 @@ export default function Home() {
     const res  = await fetch('/api/analyze', { method:'POST', headers, body:JSON.stringify(body) });
     const json = await res.json();
     setAnalysis(json.analysis);
+    setExplanations(json.explanations || []);
     setData(parseOhlc(json.ohlc));
     setPatterns(parsePatterns(json.analysis?.candlestick_patterns));
     setLoading(false);
@@ -223,7 +226,7 @@ export default function Home() {
                 <ChevronRightIcon fontSize="inherit" />
               </IconButton>
             </Box>
-            <CommentsPanel analysis={analysis} layers={layers} />
+            <CommentsPanel analysis={analysis} explanations={explanations} layers={layers} />
           </Paper>
         </SplitPane>
       </SplitPane>

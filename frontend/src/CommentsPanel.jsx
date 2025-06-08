@@ -10,34 +10,15 @@ function a11yProps(index) {
   };
 }
 
-export default function CommentsPanel({ analysis, layers = [] }) {
+export default function CommentsPanel({ analysis, explanations = [], layers = [] }) {
   const [value, setValue] = useState(0);
 
   const primary = analysis?.primary_analysis || {};
 
-  const explanations = useMemo(() => {
-    if (!analysis) return [];
-    const result = [];
-    layers.forEach((layer) => {
-      let text = '';
-      if (analysis[layer]) {
-        const val = analysis[layer];
-        text = typeof val === 'string' ? val : JSON.stringify(val, null, 2);
-      } else if (analysis.indicators_analysis && analysis.indicators_analysis[layer]) {
-        const obj = analysis.indicators_analysis[layer];
-        if (typeof obj === 'string') text = obj;
-        else {
-          text = Object.entries(obj)
-            .map(([k, v]) => `${k}: ${v}`)
-            .join('\n');
-        }
-      }
-      if (text) {
-        result.push({ title: layer, text });
-      }
-    });
-    return result;
-  }, [analysis, layers]);
+  const filtered = useMemo(
+    () => explanations.filter((ex) => layers.includes(ex.key)),
+    [explanations, layers]
+  );
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -79,10 +60,10 @@ export default function CommentsPanel({ analysis, layers = [] }) {
       )}
       {value === 1 && (
         <Box sx={{ p: 2 }}>
-          {explanations.map((item) => (
-            <Box key={item.title} sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
-              <Typography variant="subtitle1">{item.title}</Typography>
-              <Typography variant="body2">{item.text}</Typography>
+          {filtered.map((item) => (
+            <Box key={item.key} sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
+              <Typography variant="subtitle1">{item['Название']}</Typography>
+              <Typography variant="body2">{item['Текст']}</Typography>
             </Box>
           ))}
         </Box>
