@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box, Tabs, Tab, TextField, Typography
 } from '@mui/material';
@@ -12,13 +12,25 @@ function a11yProps(index) {
 
 export default function CommentsPanel({ analysis, explanations = [], layers = [] }) {
   const [value, setValue] = useState(0);
+  const [layerExplanations, setLayerExplanations] = useState([]);
 
   const primary = analysis?.primary_analysis || {};
 
-  const filtered = useMemo(
-    () => explanations.filter((ex) => layers.includes(ex.key)),
-    [explanations, layers]
-  );
+  useEffect(() => {
+    if (!Array.isArray(layers)) return;
+
+    const items = layers
+      .map((layer) => {
+        const fromAnalysis = analysis?.[layer]?.explanation;
+        const fromProps = explanations.find((ex) => ex.key === layer);
+        const fallback = fromProps ? fromProps['Текст'] || fromProps.explanation : undefined;
+        const explanation = fromAnalysis || fallback;
+        return explanation ? { layerName: layer, explanation } : null;
+      })
+      .filter(Boolean);
+
+    setLayerExplanations(items);
+  }, [analysis, layers, explanations]);
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -60,10 +72,10 @@ export default function CommentsPanel({ analysis, explanations = [], layers = []
       )}
       {value === 1 && (
         <Box sx={{ p: 2 }}>
-          {filtered.map((item) => (
-            <Box key={item.key} sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
-              <Typography variant="subtitle1">{item['Название']}</Typography>
-              <Typography variant="body2">{item['Текст']}</Typography>
+          {layerExplanations.map((item) => (
+            <Box key={item.layerName} sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
+              <Typography variant="subtitle1">{item.layerName}</Typography>
+              <Typography variant="body2">{item.explanation}</Typography>
             </Box>
           ))}
         </Box>
