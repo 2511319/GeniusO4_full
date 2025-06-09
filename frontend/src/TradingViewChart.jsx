@@ -5,10 +5,11 @@ import ChartControls from './ChartControls';
 import Legend from './Legend';
 import { computeHeikinAshi, computeRenko, findSRLevels, findTrendLines } from './chartUtils';
 
-export default function TradingViewChart({ data, patterns = [], layers, showSR = false, showTrends = false }) {
+export default function TradingViewChart({ data, forecast = [], patterns = [], layers, showSR = false, showTrends = false }) {
   const containerRef = useRef();
   const chartRef     = useRef();
   const seriesRef    = useRef();
+  const forecastSeriesRef = useRef();
   const tooltipRef   = useRef();
   const indicatorSeriesRef = useRef({});
   const seriesInfoRef = useRef({});
@@ -75,6 +76,11 @@ export default function TradingViewChart({ data, patterns = [], layers, showSR =
         chart.removeSeries(seriesRef.current);
       } catch (_) {}
     }
+    if (forecastSeriesRef.current) {
+      try {
+        chart.removeSeries(forecastSeriesRef.current);
+      } catch (_) {}
+    }
     Object.values(indicatorSeriesRef.current).forEach((s) => {
       try { chart.removeSeries(s); } catch (_) {}
     });
@@ -99,6 +105,20 @@ export default function TradingViewChart({ data, patterns = [], layers, showSR =
     series.setData(processed);
     chart.timeScale().fitContent();
     seriesRef.current = series;
+
+    if (forecast?.length && layers.includes('price_prediction')) {
+      const forecastSeries = chart.addCandlestickSeries({
+        upColor: 'rgba(76,175,80,0.5)',
+        borderUpColor: 'rgba(76,175,80,0.5)',
+        wickUpColor: 'rgba(76,175,80,0.5)',
+        downColor: 'rgba(244,67,54,0.5)',
+        borderDownColor: 'rgba(244,67,54,0.5)',
+        wickDownColor: 'rgba(244,67,54,0.5)'
+      });
+      forecastSeries.setData(forecast);
+      forecastSeriesRef.current = forecastSeries;
+      seriesInfoRef.current['Прогноз'] = { color: 'rgba(255,215,0,0.5)', dashed: false, icon: '⧉' };
+    }
 
     /* indicator lines */
     const colorMap = {
@@ -213,9 +233,10 @@ export default function TradingViewChart({ data, patterns = [], layers, showSR =
         name,
         color: info.color,
         dashed: info.dashed,
+        icon: info.icon
       }))
     );
-  }, [data, type, layers, showSR, showTrends, patterns]);
+  }, [data, forecast, type, layers, showSR, showTrends, patterns]);
 
   return (
     <Box sx={{ height: '100%', position: 'relative' }}>

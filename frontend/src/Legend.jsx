@@ -18,17 +18,21 @@ export default function Legend({ items }) {
         zIndex: 30,
       }}
     >
-      {items.map(({ name, color, dashed }) => (
+      {items.map(({ name, color, dashed, icon }) => (
         <Box key={name} sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-          <Box
-            sx={{
-              width: 12,
-              height: 12,
-              mr: 1,
-              border: dashed ? `2px dashed ${color}` : `2px solid ${color}`,
-              backgroundColor: dashed ? 'transparent' : color,
-            }}
-          />
+          {icon ? (
+            <Box component="span" sx={{ mr: 1, color }}>{icon}</Box>
+          ) : (
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                mr: 1,
+                border: dashed ? `2px dashed ${color}` : `2px solid ${color}`,
+                backgroundColor: dashed ? 'transparent' : color,
+              }}
+            />
+          )}
           {name}
         </Box>
       ))}
