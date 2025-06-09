@@ -182,7 +182,13 @@ export default function TradingViewChart({ data, patterns = [], layers, showSR =
       const datum = param.seriesData.get(series);
       if (!datum) return;
       const { value } = datum;
+      const allowedLayers = [
+        'support_resistance_levels',
+        'fibonacci_analysis',
+        'price_prediction'
+      ];
       const indVals = Object.entries(indicatorSeriesRef.current)
+        .filter(([name]) => allowedLayers.includes(name))
         .map(([name, s]) => {
           const v = param.seriesData.get(s);
           return v ? `${name}: ${Number(v.value).toFixed(2)}` : '';
