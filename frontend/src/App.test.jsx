@@ -3,10 +3,20 @@ import '@testing-library/jest-dom/vitest';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import React from 'react';
 
 vi.mock('./TradingViewChart', () => ({ default: () => <div data-testid="chart" /> }));
+
+beforeAll(() => {
+  window.matchMedia = window.matchMedia || function () {
+    return {
+      matches: false,
+      addListener: () => {},
+      removeListener: () => {},
+    };
+  };
+});
 
 describe('App', () => {
   it('renders navigation and home page', () => {
