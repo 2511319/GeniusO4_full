@@ -12,15 +12,13 @@ import { SplitPane } from '@rexxars/react-split-pane';
 import TradingViewChart       from '../TradingViewChart';
 import ChartControls          from '../ChartControls';
 import CommentsPanel           from '../CommentsPanel';
-import TechnicalIndicators     from '../TechnicalIndicators';
-import AdvancedIndicators      from '../AdvancedIndicators';
-import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
 import VolumePanel            from '../VolumePanel';
 import OscillatorsPanel       from '../OscillatorsPanel';
 import MACDPanel              from '../MACDPanel';
 import { parseOhlc, parsePatterns } from '../chartUtils';
 import { validateAnalysis } from '../analysisValidator';
 import { fetchAnalysis } from '../services/analysisLoader';
+import IndicatorsSidebar from '../IndicatorsSidebar';
 
 export default function Home() {
   const token = useSelector((s) => s.auth.token);
@@ -135,45 +133,14 @@ export default function Home() {
             Test
           </Button>
 
-          <Divider sx={{ my: 2 }} />
-
-          <Typography variant="subtitle1">Индикаторы графика</Typography>
-          <FormGroup>
-            {['Volume','RSI','MACD','OBV','ATR','VWAP'].map((ind) => (
-              <FormControlLabel
-                key={ind}
-                control={
-                  <Checkbox
-                    checked={layers.includes(ind)}
-                    onChange={() => toggleLayer(ind)}
-                  />
-                }
-                label={ind}
-              />
-            ))}
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showSR}
-                  onChange={(e) => setShowSR(e.target.checked)}
-                />
-              }
-              label="Algo-SRlevel"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showTrends}
-                  onChange={(e) => setShowTrends(e.target.checked)}
-                />
-              }
-              label="Trend lines"
-            />
-          </FormGroup>
-
-          <TechnicalIndicators layers={layers} toggleLayer={toggleLayer} />
-          <AdvancedIndicators layers={layers} toggleLayer={toggleLayer} />
-          <ModelAnalysisIndicators layers={layers} toggleLayer={toggleLayer} />
+          <IndicatorsSidebar
+            layers={layers}
+            toggleLayer={toggleLayer}
+            showSR={showSR}
+            setShowSR={setShowSR}
+            showTrends={showTrends}
+            setShowTrends={setShowTrends}
+          />
         </Paper>
 
         {/* ───────────── центральный + правый блок ───────────── */}
