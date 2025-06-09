@@ -73,4 +73,40 @@ describe('TradingViewChart', () => {
     render(<TradingViewChart data={data} layers={[]} />);
     await waitFor(() => expect(mockFitContent).toHaveBeenCalled());
   });
+
+  it('does not request tooltip data for disallowed layers', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1, RSI: 70 }];
+    render(<TradingViewChart data={data} layers={['RSI']} />);
+    await waitFor(() => expect(mockSubscribeCrosshairMove).toHaveBeenCalled());
+
+    const handler = mockSubscribeCrosshairMove.mock.calls[0][0];
+    const candleSeries = mockAddCandlestickSeries.mock.results[0].value;
+    const lineSeries = mockAddLineSeries.mock.results[0].value;
+    const get = vi.fn((s) => {
+      if (s === candleSeries) return { value: { open: 1, high: 2, low: 0, close: 1 } };
+      if (s === lineSeries) return { value: 70 };
+    });
+
+    handler({ time: 1, seriesData: { get, size: 2 }, point: { x: 0, y: 0 } });
+    expect(get).toHaveBeenCalledWith(candleSeries);
+    expect(get).not.toHaveBeenCalledWith(lineSeries);
+  });
+
+  it('requests tooltip data for allowed layers', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1, price_prediction: 1.1 }];
+    render(<TradingViewChart data={data} layers={['price_prediction']} />);
+    await waitFor(() => expect(mockSubscribeCrosshairMove).toHaveBeenCalled());
+
+    const handler = mockSubscribeCrosshairMove.mock.calls[0][0];
+    const candleSeries = mockAddCandlestickSeries.mock.results[0].value;
+    const lineSeries = mockAddLineSeries.mock.results[0].value;
+    const get = vi.fn((s) => {
+      if (s === candleSeries) return { value: { open: 1, high: 2, low: 0, close: 1 } };
+      if (s === lineSeries) return { value: 1.1 };
+    });
+
+    handler({ time: 1, seriesData: { get, size: 2 }, point: { x: 0, y: 0 } });
+    expect(get).toHaveBeenCalledWith(candleSeries);
+    expect(get).toHaveBeenCalledWith(lineSeries);
+  });
 });
