@@ -17,6 +17,7 @@ import AdvancedIndicators      from '../AdvancedIndicators';
 import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
 import { parseOhlc, parsePatterns } from '../chartUtils';
 import { validateAnalysis } from '../analysisValidator';
+import { fetchAnalysis } from '../services/analysisLoader';
 
 export default function Home() {
   const token = useSelector((s) => s.auth.token);
@@ -43,18 +44,16 @@ export default function Home() {
   const loadTestData = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/testdata');
-      if (!res.ok) {
+      const analysisData = await fetchAnalysis();
+      if (!analysisData) {
         alert('Нет сохранённых данных');
-        setLoading(false);
         return;
       }
-      const json = await res.json();
-      validateAnalysis(json.analysis);
-      setAnalysis(json.analysis || null);
-      setExplanations(json.explanations || []);
-      setData(parseOhlc(json.ohlc));
-      setPatterns(parsePatterns(json.analysis?.candlestick_patterns));
+      validateAnalysis(analysisData);
+      setAnalysis(analysisData);
+      setExplanations([]);
+      setData([]);
+      setPatterns(parsePatterns(analysisData.candlestick_patterns));
     } catch (err) {
       console.error(err);
       alert('Ошибка чтения тестовых данных');
