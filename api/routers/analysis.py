@@ -1,7 +1,6 @@
 # api/routers/analysis.py
 
 import os
-import json
 from typing import List
 
 from fastapi import APIRouter, HTTPException
@@ -10,7 +9,6 @@ from pydantic import BaseModel
 from services.crypto_compare_provider import fetch_ohlcv
 from services.data_processor import DataProcessor
 from services.chatgpt_analyzer import ChatGPTAnalyzer
-from services.viz import create_chart, prepare_explanations
 from services.statistical_analysis import StatisticalAnalyzer
 
 router = APIRouter()
@@ -26,22 +24,10 @@ class AnalyzeRequest(BaseModel):
     drop_na: bool = True
 
 class AnalyzeResponse(BaseModel):
-    figure: dict
     analysis: dict
     ohlc: List[dict]
     indicators: List[str]
-    explanations: List[dict]
 
-ALL_LAYERS = [
-    'MACD', 'RSI', 'OBV', 'ATR', 'ADX', 'Stochastic_Oscillator', 'Volume',
-    'Bollinger_Bands', 'Ichimoku_Cloud', 'Parabolic_SAR', 'VWAP',
-    'Moving_Average_Envelopes', 'support_resistance_levels', 'trend_lines',
-    'unfinished_zones', 'imbalances', 'fibonacci_analysis',
-    'elliott_wave_analysis', 'structural_edge', 'candlestick_patterns',
-    'divergence_analysis', 'fair_value_gaps', 'gap_analysis',
-    'psychological_levels', 'anomalous_candles', 'price_prediction',
-    'recommendations'
-]
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze(req: AnalyzeRequest):
@@ -83,17 +69,8 @@ async def analyze(req: AnalyzeRequest):
     analysis["divergence_analysis"] = divergences
     analysis["candlestick_patterns"] = patterns
 
-    # 4. Визуализация (рисуем выбранные слои)
-    layers = req.indicators or ALL_LAYERS
-    fig = create_chart(layers, df_ind, analysis)
-
-    explanations = prepare_explanations(layers, analysis)
-
     return AnalyzeResponse(
-        # Преобразуем JSON-строку фигуры в dict, иначе Pydantic не сможет сериализовать
-        figure=json.loads(fig.to_json()),
         analysis=analysis,
         ohlc=ohlc,
         indicators=indicator_cols,
-        explanations=explanations
     )
