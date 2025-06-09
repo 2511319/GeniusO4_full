@@ -114,3 +114,14 @@ export function parsePatterns(raw) {
     type,
   }));
 }
+
+export function parseVirtualCandles(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(({ date, open, high, low, close }) => ({
+    time: Math.floor(new Date(date).getTime() / 1000),
+    open: Number(open),
+    high: Number(high),
+    low: Number(low),
+    close: Number(close)
+  }));
+}

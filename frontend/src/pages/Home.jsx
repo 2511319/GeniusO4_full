@@ -15,7 +15,7 @@ import CommentsPanel           from '../CommentsPanel';
 import VolumePanel            from '../VolumePanel';
 import OscillatorsPanel       from '../OscillatorsPanel';
 import MACDPanel              from '../MACDPanel';
-import { parseOhlc, parsePatterns } from '../chartUtils';
+import { parseOhlc, parsePatterns, parseVirtualCandles } from '../chartUtils';
 import { validateAnalysis } from '../analysisValidator';
 import { fetchAnalysis } from '../services/analysisLoader';
 import IndicatorsSidebar from '../IndicatorsSidebar';
@@ -28,6 +28,7 @@ export default function Home() {
   const [limit,   setLimit]   = useState(144);
   const [layers,  setLayers]  = useState(['RSI']);
   const [data,    setData]    = useState([]);
+  const [forecast, setForecast] = useState([]);
   const [analysis,setAnalysis]= useState(null);
   const [explanations, setExplanations] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -55,6 +56,7 @@ export default function Home() {
       setExplanations([]);
       setData([]);
       setPatterns(parsePatterns(analysisData.candlestick_patterns));
+      setForecast(parseVirtualCandles(analysisData.price_prediction?.virtual_candles));
     } catch (err) {
       console.error(err);
       alert('Ошибка чтения тестовых данных');
@@ -75,6 +77,7 @@ export default function Home() {
     setExplanations(json.explanations || []);
     setData(parseOhlc(json.ohlc));
     setPatterns(parsePatterns(json.analysis?.candlestick_patterns));
+    setForecast(parseVirtualCandles(json.analysis?.price_prediction?.virtual_candles));
     setLoading(false);
   };
 
@@ -173,6 +176,7 @@ export default function Home() {
                 <Box sx={{ flex: 1, position: 'relative' }}>
                   <TradingViewChart
                     data={data}
+                    forecast={forecast}
                     patterns={patterns}
                     layers={layers}
                     type={chartType}
