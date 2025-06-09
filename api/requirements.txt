@@ -7,7 +7,6 @@ jinja2
 openai
 PyJWT
 pydantic
-plotly
 statsmodels
 scipy
 google-cloud-firestore

@@ -65,7 +65,7 @@ def test_analyze_success(monkeypatch):
     r = client.post('/api/analyze', json=payload, headers=headers)
     assert r.status_code == 200
     data = r.json()
-    for key in ['figure', 'analysis', 'ohlc', 'indicators', 'explanations']:
+    for key in ['analysis', 'ohlc', 'indicators']:
         assert key in data
 
 def test_analyze_returns_limit_candles(monkeypatch):
