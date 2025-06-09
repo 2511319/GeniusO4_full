@@ -33,6 +33,21 @@
 - configs/   — настройки
 - docker-compose.yml
 - .github/workflows/ci.yml
+## Как собрать и запустить с TradingView
+
+```bash
+cd frontend
+npm install
+npm run build
+npm run preview
+```
+
+Минимальные зависимости:
+- TradingView Lightweight Charts
+- React
+- Redux
+- axios или fetch
+
 
 ## Запуск React-клиента
 
