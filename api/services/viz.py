@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from typing import List, Dict, Any
 from config.config import logger
+from .analysis_validator import validate_analysis
 
 def create_chart(selected_elements: List[str], df: pd.DataFrame, analysis_data: Dict[str, Any]) -> go.Figure:
     try:
@@ -533,11 +534,11 @@ def create_chart(selected_elements: List[str], df: pd.DataFrame, analysis_data: 
         logger.exception(f"Ошибка при создании графика: {e}")
         return go.Figure()
 
+
 def prepare_explanations(selected_elements: List[str], analysis_data: Dict[str, Any]) -> List[Dict[str, str]]:
-    """
-    Подготавливает объяснения для выбранных элементов.
-    """
+    """Подготавливает объяснения для выбранных элементов."""
     explanations = []
+    validate_analysis(analysis_data)
     try:
         for element in selected_elements:
             # Обработка текстовых объяснений
