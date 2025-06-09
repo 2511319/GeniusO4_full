@@ -179,6 +179,7 @@ export default function Home() {
                     forecast={forecast}
                     patterns={patterns}
                     layers={layers}
+                    analysis={analysis}
                     type={chartType}
                     showSR={showSR}
                     showTrends={showTrends}

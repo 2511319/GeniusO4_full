@@ -5,7 +5,7 @@ import ChartControls from './ChartControls';
 import Legend from './Legend';
 import { computeHeikinAshi, computeRenko, findSRLevels, findTrendLines } from './chartUtils';
 
-export default function TradingViewChart({ data, forecast = [], patterns = [], layers, showSR = false, showTrends = false }) {
+export default function TradingViewChart({ data, forecast = [], patterns = [], layers, showSR = false, showTrends = false, analysis = {} }) {
   const containerRef = useRef();
   const chartRef     = useRef();
   const seriesRef    = useRef();
@@ -199,27 +199,37 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
         tooltipRef.current.style.display = 'none';
         return;
       }
-      const datum = param.seriesData.get(series);
-      if (!datum) return;
-      const { value } = datum;
+
       const allowedLayers = [
         'support_resistance_levels',
         'fibonacci_analysis',
         'price_prediction'
       ];
-      const indVals = Object.entries(indicatorSeriesRef.current)
-        .filter(([name]) => allowedLayers.includes(name))
-        .map(([name, s]) => {
-          const v = param.seriesData.get(s);
-          return v ? `${name}: ${Number(v.value).toFixed(2)}` : '';
-        })
-        .filter(Boolean)
-        .join(' ');
+
+      const hasAllowed = Object.entries(indicatorSeriesRef.current)
+        .some(([name, s]) => allowedLayers.includes(name) && param.seriesData.has(s));
+
+      const isForecast = forecastSeriesRef.current && param.seriesData.has(forecastSeriesRef.current);
+
+      if (!hasAllowed && !isForecast) {
+        tooltipRef.current.style.display = 'none';
+        return;
+      }
+
+      const datum = param.seriesData.get(isForecast ? forecastSeriesRef.current : series);
+      if (!datum) return;
+      const { value } = datum;
+
+      let extra = '';
+      if (isForecast && analysis?.price_prediction?.forecast) {
+        extra += `<div>${analysis.price_prediction.forecast}</div>`;
+      }
+
       tooltipRef.current.innerHTML = `
         <div><b>${new Date(param.time * 1000).toLocaleString()}</b></div>
         O: ${value.open.toFixed(2)} H: ${value.high.toFixed(2)}
         L: ${value.low.toFixed(2)} C: ${value.close.toFixed(2)}<br/>
-        ${indVals}
+        ${extra}
       `;
       tooltipRef.current.style.display = 'block';
       tooltipRef.current.style.left = param.point.x + 10 + 'px';
