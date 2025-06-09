@@ -15,6 +15,9 @@ import CommentsPanel           from '../CommentsPanel';
 import TechnicalIndicators     from '../TechnicalIndicators';
 import AdvancedIndicators      from '../AdvancedIndicators';
 import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
+import VolumePanel            from '../VolumePanel';
+import OscillatorsPanel       from '../OscillatorsPanel';
+import MACDPanel              from '../MACDPanel';
 import { parseOhlc, parsePatterns } from '../chartUtils';
 import { validateAnalysis } from '../analysisValidator';
 import { fetchAnalysis } from '../services/analysisLoader';
@@ -136,7 +139,7 @@ export default function Home() {
 
           <Typography variant="subtitle1">Индикаторы графика</Typography>
           <FormGroup>
-            {['RSI','MACD','OBV','ATR','VWAP'].map((ind) => (
+            {['Volume','RSI','MACD','OBV','ATR','VWAP'].map((ind) => (
               <FormControlLabel
                 key={ind}
                 control={
@@ -182,7 +185,7 @@ export default function Home() {
           onChange={(size) => size < 80 && setHideR(true)}
         >
           {/* ───────────── график ───────────── */}
-          <Box sx={{ height: '100%', position: 'relative' }}>
+          <Box sx={{ height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
             {loading && (
               <Box
                 sx={{
@@ -200,14 +203,21 @@ export default function Home() {
             {!loading && (
               <>
                 <ChartControls type={chartType} onChange={setChartType} />
-                <TradingViewChart
-                  data={data}
-                  patterns={patterns}
-                  layers={layers}
-                  type={chartType}
-                  showSR={showSR}
-                  showTrends={showTrends}
-                />
+                <Box sx={{ flex: 1, position: 'relative' }}>
+                  <TradingViewChart
+                    data={data}
+                    patterns={patterns}
+                    layers={layers}
+                    type={chartType}
+                    showSR={showSR}
+                    showTrends={showTrends}
+                  />
+                </Box>
+                {layers.includes('Volume') && <VolumePanel data={data} />}
+                {layers.some((l) => ['RSI', 'Stochastic_Oscillator', 'Williams_%R', 'OBV'].includes(l)) && (
+                  <OscillatorsPanel data={data} layers={layers} />
+                )}
+                {layers.includes('MACD') && <MACDPanel data={data} />}
               </>
             )}
           </Box>
