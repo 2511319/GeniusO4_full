@@ -21,9 +21,19 @@ export default function CommentsPanel({ analysis, explanations = [], layers = []
 
     const items = layers
       .map((layer) => {
-        const fromAnalysis = analysis?.[layer]?.explanation;
+        let fromAnalysis;
+        const layerData = analysis?.[layer];
+        if (Array.isArray(layerData)) {
+          fromAnalysis = layerData
+            .map((item) => item?.explanation)
+            .filter(Boolean)
+            .join('\n');
+        } else {
+          fromAnalysis = layerData?.explanation;
+        }
+
         const fromProps = explanations.find((ex) => ex.key === layer);
-        const fallback = fromProps ? fromProps['Текст'] || fromProps.explanation : undefined;
+        const fallback = fromProps ? fromProps.explanation : undefined;
         const explanation = fromAnalysis || fallback;
         return explanation ? { layerName: layer, explanation } : null;
       })
