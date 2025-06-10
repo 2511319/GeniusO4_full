@@ -16,14 +16,17 @@ export default function MACDPanel({ data = [] }) {
     });
     if (data[0] && data[0].MACD !== undefined) {
       const macd = chart.addLineSeries({ color: '#2196f3' });
+      macd.applyOptions({ priceFormat: { type: 'none' } });
       macd.setData(data.map((d) => ({ time: d.time, value: d.MACD })));
     }
     if (data[0] && data[0].MACD_signal !== undefined) {
       const signal = chart.addLineSeries({ color: '#ff9800' });
+      signal.applyOptions({ priceFormat: { type: 'none' } });
       signal.setData(data.map((d) => ({ time: d.time, value: d.MACD_signal })));
     }
     if (data[0] && data[0].MACD_hist !== undefined) {
       const hist = chart.addHistogramSeries({ color: '#9c27b0' });
+      hist.applyOptions({ priceFormat: { type: 'none' } });
       hist.setData(data.map((d) => ({ time: d.time, value: d.MACD_hist })));
     }
     chart.timeScale().fitContent();
