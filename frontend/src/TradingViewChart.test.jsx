@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TradingViewChart from './TradingViewChart';
 
 const mockCreateRay = vi.fn();
-const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn() }));
+const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn(), applyOptions: vi.fn() }));
 const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay, setMarkers: vi.fn() }));
 const mockSubscribeCrosshairMove = vi.fn();
 const mockFitContent = vi.fn();
@@ -81,6 +81,15 @@ describe('TradingViewChart', () => {
     await waitFor(() => expect(mockAddCandlestickSeries).toHaveBeenCalledTimes(2));
   });
 
+  it('sets data for virtual candles', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
+    const forecast = [{ time: 2, open: 1, high: 2, low: 0, close: 1 }];
+    render(<TradingViewChart data={data} forecast={forecast} layers={['price_prediction']} />);
+    await waitFor(() => expect(mockAddCandlestickSeries).toHaveBeenCalledTimes(2));
+    const forecastSeries = mockAddCandlestickSeries.mock.results[1].value;
+    expect(forecastSeries.setData).toHaveBeenCalledWith(forecast);
+  });
+
   it('does not request tooltip data for disallowed layers', async () => {
     const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1, RSI: 70 }];
     render(<TradingViewChart data={data} layers={['RSI']} />);
@@ -115,5 +124,39 @@ describe('TradingViewChart', () => {
     handler({ time: 1, seriesData: { get, size: 2 }, point: { x: 0, y: 0 } });
     expect(get).toHaveBeenCalledWith(candleSeries);
     expect(get).toHaveBeenCalledWith(lineSeries);
+  });
+
+  it('requests tooltip data for forecast candles', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
+    const forecast = [{ time: 2, open: 1.1, high: 2.2, low: 0.9, close: 1.05 }];
+    render(
+      <TradingViewChart
+        data={data}
+        forecast={forecast}
+        layers={['price_prediction']}
+        analysis={{ price_prediction: { forecast: 'up' } }}
+      />
+    );
+    await waitFor(() => expect(mockSubscribeCrosshairMove).toHaveBeenCalled());
+
+    const handler = mockSubscribeCrosshairMove.mock.calls[0][0];
+    const forecastSeries = mockAddCandlestickSeries.mock.results[1].value;
+    const get = vi.fn(() => ({ value: { open: 1.1, high: 2.2, low: 0.9, close: 1.05 } }));
+    const has = (s) => s === forecastSeries;
+
+    handler({ time: 2, seriesData: { get, size: 1, has }, point: { x: 0, y: 0 } });
+    expect(get).toHaveBeenCalledWith(forecastSeries);
+  });
+
+  it('toggles series visibility from legend', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1, RSI: 70 }];
+    const applyOptions = vi.fn();
+    mockAddLineSeries.mockReturnValueOnce({ setData: vi.fn(), applyOptions });
+    const { findByText } = render(<TradingViewChart data={data} layers={['RSI']} />);
+    const item = await findByText('RSI');
+    item.click();
+    expect(applyOptions).toHaveBeenCalledWith({ visible: false });
+    item.click();
+    expect(applyOptions).toHaveBeenLastCalledWith({ visible: true });
   });
 });
