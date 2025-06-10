@@ -135,6 +135,7 @@ cd frontend
 npm install
 npm run build
 ```
+Сборка включает `virtual_candles`, компонент легенды и выборочные тултипы.
 
 Запустить тесты:
 
