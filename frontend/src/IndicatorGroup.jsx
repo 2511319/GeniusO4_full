@@ -1,18 +1,36 @@
 import React from 'react';
-import { Box, FormControlLabel, Checkbox, Typography } from '@mui/material';
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  FormControlLabel,
+  Checkbox,
+  Typography
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-export default function IndicatorGroup({ title, indicators, layers, toggleLayer }) {
-  if (!indicators.length) return null;
+export default function IndicatorGroup({ title, indicators, layers, toggleLayer, extraControls }) {
+  if (!indicators.length && !extraControls) return null;
   return (
-    <Box sx={{ mb: 1 }}>
-      <Typography variant="subtitle1">{title}</Typography>
-      {indicators.map((ind) => (
-        <FormControlLabel
-          key={ind}
-          control={<Checkbox checked={layers.includes(ind)} onChange={() => toggleLayer(ind)} />}
-          label={ind}
-        />
-      ))}
-    </Box>
+    <Accordion disableGutters>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography variant="subtitle1">{title}</Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        {indicators.map((ind) => (
+          <FormControlLabel
+            key={ind}
+            control={
+              <Checkbox
+                checked={layers.includes(ind)}
+                onChange={() => toggleLayer(ind)}
+              />
+            }
+            label={ind}
+          />
+        ))}
+        {extraControls}
+      </AccordionDetails>
+    </Accordion>
   );
 }
