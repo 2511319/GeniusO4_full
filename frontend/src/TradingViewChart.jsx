@@ -16,6 +16,20 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
   const crosshairHandlerRef = useRef();
   const [type, setType] = React.useState('candles');
   const [legendItems, setLegendItems] = React.useState([]);
+  const [visible, setVisible] = React.useState({});
+  const visibleRef = useRef({});
+
+  const handleLegendToggle = (name) => {
+    const info = seriesInfoRef.current[name];
+    if (!info) return;
+    const current = visibleRef.current[name] !== false;
+    const next    = !current;
+    visibleRef.current[name] = next;
+    if (info.series && info.series.applyOptions) {
+      info.series.applyOptions({ visible: next });
+    }
+    setVisible({ ...visibleRef.current });
+  };
 
   /* ───────── helpers for indicators tooltip ───────── */
   const buildTooltip = () => {
@@ -238,19 +252,38 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
     chart.subscribeCrosshairMove(handler);
     crosshairHandlerRef.current = handler;
 
+    const nextVisible = { ...visibleRef.current };
+    Object.keys(seriesInfoRef.current).forEach((n) => {
+      if (nextVisible[n] === undefined) nextVisible[n] = true;
+    });
+    visibleRef.current = nextVisible;
+    setVisible(nextVisible);
     setLegendItems(
       Object.entries(seriesInfoRef.current).map(([name, info]) => ({
         name,
         color: info.color,
         dashed: info.dashed,
-        icon: info.icon
+        icon: info.icon,
+        active: nextVisible[name]
       }))
     );
   }, [data, forecast, type, layers, showSR, showTrends, patterns]);
 
+  useEffect(() => {
+    setLegendItems(
+      Object.entries(seriesInfoRef.current).map(([name, info]) => ({
+        name,
+        color: info.color,
+        dashed: info.dashed,
+        icon: info.icon,
+        active: visibleRef.current[name] !== false
+      }))
+    );
+  }, [visible]);
+
   return (
     <Box sx={{ height: '100%', position: 'relative' }}>
-      <Legend items={legendItems} />
+      <Legend items={legendItems} onToggle={handleLegendToggle} />
       <ChartControls type={type} onChange={setType} />
       <Box ref={containerRef} sx={{ height: '100%' }} />
     </Box>
