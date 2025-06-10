@@ -45,6 +45,9 @@ export function validateAnalysis(analysis) {
           if (!gap.date) {
             console.warn(`gap_analysis: запись ${i} не содержит временной границы`);
           }
+          if (!gap.start_point || !gap.end_point) {
+            console.warn('Нехватка координат для gap_analysis');
+          }
         });
       }
     }
