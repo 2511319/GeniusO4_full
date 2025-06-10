@@ -116,19 +116,21 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
       return;
     }
     const series = chart.addCandlestickSeries();
+    series.applyOptions({ priceFormat: { type: 'none' } });
     series.setData(processed);
     chart.timeScale().fitContent();
     seriesRef.current = series;
 
     if (forecast?.length && layers.includes('price_prediction')) {
       const forecastSeries = chart.addCandlestickSeries({
-        upColor: 'rgba(76,175,80,0.5)',
-        borderUpColor: 'rgba(76,175,80,0.5)',
-        wickUpColor: 'rgba(76,175,80,0.5)',
-        downColor: 'rgba(244,67,54,0.5)',
-        borderDownColor: 'rgba(244,67,54,0.5)',
-        wickDownColor: 'rgba(244,67,54,0.5)'
+        upColor: 'rgba(76,175,80,0.4)',
+        borderUpColor: 'rgba(76,175,80,0.4)',
+        wickUpColor: 'rgba(76,175,80,0.4)',
+        downColor: 'rgba(244,67,54,0.4)',
+        borderDownColor: 'rgba(244,67,54,0.4)',
+        wickDownColor: 'rgba(244,67,54,0.4)'
       });
+      forecastSeries.applyOptions({ priceFormat: { type: 'none' } });
       forecastSeries.setData(forecast);
       forecastSeriesRef.current = forecastSeries;
       seriesInfoRef.current['Прогноз'] = { color: 'rgba(255,215,0,0.5)', dashed: false, icon: '⧉' };
@@ -146,6 +148,7 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
       if (!processed[0] || processed[0][name] === undefined) return;
       const color = colorMap[name] || `hsl(${idx*60},70%,50%)`;
       const line = chart.addLineSeries({ color });
+      line.applyOptions({ priceFormat: { type: 'none' } });
       line.setData(processed.map((d) => ({ time: d.time, value: d[name] })));
       indicatorSeriesRef.current[name] = line;
       seriesInfoRef.current[name] = { series: line, color, dashed: false };
@@ -237,6 +240,25 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
       let extra = '';
       if (isForecast && analysis?.price_prediction?.forecast) {
         extra += `<div>${analysis.price_prediction.forecast}</div>`;
+      }
+      const sr = analysis?.support_resistance_levels;
+      if (sr) {
+        const levels = [
+          ...(sr.supports || []),
+          ...(sr.resistances || [])
+        ];
+        levels.forEach(({ type, level, date, explanation }) => {
+          extra += `<div>${type}: ${level} (${date}) - ${explanation}</div>`;
+        });
+      }
+      const fib = analysis?.fibonacci_analysis;
+      if (fib) {
+        const items = Array.isArray(fib) ? fib : Object.values(fib);
+        items.forEach(({ type, level, date, explanation }) => {
+          if (type && level && date) {
+            extra += `<div>${type}: ${level} (${date}) - ${explanation}</div>`;
+          }
+        });
       }
 
       tooltipRef.current.innerHTML = `

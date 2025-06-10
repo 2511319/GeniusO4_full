@@ -15,6 +15,7 @@ export default function VolumePanel({ data = [] }) {
       localization: { locale: 'ru-RU' },
     });
     const series = chart.addHistogramSeries({ color: '#4caf50' });
+    series.applyOptions({ priceFormat: { type: 'none' } });
     series.setData(data.map((d) => ({ time: d.time, value: d.Volume })));
     chart.timeScale().fitContent();
     const resize = () => chart.resize(ref.current.clientWidth, 100);

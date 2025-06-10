@@ -20,6 +20,7 @@ export default function OscillatorsPanel({ data = [], layers = [] }) {
     OSC_FIELDS.forEach((name, idx) => {
       if (!layers.includes(name) || !data[0] || data[0][name] === undefined) return;
       const series = chart.addLineSeries({ color: colors[idx % colors.length] });
+      series.applyOptions({ priceFormat: { type: 'none' } });
       series.setData(data.map((d) => ({ time: d.time, value: d[name] })));
     });
     chart.timeScale().fitContent();

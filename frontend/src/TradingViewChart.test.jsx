@@ -5,7 +5,7 @@ import TradingViewChart from './TradingViewChart';
 
 const mockCreateRay = vi.fn();
 const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn(), applyOptions: vi.fn() }));
-const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay, setMarkers: vi.fn() }));
+const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay, setMarkers: vi.fn(), applyOptions: vi.fn() }));
 const mockSubscribeCrosshairMove = vi.fn();
 const mockFitContent = vi.fn();
 
