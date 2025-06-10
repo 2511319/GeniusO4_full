@@ -1,16 +1,65 @@
-# AGENT Guidelines
+# Agent Guidelines for Codex
 
-- Before committing, run Python syntax check:
-  `python -m py_compile $(git ls-files '*.py')`
-- Ensure frontend builds successfully:
-  `cd frontend && npm install && npm run build`
-- Update README when environment variables or commands change.
+This document provides conventions and best practices for the Codex AI agent to generate code accurately and consistently for the GeniusO4 front-end project.
 
-## Дополнительные требования
-- Install dependencies before running tests:
-  `pip install -r api/requirements.txt`
-- Run tests for backend and frontend:
-  `pytest` and `npm test`
-- Project layout:
-  `api/` contains FastAPI application, `frontend/` holds React UI; start both via `run.py`
-- For offline environments store wheels/npm packages locally or use a mirror of PyPI/NPM.
+## 1. Purpose
+Ensure that the Codex agent:
+- Understands project structure.
+- Follows coding conventions.
+- Produces unambiguous, focused changes.
+
+## 2. General Conventions
+1. Refer to exact file paths in prompts.
+2. Use full component, function, and variable names as in the codebase.
+3. Do not add or remove unrelated code.
+4. Adhere to existing code style:
+   - Indentation: 2 spaces or project setting.
+   - Quotes: single or double consistent with surrounding code.
+   - Semicolons: follow project convention.
+5. Import only necessary modules.
+
+## 3. Task Description Format
+Each mini-task must include:
+- **Title**: Short imperative verb phrase.
+- **Files to Modify**: Exact relative paths.
+- **Changes**: Step-by-step instructions.
+- **Validation**: Criteria to verify correct implementation.
+
+### Example
+\`\`\`
+Title: Enable custom tooltips for support_resistance_levels
+
+Files to Modify:
+- src/components/TradingViewChart.jsx
+
+Changes:
+1. Locate \`supportSeriesRef\` initialization.
+2. Disable default tooltip: \`supportSeriesRef.current.applyOptions({ priceLineVisible: false })\`.
+3. Subscribe to \`chart.subscribeCrosshairMove\` to show a custom popup with \`type\`, \`level\`, \`date\`, \`explanation\`.
+4. Unsubscribe on cleanup.
+
+Validation:
+- Hovering over a support line shows a custom popup with correct fields.
+- No tooltips appear for other series.
+\`\`\`
+
+## 4. Common Patterns
+- Use \`useRef\` for chart and series references.
+- Update series via \`setData\`, \`applyOptions\`, \`setMarkers\`, \`setRegions\`.
+- Parse JSON in \`analysisValidator.js\` and log warnings on missing fields.
+
+## 5. Error Handling
+- Use \`console.warn\` for non-critical missing data.
+- Do not throw exceptions for optional sections.
+
+## 6. Testing
+Include Jest tests for:
+- Correct rendering of CommentsPanel with \`explanation\`.
+- Forecast candles appearing in TradingViewChart.
+- Sidebar group order and checkbox toggles.
+- Legend toggling visibility.
+
+## 7. Documentation Updates
+After code changes:
+- Update this AGENTS.md if any conventions change.
+- Ensure README.md reflects any new architecture or component changes.

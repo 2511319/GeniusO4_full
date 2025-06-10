@@ -1,171 +1,138 @@
-# GeniusO4 Full
+# GeniusO4 Front-End Application
 
-## Быстрый старт
+This document describes the architecture, components, data flow, and coding conventions of the GeniusO4 front-end application to help automated code generation tools (such as Codex) understand and navigate the codebase without confusion.
 
-1. Скопируйте `.env.example` в нужный файл окружения:
-   ```bash
-   cp .env.example .env.dev
+## Table of Contents
+1. Introduction  
+2. Technology Stack  
+3. Project Structure  
+4. Data Flow and JSON Schema  
+5. UI Components  
+   - TradingViewChartComponent  
+   - IndicatorsSidebar  
+   - CommentsPanel  
+   - Legend  
+   - VolumePanel  
+   - OscillatorsPanel  
+   - MACDPanel  
+6. Indicator Categories and Grouping  
+7. Tooltip Rules  
+8. Virtual Candles (Forecast)  
+9. Legend Usage  
+10. Development Workflow  
+11. Building and Testing  
+12. License  
+
+## 1. Introduction
+The GeniusO4 application visualizes financial data and analysis overlays returned by a machine learning model. It uses the TradingView Charting Library for rendering interactive charts. This README provides detailed information about file organization, component responsibilities, and data contracts.
+
+## 2. Technology Stack
+- React (version 18)  
+- JavaScript (ES6) or TypeScript  
+- TradingView Charting Library  
+- Material-UI for user interface controls  
+- Axios or Fetch API for data requests  
+- Redux or React Context for state management  
+- Jest and React Testing Library for unit tests  
+
+## 3. Project Structure
+```
+/src
+  /components
+    TradingViewChart.jsx
+    IndicatorsSidebar.jsx
+    CommentsPanel.jsx
+    Legend.jsx
+    VolumePanel.jsx
+    OscillatorsPanel.jsx
+    MACDPanel.jsx
+  /data
+    analysisLoader.js
+    analysisValidator.js
+    indicatorGroups.js
+  /assets
+    (icons, styles)
+  App.jsx
+  index.jsx
+README.md
+AGENTS.md
+package.json
+```
+
+## 4. Data Flow and JSON Schema
+1. Fetch JSON responses using `fetchAnalysis()`.  
+2. Validate required fields in each section of the response:
+   - Overlays: require `date` and `level` or `start_point` and `end_point`.  
+   - Forecast: array `virtual_candles` containing objects `{ time, open, high, low, close, explanation }`.  
+3. On missing fields, call:
+   ```js
+   console.warn('Missing fields for section ' + sectionName);
    ```
-   Аналогично создайте `.env.docker` и `.env.prod`, подставив свои значения.
-   В файле окружения можно задать `DEFAULT_SYMBOL` и `DEFAULT_QUOTE` – базовую
-   и котируемую валюту по умолчанию.
-2. Установите зависимости Python и Node:
-   ```bash
-   pip install -r api/requirements.txt
-   cd frontend && npm install
-   ```
-3. Запустите сервер вручную (из каталога `api`):
-   ```bash
-   python -m uvicorn app:app --reload
-   ```
-   или воспользуйтесь `python run.py --mode dev` либо `docker-compose up --build`.
-4. Откройте:
-   - React UI: http://localhost:5173
-   - Health: http://localhost:8000/health
+   Do not break application flow.
 
-При работе без доступа к интернету храните нужные Python-`whl` и npm-пакеты локально или
-используйте зеркала PyPI и NPM.
+## 5. UI Components
+### TradingViewChartComponent
+- Initializes the main TradingView chart.  
+- Adds series for price candles, technical overlays, forecast candles, and commentary markers.  
+- Exposes update and retrieval methods for series and regions.
 
-## Структура
+### IndicatorsSidebar
+- Left sliding panel with seven fixed categories.  
+- Uses MUI Accordion and Checkbox controls.  
+- Categories (in strict order):
+  1. Overlays  
+  2. Volume  
+  3. Momentum  
+  4. Volatility  
+  5. MACD  
+  6. Model Analysis  
+  7. Forecast  
 
-- api/       — FastAPI + сервисы
-- frontend/  — прототип React-клиента
-- configs/   — настройки
-- docker-compose.yml
-- .github/workflows/ci.yml
-## Как собрать и запустить с TradingView
+### CommentsPanel
+- Right panel with tabs: "Primary Analysis" and "Explanation".  
+- "Primary Analysis": displays text from `primary_analysis` JSON fields.  
+- "Explanation": displays `explanation` from each active overlay section.
 
-```bash
-cd frontend
-npm install
-npm run build
-npm run preview
-```
+### Legend
+- Renders below the main chart.  
+- Displays active series with color markers or icons.  
+- Toggles series visibility on click via:
+  ```js
+  series.applyOptions({ visible: !visible });
+  ```
 
-Минимальные зависимости:
-- TradingView Lightweight Charts
-- React
-- Redux
-- axios или fetch
+## 6. Indicator Categories and Grouping
+Defined in `src/data/indicatorGroups.js`. Each category maps to an array of indicator keys and display names.
 
+## 7. Tooltip Rules
+- Disable default TradingView tooltips for all series.  
+- Implement custom tooltips only for:
+  - support_resistance_levels  
+  - fibonacci_analysis  
+  - price_prediction (forecast candles)  
 
-## Запуск React-клиента
+## 8. Virtual Candles (Forecast)
+- Use `chart.addCandlestickSeries({ priceFormat: { type: 'ohlc' } })`.  
+- Render `virtual_candles` data as series with `opacity: 0.4`.  
+- Include entry in Legend with icon "⧉" and label "Forecast".  
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+## 9. Legend Usage
+- Obtain series list via `chart.getSeries()`.  
+- Generate `legendItems` array: `{ name, color, icon, visible }`.  
+- Render clickable legend elements to toggle visibility.
 
-Дев-сервер доступен на `http://localhost:5173` и проксирует запросы `/api` к FastAPI.
-Все ответы от API сохраняются в папку `frontend/dev_logs` для упрощения отладки. В режиме разработки можно нажать кнопку `Test`, чтобы повторно построить график по последнему сохранённому ответу.
+## 10. Development Workflow
+- Work on atomic tasks (one feature or bug fix per pull request).  
+- Write unit tests for each critical component:  
+  - CommentsPanel  
+  - TradingViewChart forecast update  
+  - Sidebar toggles  
+  - Legend click handling  
 
-### Типовой сценарий
+## 11. Building and Testing
+- Remove legacy dependencies: `plotly.js`, `react-dash`, `echarts`.  
+- Build: `npm run build` with no errors or warnings.  
+- Test: `npm test` should pass all tests.
 
-1. Запустите `python run.py --mode dev` для одновременного старта FastAPI и React-клиента.
-2. Откройте `http://localhost:5173`, введите тикер и JWT‑токен и нажмите `Load`.
-3. Выбирайте нужные индикаторы на графике чекбоксами.
-
-## Работа с API `/api/analyze`
-
-Пример запроса:
-
-```json
-{
-  "symbol": "BTCUSDT",
-  "interval": "4h",
-  "limit": 144,
-  "indicators": ["MACD", "RSI"],
-  "drop_na": true
-}
-```
-
-Поле `symbol` может содержать пару целиком (`BTCUSDT`) или только базовый
-актив (`BTC`). В последнем случае котируемая валюта берётся из переменной
-`DEFAULT_QUOTE` (по умолчанию `USD`).
-
-Параметр `drop_na` определяет, удалять ли свечи с пустыми значениями
-индикаторов при обработке данных. По умолчанию `true`.
-
-Если список индикаторов пустой, строятся все доступные слои. В ответе приходят:
-
-```json
-{
-  "figure": {},
-  "analysis": {},
-  "ohlc": [ {"Open Time": "...", "Open": 0, ... } ],
-  "indicators": ["RSI", "MACD", "MA_50", ...]
-}
-```
-
-Для авторизации используйте JWT‑токен:
-
-```
-Authorization: Bearer <JWT>
-```
-
-В React-клиенте токен можно ввести в поле — он сохраняется в `localStorage` и будет автоматически подставляться в запросы. Интерфейс позволяет включать и отключать отдельные слои графика чекбоксами.
-Под графиком отображается аналитический блок с разделами `primary_analysis`, `price_prediction` и другими. Каждый раздел можно скрыть или показать с помощью индивидуальных чекбоксов.
-
-## Индикаторы
-
-API поддерживает следующие индикаторы:
-
-MACD, RSI, OBV, ATR, ADX, Stochastic_Oscillator, Volume,
-Bollinger_Bands, Ichimoku_Cloud, Parabolic_SAR, VWAP,
-Moving_Average_Envelopes, support_resistance_levels, trend_lines,
-unfinished_zones, imbalances, fibonacci_analysis,
-elliott_wave_analysis, structural_edge, candlestick_patterns,
-divergence_analysis, fair_value_gaps, gap_analysis,
-psychological_levels, anomalous_candles, price_prediction,
-recommendations
-
-## Тестирование и сборка
-
-Проверить синтаксис Python:
-
-```bash
-python -m py_compile $(git ls-files '*.py')
-```
-
-Собрать фронтенд:
-
-```bash
-cd frontend
-npm install
-npm run build
-```
-Сборка включает `virtual_candles`, компонент легенды и выборочные тултипы.
-
-Запустить тесты:
-
-```bash
-pytest                # проверка API
-cd frontend && npm test
-```
-
-Для запуска в Docker или продакшн‑режиме используйте:
-
-```bash
-python run.py --mode docker      # локально через Docker
-./deploy.sh                      # деплой в Cloud Run
-```
-
-## Деплой
-
-Скрипт `deploy.sh` собирает образы и разворачивает сервисы в Google Cloud Run. Перед запуском создайте `.env.prod` и заполните переменные `GCP_PROJECT_ID` и `GCP_REGION`.
-
-```bash
-./deploy.sh
-```
-
-После деплоя фронтенд доступен по адресу, указанному в выводе `gcloud run deploy`.
-
-При клонировании репозитория не используйте опцию `--depth`, чтобы сохранялась полная история коммитов.
-
-
-## Документация
-
-Подробности работы функций `computeHeikinAshi`, `computeRenko` и `findSRLevels`
-описаны в [docs/chart_utils.md](docs/chart_utils.md).
-
+## 12. License
+Specify project license here.
