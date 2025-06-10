@@ -33,6 +33,12 @@ export function validateAnalysis(analysis) {
             console.warn(`Раздел ${key}: запись ${i} отсутствует поле ${f}`);
           }
         });
+        if (
+          key === 'unfinished_zones' &&
+          (!item.start_point || !item.end_point)
+        ) {
+          console.warn('Нехватка координат для unfinished_zones');
+        }
       });
     } else if (typeof value === 'object') {
       fields.forEach((f) => {
@@ -40,6 +46,9 @@ export function validateAnalysis(analysis) {
           console.warn(`Раздел ${key}: отсутствует поле ${f}`);
         }
       });
+      if (key === 'unfinished_zones' && (!value.start_point || !value.end_point)) {
+        console.warn('Нехватка координат для unfinished_zones');
+      }
       if (key === 'gap_analysis' && Array.isArray(value.gaps)) {
         value.gaps.forEach((gap, i) => {
           if (!gap.date) {
