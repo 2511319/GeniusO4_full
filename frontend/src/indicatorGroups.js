@@ -1,40 +1,22 @@
-export const technicalIndicators = [
+export const overlays = [
   'MA_20',
   'MA_50',
   'MA_100',
   'MA_200',
-  'RSI',
-  'MACD',
-  'OBV',
-  'ATR',
   'ADX',
-  'Stochastic_Oscillator',
-  'Bollinger_Bands',
-  'Williams_%R',
   'Parabolic_SAR',
-  'Ichimoku_Cloud',
-  'VWAP',
-  'Moving_Average_Envelopes',
-  'Volume'
+  'Ichimoku_Cloud'
 ];
 
-// соответствие объединённых индикаторов их столбцам в данных
-export const indicatorColumnMap = {
-  MACD: ['MACD', 'MACD_signal', 'MACD_hist'],
-  Bollinger_Bands: ['Bollinger_Middle', 'Bollinger_Upper', 'Bollinger_Lower'],
-  Ichimoku_Cloud: [
-    'Ichimoku_A',
-    'Ichimoku_B',
-    'Ichimoku_Base_Line',
-    'Ichimoku_Conversion_Line'
-  ],
-  Moving_Average_Envelopes: [
-    'Moving_Average_Envelope_Upper',
-    'Moving_Average_Envelope_Lower'
-  ]
-};
+export const volume = ['Volume', 'OBV'];
 
-export const advancedIndicators = [
+export const momentum = ['RSI', 'Stochastic_Oscillator', 'Williams_%R'];
+
+export const volatility = ['ATR'];
+
+export const macd = ['MACD'];
+
+export const modelAnalysis = [
   'support_resistance_levels',
   'trend_lines',
   'unfinished_zones',
@@ -50,7 +32,19 @@ export const advancedIndicators = [
   'anomalous_candles'
 ];
 
-export const modelAnalysisIndicators = [
-  'price_prediction',
-  'recommendations'
-];
+export const forecast = ['price_prediction', 'recommendations'];
+
+export const indicatorColumnMap = {
+  MACD: ['MACD', 'MACD_signal', 'MACD_hist'],
+  Bollinger_Bands: ['Bollinger_Middle', 'Bollinger_Upper', 'Bollinger_Lower'],
+  Ichimoku_Cloud: [
+    'Ichimoku_A',
+    'Ichimoku_B',
+    'Ichimoku_Base_Line',
+    'Ichimoku_Conversion_Line'
+  ],
+  Moving_Average_Envelopes: [
+    'Moving_Average_Envelope_Upper',
+    'Moving_Average_Envelope_Lower'
+  ]
+};
