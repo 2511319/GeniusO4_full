@@ -54,6 +54,9 @@ function apiLogger() {
 
 export default defineConfig({
   plugins: [react(), apiLogger()],
+  build: {
+    chunkSizeWarningLimit: 1000,
+  },
   server: {
     port: 5173,
     proxy: {
