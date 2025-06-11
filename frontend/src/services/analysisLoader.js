@@ -1,6 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-
 export function parseAnalysis(content) {
   try {
     return JSON.parse(content);
@@ -10,18 +7,14 @@ export function parseAnalysis(content) {
   }
 }
 
-export async function fetchAnalysis(dir = path.join(process.cwd(), '..', 'api', 'dev_logs')) {
+export async function fetchAnalysis(url = '/api/testdata') {
   try {
-    const files = fs
-      .readdirSync(dir)
-      .filter((f) => f.startsWith('chatgpt_response_') && f.endsWith('.json'))
-      .sort();
-    if (!files.length) return null;
-    const file = path.join(dir, files[files.length - 1]);
-    const data = fs.readFileSync(file, 'utf-8');
-    return parseAnalysis(data);
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const text = await res.text();
+    return parseAnalysis(text);
   } catch (err) {
-    console.error('Failed to read analysis', err);
+    console.error('Failed to load analysis', err);
     return null;
   }
 }
