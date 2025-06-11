@@ -10,7 +10,7 @@ function a11yProps(index) {
   };
 }
 
-export default function CommentsPanel({ analysis, explanations = [], layers = [] }) {
+export default function CommentsPanel({ analysis, layers = [] }) {
   const [value, setValue] = useState(0);
   const [layerExplanations, setLayerExplanations] = useState([]);
 
@@ -21,26 +21,23 @@ export default function CommentsPanel({ analysis, explanations = [], layers = []
 
     const items = layers
       .map((layer) => {
-        let fromAnalysis;
         const layerData = analysis?.[layer];
+        let explanation;
         if (Array.isArray(layerData)) {
-          fromAnalysis = layerData
+          explanation = layerData
             .map((item) => item?.explanation)
             .filter(Boolean)
             .join('\n');
         } else {
-          fromAnalysis = layerData?.explanation;
+          explanation = layerData?.explanation;
         }
 
-        const fromProps = explanations.find((ex) => ex.key === layer);
-        const fallback = fromProps ? fromProps.explanation : undefined;
-        const explanation = fromAnalysis || fallback;
         return explanation ? { layerName: layer, explanation } : null;
       })
       .filter(Boolean);
 
     setLayerExplanations(items);
-  }, [analysis, layers, explanations]);
+  }, [analysis, layers]);
 
   return (
     <Box sx={{ width: '100%' }}>
