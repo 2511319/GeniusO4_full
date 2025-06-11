@@ -59,7 +59,11 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
       },
       width:  containerRef.current.clientWidth,
       height: containerRef.current.clientHeight,
-      crosshair: { mode: 1 },
+      crosshair: {
+        mode: 1,
+        vertLine: { labelVisible: false },
+        horzLine: { labelVisible: false },
+      },
       localization: { locale: 'ru-RU' },
     });
 
@@ -115,16 +119,16 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
       seriesRef.current = null;
       return;
     }
-    const series = chart.addCandlestickSeries();
-    series.applyOptions({ priceFormat: { type: 'none' } });
+    const series = chart.addCandlestickSeries({ crosshairMarkerVisible: false });
+    series.applyOptions({ priceFormat: { type: 'none' }, lastValueVisible: false, priceLineVisible: false });
     series.setData(processed);
     chart.timeScale().fitContent();
     seriesRef.current = series;
 
     if (forecast?.length && layers.includes('price_prediction')) {
-      const forecastSeries = chart.addCandlestickSeries({ priceFormat: { type: 'ohlc' } });
+      const forecastSeries = chart.addCandlestickSeries({ priceFormat: { type: 'ohlc' }, crosshairMarkerVisible: false });
       forecastSeries.setData(forecast);
-      forecastSeries.applyOptions({ opacity: 0.4 });
+      forecastSeries.applyOptions({ opacity: 0.4, lastValueVisible: false, priceLineVisible: false });
       forecastSeriesRef.current = forecastSeries;
       seriesInfoRef.current['Прогноз'] = { series: forecastSeries, color: '#2196f3', dashed: false, icon: '⧉' };
     }
@@ -140,8 +144,8 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
     layers.forEach((name, idx) => {
       if (!processed[0] || processed[0][name] === undefined) return;
       const color = colorMap[name] || `hsl(${idx*60},70%,50%)`;
-      const line = chart.addLineSeries({ color });
-      line.applyOptions({ priceFormat: { type: 'none' } });
+      const line = chart.addLineSeries({ color, crosshairMarkerVisible: false });
+      line.applyOptions({ priceFormat: { type: 'none' }, lastValueVisible: false, priceLineVisible: false });
       line.setData(processed.map((d) => ({ time: d.time, value: d[name] })));
       indicatorSeriesRef.current[name] = line;
       seriesInfoRef.current[name] = { series: line, color, dashed: false };
@@ -205,64 +209,61 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
 
     /* tooltip */
     const handler = (param) => {
-      if (!param || !param.time || !param.seriesData.size) {
+      if (!param || !param.time) {
         tooltipRef.current.style.display = 'none';
         return;
       }
 
-      const allowedLayers = [
-        'support_resistance_levels',
-        'fibonacci_analysis',
-        'price_prediction'
-      ];
+      const active = layers.filter((l) => ['support_resistance_levels', 'fibonacci_analysis', 'price_prediction'].includes(l));
+      const forecastHovered = forecastSeriesRef.current && param.seriesData.has(forecastSeriesRef.current);
 
-      const hasAllowed = Object.entries(indicatorSeriesRef.current)
-        .some(([name, s]) => allowedLayers.includes(name) && param.seriesData.has(s));
-
-      const isForecast = forecastSeriesRef.current && param.seriesData.has(forecastSeriesRef.current);
-
-      if (!hasAllowed && !isForecast) {
+      if (!forecastHovered && active.length === 0) {
         tooltipRef.current.style.display = 'none';
         return;
       }
 
-      const datum = param.seriesData.get(isForecast ? forecastSeriesRef.current : series);
-      if (!datum) return;
-      const { value } = datum;
+      let html = '';
 
-      let extra = '';
-      if (isForecast && analysis?.price_prediction?.forecast) {
-        extra += `<div>${analysis.price_prediction.forecast}</div>`;
+      if (forecastHovered && active.includes('price_prediction')) {
+        const datum = param.seriesData.get(forecastSeriesRef.current);
+        if (datum) {
+          const { value } = datum;
+          html += `<div>O: ${value.open.toFixed(2)} H: ${value.high.toFixed(2)} L: ${value.low.toFixed(2)} C: ${value.close.toFixed(2)}</div>`;
+          if (analysis?.price_prediction?.explanation) {
+            html += `<div>${analysis.price_prediction.explanation}</div>`;
+          }
+        }
       }
-      const sr = analysis?.support_resistance_levels;
-      if (sr) {
+
+      if (active.includes('support_resistance_levels') && analysis?.support_resistance_levels) {
         const levels = [
-          ...(sr.supports || []),
-          ...(sr.resistances || [])
+          ...(analysis.support_resistance_levels.supports || []),
+          ...(analysis.support_resistance_levels.resistances || [])
         ];
         levels.forEach(({ type, level, date, explanation }) => {
-          extra += `<div>${type}: ${level} (${date}) - ${explanation}</div>`;
-        });
-      }
-      const fib = analysis?.fibonacci_analysis;
-      if (fib) {
-        const items = Array.isArray(fib) ? fib : Object.values(fib);
-        items.forEach(({ type, level, date, explanation }) => {
-          if (type && level && date) {
-            extra += `<div>${type}: ${level} (${date}) - ${explanation}</div>`;
-          }
+          html += `<div>${type}: ${level} (${date}) - ${explanation}</div>`;
         });
       }
 
-      tooltipRef.current.innerHTML = `
-        <div><b>${new Date(param.time * 1000).toLocaleString()}</b></div>
-        O: ${value.open.toFixed(2)} H: ${value.high.toFixed(2)}
-        L: ${value.low.toFixed(2)} C: ${value.close.toFixed(2)}<br/>
-        ${extra}
-      `;
+      if (active.includes('fibonacci_analysis') && analysis?.fibonacci_analysis) {
+        const items = Object.values(analysis.fibonacci_analysis);
+        items.forEach(({ levels, explanation }) => {
+          if (!levels) return;
+          Object.entries(levels).forEach(([p, v]) => {
+            html += `<div>${p}: ${v} - ${explanation}</div>`;
+          });
+        });
+      }
+
+      if (!html) {
+        tooltipRef.current.style.display = 'none';
+        return;
+      }
+
+      tooltipRef.current.innerHTML = html;
       tooltipRef.current.style.display = 'block';
       tooltipRef.current.style.left = param.point.x + 10 + 'px';
-      tooltipRef.current.style.top  = param.point.y + 10 + 'px';
+      tooltipRef.current.style.top = param.point.y + 10 + 'px';
     };
     chart.subscribeCrosshairMove(handler);
     crosshairHandlerRef.current = handler;
