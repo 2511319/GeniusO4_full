@@ -6,22 +6,24 @@ import {
 } from '@mui/material';
 import IndicatorGroup from './IndicatorGroup';
 import {
-  advancedIndicators,
-  modelAnalysisIndicators
+  overlays,
+  volume,
+  momentum,
+  volatility,
+  macd,
+  modelAnalysis,
+  forecast
 } from './indicatorGroups';
 
 // Группы индикаторов
 const GROUPS = [
-  {
-    title: 'Overlays',
-    indicators: ['MA_20', 'MA_50', 'MA_100', 'MA_200', 'ADX', 'Parabolic_SAR', 'Ichimoku_Cloud']
-  },
-  { title: 'Volume', indicators: ['Volume', 'OBV'] },
-  { title: 'Momentum', indicators: ['RSI', 'Stochastic_Oscillator', 'Williams_%R'] },
-  { title: 'Volatility', indicators: ['ATR'] },
-  { title: 'MACD', indicators: ['MACD'] },
-  { title: 'Model Analysis', indicators: [...advancedIndicators] },
-  { title: 'Forecast', indicators: [...modelAnalysisIndicators] }
+  { title: 'Overlays', indicators: overlays },
+  { title: 'Volume', indicators: volume },
+  { title: 'Momentum', indicators: momentum },
+  { title: 'Volatility', indicators: volatility },
+  { title: 'MACD', indicators: macd },
+  { title: 'Model Analysis', indicators: modelAnalysis },
+  { title: 'Forecast', indicators: forecast }
 ];
 
 export default function IndicatorsSidebar({
@@ -35,11 +37,29 @@ export default function IndicatorsSidebar({
   const baseExtra = (
     <>
       <FormControlLabel
-        control={<Checkbox checked={showSR} onChange={(e) => setShowSR(e.target.checked)} />}
+        control={
+          <Checkbox
+            checked={showSR}
+            onChange={(e) => {
+              e.stopPropagation();
+              setShowSR(e.target.checked);
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        }
         label="Algo-SRlevel"
       />
       <FormControlLabel
-        control={<Checkbox checked={showTrends} onChange={(e) => setShowTrends(e.target.checked)} />}
+        control={
+          <Checkbox
+            checked={showTrends}
+            onChange={(e) => {
+              e.stopPropagation();
+              setShowTrends(e.target.checked);
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        }
         label="Trend lines"
       />
     </>

@@ -23,7 +23,11 @@ export default function IndicatorGroup({ title, indicators, layers, toggleLayer,
             control={
               <Checkbox
                 checked={layers.includes(ind)}
-                onChange={() => toggleLayer(ind)}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  toggleLayer(ind);
+                }}
+                onClick={(e) => e.stopPropagation()}
               />
             }
             label={ind}
