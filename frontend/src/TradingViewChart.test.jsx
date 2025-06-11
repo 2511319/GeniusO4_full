@@ -90,6 +90,16 @@ describe('TradingViewChart', () => {
     expect(forecastSeries.setData).toHaveBeenCalledWith(forecast);
   });
 
+  it('creates forecast series with ohlc format and opacity', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
+    const forecast = [{ time: 2, open: 1, high: 2, low: 0, close: 1 }];
+    render(<TradingViewChart data={data} forecast={forecast} layers={['price_prediction']} />);
+    await waitFor(() => expect(mockAddCandlestickSeries).toHaveBeenCalledTimes(2));
+    expect(mockAddCandlestickSeries.mock.calls[1][0]).toEqual({ priceFormat: { type: 'ohlc' } });
+    const forecastSeries = mockAddCandlestickSeries.mock.results[1].value;
+    expect(forecastSeries.applyOptions).toHaveBeenCalledWith({ opacity: 0.4 });
+  });
+
   it('does not request tooltip data for disallowed layers', async () => {
     const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1, RSI: 70 }];
     render(<TradingViewChart data={data} layers={['RSI']} />);

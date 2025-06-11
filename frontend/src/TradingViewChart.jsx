@@ -122,18 +122,11 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
     seriesRef.current = series;
 
     if (forecast?.length && layers.includes('price_prediction')) {
-      const forecastSeries = chart.addCandlestickSeries({
-        upColor: 'rgba(76,175,80,0.4)',
-        borderUpColor: 'rgba(76,175,80,0.4)',
-        wickUpColor: 'rgba(76,175,80,0.4)',
-        downColor: 'rgba(244,67,54,0.4)',
-        borderDownColor: 'rgba(244,67,54,0.4)',
-        wickDownColor: 'rgba(244,67,54,0.4)'
-      });
-      forecastSeries.applyOptions({ priceFormat: { type: 'none' } });
+      const forecastSeries = chart.addCandlestickSeries({ priceFormat: { type: 'ohlc' } });
       forecastSeries.setData(forecast);
+      forecastSeries.applyOptions({ opacity: 0.4 });
       forecastSeriesRef.current = forecastSeries;
-      seriesInfoRef.current['Прогноз'] = { color: 'rgba(255,215,0,0.5)', dashed: false, icon: '⧉' };
+      seriesInfoRef.current['Прогноз'] = { series: forecastSeries, color: '#2196f3', dashed: false, icon: '⧉' };
     }
 
     /* indicator lines */
