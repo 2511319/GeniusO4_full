@@ -18,7 +18,7 @@ export default function Legend({ items, onToggle }) {
         zIndex: 30,
       }}
     >
-      {items.map(({ name, color, dashed, icon, active }) => (
+      {items.map(({ name, color, icon, visible }) => (
         <Box
           key={name}
           sx={{
@@ -26,7 +26,7 @@ export default function Legend({ items, onToggle }) {
             alignItems: 'center',
             mb: 0.5,
             cursor: 'pointer',
-            opacity: active ? 1 : 0.5,
+            opacity: visible ? 1 : 0.5,
           }}
           onClick={() => onToggle && onToggle(name)}
         >
@@ -38,8 +38,8 @@ export default function Legend({ items, onToggle }) {
                 width: 12,
                 height: 12,
                 mr: 1,
-                border: dashed ? `2px dashed ${color}` : `2px solid ${color}`,
-                backgroundColor: active && !dashed ? color : 'transparent',
+                border: `2px solid ${color}`,
+                backgroundColor: visible ? color : 'transparent',
               }}
             />
           )}

@@ -130,7 +130,7 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
       forecastSeries.setData(forecast);
       forecastSeries.applyOptions({ opacity: 0.4, lastValueVisible: false, priceLineVisible: false });
       forecastSeriesRef.current = forecastSeries;
-      seriesInfoRef.current['Прогноз'] = { series: forecastSeries, color: '#2196f3', dashed: false, icon: '⧉' };
+      seriesInfoRef.current['Прогноз'] = { series: forecastSeries, color: '#2196f3', icon: '⧉' };
     }
 
     /* indicator lines */
@@ -148,7 +148,7 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
       line.applyOptions({ priceFormat: { type: 'none' }, lastValueVisible: false, priceLineVisible: false });
       line.setData(processed.map((d) => ({ time: d.time, value: d[name] })));
       indicatorSeriesRef.current[name] = line;
-      seriesInfoRef.current[name] = { series: line, color, dashed: false };
+      seriesInfoRef.current[name] = { series: line, color };
     });
 
     /* support/resistance */
@@ -168,8 +168,8 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
           lineStyle: 2,
         });
       });
-      if (hasSupport) seriesInfoRef.current.support = { color: '#4caf50', dashed: true };
-      if (hasResistance) seriesInfoRef.current.resistance = { color: '#f44336', dashed: true };
+      if (hasSupport) seriesInfoRef.current.support = { color: '#4caf50' };
+      if (hasResistance) seriesInfoRef.current.resistance = { color: '#f44336' };
     }
 
     /* trend lines */
@@ -191,8 +191,8 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
           lineStyle: 0,
         });
       });
-      if (hasSupport) seriesInfoRef.current['trend-support'] = { color: '#4caf50', dashed: false };
-      if (hasResistance) seriesInfoRef.current['trend-resistance'] = { color: '#f44336', dashed: false };
+      if (hasSupport) seriesInfoRef.current['trend-support'] = { color: '#4caf50' };
+      if (hasResistance) seriesInfoRef.current['trend-resistance'] = { color: '#f44336' };
     }
 
     if (layers.includes('candlestick_patterns') && patterns.length) {
@@ -204,7 +204,7 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
         text: p.type || '',
       }));
       series.setMarkers(markers);
-      seriesInfoRef.current.patterns = { color: 'magenta', dashed: false };
+      seriesInfoRef.current.patterns = { color: 'magenta' };
     }
 
     /* tooltip */
@@ -278,9 +278,8 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
       Object.entries(seriesInfoRef.current).map(([name, info]) => ({
         name,
         color: info.color,
-        dashed: info.dashed,
         icon: info.icon,
-        active: nextVisible[name]
+        visible: nextVisible[name]
       }))
     );
   }, [data, forecast, type, layers, showSR, showTrends, patterns]);
@@ -290,9 +289,8 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
       Object.entries(seriesInfoRef.current).map(([name, info]) => ({
         name,
         color: info.color,
-        dashed: info.dashed,
         icon: info.icon,
-        active: visibleRef.current[name] !== false
+        visible: visibleRef.current[name] !== false
       }))
     );
   }, [visible]);
