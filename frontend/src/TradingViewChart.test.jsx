@@ -21,6 +21,8 @@ vi.mock('lightweight-charts', () => ({
   })),
 }));
 
+import { createChart } from 'lightweight-charts';
+
 describe('TradingViewChart', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -72,6 +74,17 @@ describe('TradingViewChart', () => {
     const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
     render(<TradingViewChart data={data} layers={[]} />);
     await waitFor(() => expect(mockFitContent).toHaveBeenCalled());
+  });
+
+  it('disables default tooltips', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
+    render(<TradingViewChart data={data} layers={['RSI']} />);
+    await waitFor(() => expect(createChart).toHaveBeenCalled());
+    const options = createChart.mock.calls[0][1];
+    expect(options.crosshair.vertLine.labelVisible).toBe(false);
+    expect(options.crosshair.horzLine.labelVisible).toBe(false);
+    expect(mockAddCandlestickSeries.mock.calls[0][0].crosshairMarkerVisible).toBe(false);
+    expect(mockAddLineSeries.mock.calls[0][0].crosshairMarkerVisible).toBe(false);
   });
 
   it('renders forecast candlestick series', async () => {
