@@ -5,7 +5,7 @@ import TradingViewChart from './TradingViewChart';
 
 const mockCreateRay = vi.fn();
 const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn(), applyOptions: vi.fn() }));
-const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay, setMarkers: vi.fn(), applyOptions: vi.fn() }));
+const mockAddCandlestickSeries = vi.fn(() => ({ setData: vi.fn(), createRay: mockCreateRay, setMarkers: vi.fn(), setRegions: vi.fn(), applyOptions: vi.fn() }));
 const mockSubscribeCrosshairMove = vi.fn();
 const mockFitContent = vi.fn();
 
@@ -169,6 +169,20 @@ describe('TradingViewChart', () => {
 
     handler({ time: 2, seriesData: { get, size: 1, has }, point: { x: 0, y: 0 } });
     expect(get).toHaveBeenCalledWith(forecastSeries);
+  });
+
+  it('draws rectangle when gap has coordinates', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
+    const analysis = { gap_analysis: { gaps: [{ start_point: { date: 'd1', price: 1 }, end_point: { date: 'd2', price: 2 } }], comment: '' } };
+    render(<TradingViewChart data={data} layers={['gap_analysis']} analysis={analysis} />);
+    await waitFor(() => expect(mockAddCandlestickSeries.mock.results[0].value.setRegions).toHaveBeenCalled());
+  });
+
+  it('draws vertical region when coords missing', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
+    const analysis = { gap_analysis: { gaps: [{ date: 'd1', price_range: [1,2] }], comment: '' } };
+    render(<TradingViewChart data={data} layers={['gap_analysis']} analysis={analysis} />);
+    await waitFor(() => expect(mockAddCandlestickSeries.mock.results[0].value.setRegions).toHaveBeenCalled());
   });
 
   it('toggles series visibility from legend', async () => {

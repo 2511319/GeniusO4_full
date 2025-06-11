@@ -207,6 +207,53 @@ export default function TradingViewChart({ data, forecast = [], patterns = [], l
       seriesInfoRef.current.patterns = { color: 'magenta' };
     }
 
+    /* gap_analysis & unfinished_zones */
+    if (layers.includes('gap_analysis') || layers.includes('unfinished_zones')) {
+      const regions = [];
+      const toTs = (d) => Math.floor(new Date(d).getTime() / 1000);
+
+      if (layers.includes('gap_analysis') && analysis?.gap_analysis?.gaps) {
+        analysis.gap_analysis.gaps.forEach((gap) => {
+          if (gap.start_point && gap.end_point) {
+            regions.push({
+              from: { time: toTs(gap.start_point.date), price: gap.start_point.price },
+              to:   { time: toTs(gap.end_point.date),   price: gap.end_point.price }
+            });
+          } else if (gap.date && Array.isArray(gap.price_range)) {
+            const [low, high] = gap.price_range;
+            regions.push({
+              time: toTs(gap.date),
+              price1: low,
+              price2: high,
+            });
+          }
+        });
+      }
+
+      if (layers.includes('unfinished_zones') && Array.isArray(analysis?.unfinished_zones)) {
+        analysis.unfinished_zones.forEach((zone) => {
+          if (zone.start_point && zone.end_point) {
+            regions.push({
+              from: { time: toTs(zone.start_point.date), price: zone.start_point.price },
+              to:   { time: toTs(zone.end_point.date),   price: zone.end_point.price }
+            });
+          } else if (zone.date && Array.isArray(zone.price_range)) {
+            const [low, high] = zone.price_range;
+            regions.push({
+              time: toTs(zone.date),
+              price1: low,
+              price2: high,
+            });
+          }
+        });
+      }
+
+      if (regions.length && series.setRegions) {
+        series.setRegions(regions);
+        seriesInfoRef.current.zones = { color: 'rgba(255,193,7,0.3)' };
+      }
+    }
+
     /* tooltip */
     const handler = (param) => {
       if (!param || !param.time) {

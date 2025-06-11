@@ -34,10 +34,10 @@ export function validateAnalysis(analysis) {
           }
         });
         if (
-          key === 'unfinished_zones' &&
+          (key === 'unfinished_zones' || key === 'gap_analysis') &&
           (!item.start_point || !item.end_point)
         ) {
-          console.warn('Нехватка координат для unfinished_zones');
+          console.warn('Нехватка координат для ' + key);
         }
       });
     } else if (typeof value === 'object') {

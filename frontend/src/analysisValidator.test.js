@@ -26,3 +26,30 @@ describe('validateAnalysis unfinished_zones', () => {
     warn.mockRestore();
   });
 });
+
+describe('validateAnalysis gap_analysis', () => {
+  it('warns when coordinates missing', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    validateAnalysis({
+      gap_analysis: { gaps: [{ date: 'd', price_range: [1, 2] }], comment: '' }
+    });
+    expect(warn).toHaveBeenCalledWith('Нехватка координат для gap_analysis');
+    warn.mockRestore();
+  });
+
+  it('does not warn when coordinates present', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    validateAnalysis({
+      gap_analysis: {
+        gaps: [{
+          date: 'd',
+          start_point: { x: 1, y: 2 },
+          end_point: { x: 3, y: 4 }
+        }],
+        comment: ''
+      }
+    });
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});
