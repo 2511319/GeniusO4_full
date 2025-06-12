@@ -1,0 +1,79 @@
+// src/components/InsightsPanel.jsx
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Box, Typography, Divider } from '@mui/material';
+
+/**
+ * Панель Insights для прочих разделов анализа:
+ * indicators_analysis, volume_analysis, indicator_correlations,
+ * pivot_points, risk_management, feedback
+ */
+export default function InsightsPanel({ analysis }) {
+  // Пример вывода indicators_analysis как таблицы
+  const ia = analysis.indicators_analysis || {};
+  const va = analysis.volume_analysis || {};
+  const ic = analysis.indicator_correlations || {};
+  const pp = analysis.pivot_points || {};
+  const rm = analysis.risk_management || {};
+  const fb = analysis.feedback || {};
+
+  return (
+    <Box sx={{
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      width: 300,
+      maxHeight: '40%',
+      bgcolor: '#fafafa',
+      overflowY: 'auto',
+      p: 1,
+    }}>
+      <Typography variant="h6">Indicators Analysis</Typography>
+      {Object.entries(ia).map(([key, val]) => (
+        <Typography key={key} variant="body2">{key}: {val}</Typography>
+      ))}
+      <Divider sx={{ my: 1 }} />
+
+      <Typography variant="h6">Volume Analysis</Typography>
+      {va.volume_trends && <Typography variant="body2">{va.volume_trends}</Typography>}
+      {(va.significant_volume_changes || []).map((item,i) => (
+        <Typography key={i} variant="body2">
+          {item.date}: {item.explanation}
+        </Typography>
+      ))}
+      <Divider sx={{ my: 1 }} />
+
+      <Typography variant="h6">Indicator Correlations</Typography>
+      {ic.explanation && <Typography variant="body2">{ic.explanation}</Typography>}
+      <Divider sx={{ my: 1 }} />
+
+      <Typography variant="h6">Pivot Points</Typography>
+      {['daily','weekly','monthly'].map(ps => (
+        <Box key={ps}>
+          <Typography variant="subtitle2">{ps.toUpperCase()}</Typography>
+          {(pp[ps] || []).map((p,i) => (
+            <Typography key={i} variant="body2">
+              {p.date}: Pivot={p.pivot}, S1={p.support1}, R1={p.resistance1}
+            </Typography>
+          ))}
+        </Box>
+      ))}
+      <Divider sx={{ my: 1 }} />
+
+      <Typography variant="h6">Risk Management</Typography>
+      {(rm.rules || []).map((rule,i) => (
+        <Typography key={i} variant="body2">{rule}</Typography>
+      ))}
+      <Divider sx={{ my: 1 }} />
+
+      <Typography variant="h6">Feedback</Typography>
+      {fb.note && <Typography variant="body2">{fb.note}</Typography>}
+      {fb.suggestions && <Typography variant="body2">{fb.suggestions}</Typography>}
+    </Box>
+  );
+}
+
+InsightsPanel.propTypes = {
+  analysis: PropTypes.object.isRequired,
+};

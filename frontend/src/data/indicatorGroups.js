@@ -20,28 +20,28 @@ export const overlays = [
   'Ichimoku_Conversion_Line',
   'Ichimoku_Base_Line',
   'Ichimoku_A',
-  'Ichimoku_B'
+  'Ichimoku_B',
 ];
 
 export const volume = [
   'Volume',
-  'OBV'
+  'OBV',
 ];
 
 export const momentum = [
   'RSI',
   'Stochastic_Oscillator',
-  'Williams_%R'
+  'Williams_%R',
 ];
 
 export const volatility = [
-  'ATR'
+  'ATR',
 ];
 
 export const macd = [
   'MACD',
   'MACD_signal',
-  'MACD_hist'
+  'MACD_hist',
 ];
 
 export const modelAnalysis = [
@@ -54,16 +54,16 @@ export const modelAnalysis = [
   'gap_analysis',
   'structural_edge',
   'candlestick_patterns',
-  'divergence_analysis'
+  'divergence_analysis',
 ];
 
 export const forecast = [
   'price_prediction',
-  'recommendations'
+  'recommendations',
 ];
 
 /**
- * Для удобства импорта можно собрать всё в один объект:
+ * Экспорт всех групп для удобного импорта
  */
 export default {
   overlays,
@@ -72,5 +72,5 @@ export default {
   volatility,
   macd,
   modelAnalysis,
-  forecast
+  forecast,
 };

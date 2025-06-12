@@ -1,110 +1,127 @@
-// src/utils/chartUtils.js
 
-/**
- * Heikin-Ashi candles
- * @param {Array<{time, open, high, low, close}>} candles
- * @returns {Array<{time, open, high, low, close}>}
- */
-export function computeHeikinAshi(candles) {
-  if (!candles?.length) return [];
-  const ha = [];
-  candles.forEach((c, idx) => {
-    const closeHA = (c.open + c.high + c.low + c.close) / 4;
-    let openHA;
-    if (idx === 0) {
-      openHA = (c.open + c.close) / 2;
-    } else {
-      const prev = ha[idx - 1];
-      openHA = (prev.open + prev.close) / 2;
-    }
-    const highHA = Math.max(c.high, openHA, closeHA);
-    const lowHA  = Math.min(c.low, openHA, closeHA);
-    ha.push({ time: c.time, open: openHA, high: highHA, low: lowHA, close: closeHA });
-  });
-  return ha;
+export function computeHeikinAshi(raw) {
+  if (!raw?.length) return [];
+  const res = [];
+  for (let i = 0; i < raw.length; i++) {
+    const prev = res[i - 1] || raw[i];
+    const cur  = raw[i];
+    const close = (cur.open + cur.high + cur.low + cur.close) / 4;
+    const open  = (prev.open + prev.close) / 2;
+    const high  = Math.max(cur.high, open, close);
+    const low   = Math.min(cur.low, open, close);
+    res.push({ time: cur.time, open, high, low, close });
+  }
+  return res;
 }
 
-/**
- * Очень упрощённый Renko-алгоритм: размер кирпича = avgATR × factor (default 2).
- * @param {Array<{time, open, high, low, close}>} candles
- * @param {string} resolution      // '1m','1h','1d' — пока не используется
- * @param {number} factor          // multiplier to ATR
- * @returns {Array<{time, open, high, low, close}>}
- */
-export function computeRenko(candles, resolution, factor = 2) {
-  if (!candles?.length) return [];
-
-  // расчёт среднего ATR за последние 14 свечей
-  const atr14 =
-    candles
-      .slice(-15)
-      .reduce(
-        (s, c, i, arr) =>
-          i === 0 ? 0 : s + Math.max(c.high - c.low, Math.abs(c.high - arr[i - 1].close), Math.abs(c.low - arr[i - 1].close)),
-        0
-      ) / 14 || 1;
-
-  const brick = atr14 * factor;
-
-  const renko = [];
-  let lastClose = candles[0].close;
-  candles.forEach((c) => {
-    while (Math.abs(c.close - lastClose) >= brick) {
-      const direction = c.close > lastClose ? 1 : -1;
-      const newClose  = lastClose + direction * brick;
-      renko.push({
-        time: c.time,
-        open: lastClose,
-        close: newClose,
-        high: Math.max(lastClose, newClose),
-        low: Math.min(lastClose, newClose),
+export function computeRenko(raw, brick = 0.5) {
+  if (!raw?.length) return [];
+  const res = [];
+  let lastClose = raw[0].close;
+  let lastTime  = raw[0].time;
+  for (const c of raw) {
+    const diff = c.close - lastClose;
+    const bricks = Math.floor(Math.abs(diff) / brick);
+    for (let i = 0; i < bricks; i++) {
+      lastClose += Math.sign(diff) * brick;
+      res.push({
+        time: lastTime + i, // псевдо-время
+        open: lastClose - Math.sign(diff) * brick,
+        close: lastClose,
+        high: Math.max(lastClose, lastClose - Math.sign(diff) * brick),
+        low:  Math.min(lastClose, lastClose - Math.sign(diff) * brick),
       });
-      lastClose = newClose;
     }
-  });
-  return renko;
+    lastTime = c.time;
+  }
+  return res;
 }
 
-/* ==================================================================== */
-/* Заглушки-детекторы — чтоб импорт существовал (можно доработать позже) */
-/* ==================================================================== */
-
-/**
- * Находит простые уровни поддержки/сопротивления
- * @param {Array<{time, close}>} candles
- * @returns {Array<{level:number,count:number}>}
- */
-export function findSRLevels(candles) {
-  if (!candles?.length) return [];
-  const levels = {};
-  candles.forEach((c) => {
-    const rounded = Math.round(c.close / 10) * 10; // округляем до «десятки»
-    levels[rounded] = (levels[rounded] || 0) + 1;
-  });
-  return Object.entries(levels)
-    .filter(([, cnt]) => cnt > 2)
-    .map(([level, count]) => ({ level: Number(level), count }));
+export function findSRLevels(data, depth = 14) {
+  const out = [];
+  for (let i = depth; i < data.length - depth; i++) {
+    const slice = data.slice(i - depth, i + depth);
+    const highs = slice.map((d) => d.high);
+    const lows  = slice.map((d) => d.low);
+    const curH  = data[i].high;
+    const curL  = data[i].low;
+    if (curH === Math.max(...highs))
+      out.push({ price: curH, type: 'resistance', time: data[i].time });
+    if (curL === Math.min(...lows))
+      out.push({ price: curL, type: 'support', time: data[i].time });
+  }
+  /* фильтр дублей ±0.1% */
+  return out.reduce((acc, lvl) => {
+    if (!acc.find((l) => Math.abs(l.price - lvl.price) / lvl.price < 0.001))
+      acc.push(lvl);
+    return acc;
+  }, []);
 }
 
-/**
- * Находит простые трендовые линии (по двум крайним экстремумам)
- * @param {Array<{time, high, low}>} candles
- * @returns {Array<{start_point:{date,price},end_point:{date,price},type}>}
- */
-export function findTrendLines(candles) {
-  if (candles.length < 2) return [];
-  const first = candles[0];
-  const last  = candles[candles.length - 1];
-  return [
-    {
-      start_point: { date: first.time, price: first.low },
-      end_point:   { date: last.time,  price: last.low },
-      type: 'ascending',
-    },
-    {
-      start_point: { date: first.time, price: first.high },
-      end_point:   { date: last.time,  price: last.high },
-      type: 'descending',
-    },
-  ];
+export function findTrendLines(data, minPoints = 3) {
+  if (!Array.isArray(data) || data.length < minPoints) return [];
+  const lines = [];
+
+  const pushLine = (arr, type, start, end, key) => {
+    if (end - start + 1 >= minPoints) {
+      lines.push({
+        type,
+        from: { time: data[start].time, price: data[start][key] },
+        to: { time: data[end].time, price: data[end][key] }
+      });
+    }
+  };
+
+  let startLow = 0;
+  for (let i = 1; i < data.length; i++) {
+    if (data[i].low > data[i - 1].low) continue;
+    pushLine(lines, 'support', startLow, i - 1, 'low');
+    startLow = i;
+  }
+  pushLine(lines, 'support', startLow, data.length - 1, 'low');
+
+  let startHigh = 0;
+  for (let i = 1; i < data.length; i++) {
+    if (data[i].high < data[i - 1].high) continue;
+    pushLine(lines, 'resistance', startHigh, i - 1, 'high');
+    startHigh = i;
+  }
+  pushLine(lines, 'resistance', startHigh, data.length - 1, 'high');
+
+  return lines;
+}
+
+export function parseOhlc(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((d) => {
+    const { 'Open Time': openTime, Open, High, Low, Close, ...rest } = d;
+    return {
+      time: Math.floor(new Date(openTime).getTime() / 1000),
+      open: Number(Open),
+      high: Number(High),
+      low: Number(Low),
+      close: Number(Close),
+      ...rest,
+    };
+  });
+}
+
+export function parsePatterns(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(({ date, price, type }) => ({
+    time: Math.floor(new Date(date).getTime() / 1000),
+    price: Number(price),
+    type,
+  }));
+}
+
+export function parseVirtualCandles(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(({ date, open, high, low, close }) => ({
+    time: Math.floor(new Date(date).getTime() / 1000),
+    open: Number(open),
+    high: Number(high),
+    low: Number(low),
+    close: Number(close)
+  }));
 }
