@@ -1,40 +1,58 @@
 import React, { useEffect, useRef } from 'react';
-import { Box } from '@mui/material';
+import PropTypes from 'prop-types';
 import { createChart } from 'lightweight-charts';
 
-export default function MACDPanel({ data = [] }) {
-  const ref = useRef();
+/**
+ * MACDPanel рендерит:
+ * - MACD Line
+ * - Signal Line
+ * - Histogram
+ *
+ * Props:
+ * - macd:        Array<{ time: string|number, value: number }>
+ * - signal:      Array<{ time: string|number, value: number }>
+ * - histogram:   Array<{ time: string|number, value: number }>
+ */
+export default function MACDPanel({ macd, signal, histogram }) {
+  const containerRef = useRef();
+
   useEffect(() => {
-    if (!ref.current) return;
-    ref.current.innerHTML = '';
-    const chart = createChart(ref.current, {
+    const chart = createChart(containerRef.current, {
+      width: containerRef.current.clientWidth,
       height: 120,
-      layout: { background: { color: '#121212' }, textColor: '#c7c7c7' },
-      grid: { vertLines: { color: '#2a2a2a' }, horzLines: { color: '#2a2a2a' } },
-      width: ref.current.clientWidth,
-      localization: { locale: 'ru-RU' },
+      layout: { backgroundColor: '#fff', textColor: '#000' },
+      grid: { vertLines: { visible: false }, horzLines: { color: '#eee' } },
+      rightPriceScale: { scaleMargins: { top: 0.3, bottom: 0 } },
+      timeScale: { timeVisible: true },
     });
-    if (data[0] && data[0].MACD !== undefined) {
-      const macd = chart.addLineSeries({ color: '#2196f3' });
-      macd.applyOptions({ priceFormat: { type: 'none' } });
-      macd.setData(data.map((d) => ({ time: d.time, value: d.MACD })));
-    }
-    if (data[0] && data[0].MACD_signal !== undefined) {
-      const signal = chart.addLineSeries({ color: '#ff9800' });
-      signal.applyOptions({ priceFormat: { type: 'none' } });
-      signal.setData(data.map((d) => ({ time: d.time, value: d.MACD_signal })));
-    }
-    if (data[0] && data[0].MACD_hist !== undefined) {
-      const hist = chart.addHistogramSeries({ color: '#9c27b0' });
-      hist.applyOptions({ priceFormat: { type: 'none' } });
-      hist.setData(data.map((d) => ({ time: d.time, value: d.MACD_hist })));
-    }
-    chart.timeScale().fitContent();
-    const resize = () => chart.resize(ref.current.clientWidth, 120);
-    window.addEventListener('resize', resize);
+
+    // MACD Line
+    const macdSeries = chart.addLineSeries({ color: '#007aff', lineWidth: 2 });
+    macdSeries.setData(macd);
+
+    // Signal Line
+    const signalSeries = chart.addLineSeries({ color: '#ff3b30', lineWidth: 1 });
+    signalSeries.setData(signal);
+
+    // Histogram
+    const histSeries = chart.addHistogramSeries({
+      priceFormat: { type: 'volume' },
+      priceScaleId: '',
+      scaleMargins: { top: 0.7, bottom: 0 },
+      color: (hist) => (hist.value >= 0 ? 'rgba(0,200,0,0.5)' : 'rgba(200,0,0,0.5)'),
+    });
+    histSeries.setData(histogram);
+
     return () => {
-      window.removeEventListener('resize', resize);
+      chart.remove();
     };
-  }, [data]);
-  return <Box ref={ref} sx={{ height: 120 }} className="chart-panel" />;
+  }, [macd, signal, histogram]);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 120 }} />;
 }
+
+MACDPanel.propTypes = {
+  macd: PropTypes.array.isRequired,
+  signal: PropTypes.array.isRequired,
+  histogram: PropTypes.array.isRequired,
+};

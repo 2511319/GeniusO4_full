@@ -1,28 +1,77 @@
 import React, { useEffect, useRef } from 'react';
-import { Box } from '@mui/material';
+import PropTypes from 'prop-types';
 import { createChart } from 'lightweight-charts';
 
-export default function VolumePanel({ data = [] }) {
-  const ref = useRef();
+/**
+ * VolumePanel рендерит два графика:
+ * 1. Гистограмма объёма торгов (volumeData)
+ * 2. Линейный график OBV (obvData)
+ *
+ * Props:
+ * - volumeData: Array<{ time: string|number, value: number, color?: string }>
+ * - obvData:    Array<{ time: string|number, value: number }>
+ */
+export default function VolumePanel({ volumeData, obvData }) {
+  const containerRef = useRef();
+  const obvRef = useRef();
+  const volumeRef = useRef();
+  const chartRef = useRef();
+
   useEffect(() => {
-    if (!ref.current) return;
-    ref.current.innerHTML = '';
-    const chart = createChart(ref.current, {
-      height: 100,
-      layout: { background: { color: '#121212' }, textColor: '#c7c7c7' },
-      grid: { vertLines: { color: '#2a2a2a' }, horzLines: { color: '#2a2a2a' } },
-      width: ref.current.clientWidth,
-      localization: { locale: 'ru-RU' },
+    // Создаём один общий chart, но для гистограммы и линии используем разные priceScaleId или создаём два chart
+    chartRef.current = createChart(containerRef.current, {
+      width: containerRef.current.clientWidth,
+      height: 160,
+      layout: { backgroundColor: '#ffffff', textColor: '#000000' },
+      grid: { vertLines: { visible: false }, horzLines: { color: '#eee' } },
+      rightPriceScale: { scaleMargins: { top: 0.3, bottom: 0 } },
+      timeScale: { timeVisible: true, secondsVisible: false },
     });
-    const series = chart.addHistogramSeries({ color: '#4caf50' });
-    series.applyOptions({ priceFormat: { type: 'none' } });
-    series.setData(data.map((d) => ({ time: d.time, value: d.Volume })));
-    chart.timeScale().fitContent();
-    const resize = () => chart.resize(ref.current.clientWidth, 100);
-    window.addEventListener('resize', resize);
+
+    // Гистограмма объёма
+    volumeRef.current = chartRef.current.addHistogramSeries({
+      priceScaleId: '',
+      scaleMargins: { top: 0.7, bottom: 0 },
+    });
+    volumeRef.current.setData(volumeData);
+
+    // OBV линия
+    obvRef.current = chartRef.current.addLineSeries({
+      priceFormat: { type: 'volume' },
+      lineWidth: 1,
+      color: '#1976d2',
+    });
+    obvRef.current.setData(obvData);
+
     return () => {
-      window.removeEventListener('resize', resize);
+      chartRef.current.remove();
     };
-  }, [data]);
-  return <Box ref={ref} sx={{ height: 100 }} className="chart-panel" />;
+  }, []);
+
+  // Обновление данных
+  useEffect(() => {
+    if (volumeRef.current) volumeRef.current.setData(volumeData);
+  }, [volumeData]);
+
+  useEffect(() => {
+    if (obvRef.current) obvRef.current.setData(obvData);
+  }, [obvData]);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 160 }} />;
 }
+
+VolumePanel.propTypes = {
+  volumeData: PropTypes.arrayOf(
+    PropTypes.shape({
+      time: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      value: PropTypes.number.isRequired,
+      color: PropTypes.string,
+    })
+  ).isRequired,
+  obvData: PropTypes.arrayOf(
+    PropTypes.shape({
+      time: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      value: PropTypes.number.isRequired,
+    })
+  ).isRequired,
+};

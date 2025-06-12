@@ -1,34 +1,86 @@
 import React, { useEffect, useRef } from 'react';
-import { Box } from '@mui/material';
+import PropTypes from 'prop-types';
 import { createChart } from 'lightweight-charts';
 
-const OSC_FIELDS = ['RSI', 'Stochastic_Oscillator', 'Williams_%R', 'OBV'];
+/**
+ * OscillatorsPanel рендерит три осциллятора:
+ * - RSI
+ * - Stochastic (%K и %D)
+ * - Williams %R
+ *
+ * Каждый осциллятор в своей панели.
+ *
+ * Props:
+ * - rsi:        Array<{ time: string|number, value: number }>
+ * - stochastic: { k: Array<{ time, value }>, d: Array<{ time, value }> }
+ * - williams:   Array<{ time: string|number, value: number }>
+ */
+export default function OscillatorsPanel({ rsi, stochastic, williams }) {
+  const rsiRef = useRef();
+  const stoRef = useRef();
+  const wilRef = useRef();
 
-export default function OscillatorsPanel({ data = [], layers = [] }) {
-  const ref = useRef();
   useEffect(() => {
-    if (!ref.current) return;
-    ref.current.innerHTML = '';
-    const chart = createChart(ref.current, {
+    // RSI chart
+    rsiRef.current = createChart(document.getElementById('rsi-chart'), {
+      width: document.getElementById('rsi-chart').clientWidth,
       height: 120,
-      layout: { background: { color: '#121212' }, textColor: '#c7c7c7' },
-      grid: { vertLines: { color: '#2a2a2a' }, horzLines: { color: '#2a2a2a' } },
-      width: ref.current.clientWidth,
-      localization: { locale: 'ru-RU' },
+      layout: { backgroundColor: '#fff', textColor: '#000' },
+      rightPriceScale: { scaleMargins: { top: 0.3, bottom: 0 } },
+      timeScale: { timeVisible: true },
     });
-    const colors = ['#ff9800', '#2196f3', '#9c27b0', '#009688'];
-    OSC_FIELDS.forEach((name, idx) => {
-      if (!layers.includes(name) || !data[0] || data[0][name] === undefined) return;
-      const series = chart.addLineSeries({ color: colors[idx % colors.length] });
-      series.applyOptions({ priceFormat: { type: 'none' } });
-      series.setData(data.map((d) => ({ time: d.time, value: d[name] })));
+    const rsiSeries = rsiRef.current.addLineSeries({ color: '#ff5722' });
+    rsiSeries.setData(rsi);
+    rsiRef.current.applyOptions({
+      layout: { backgroundColor: '#f9f9f9' },
+      grid: { horzLines: { color: '#eee' } },
     });
-    chart.timeScale().fitContent();
-    const resize = () => chart.resize(ref.current.clientWidth, 120);
-    window.addEventListener('resize', resize);
+
+    // Stochastic chart
+    stoRef.current = createChart(document.getElementById('sto-chart'), {
+      width: document.getElementById('sto-chart').clientWidth,
+      height: 120,
+      layout: { backgroundColor: '#fff', textColor: '#000' },
+      rightPriceScale: { scaleMargins: { top: 0.3, bottom: 0 } },
+      timeScale: { timeVisible: true },
+    });
+    const kSeries = stoRef.current.addLineSeries({ color: '#2962ff' });
+    const dSeries = stoRef.current.addLineSeries({ color: '#c62828' });
+    kSeries.setData(stochastic.k);
+    dSeries.setData(stochastic.d);
+
+    // Williams chart
+    wilRef.current = createChart(document.getElementById('wil-chart'), {
+      width: document.getElementById('wil-chart').clientWidth,
+      height: 120,
+      layout: { backgroundColor: '#fff', textColor: '#000' },
+      rightPriceScale: { scaleMargins: { top: 0.3, bottom: 0 } },
+      timeScale: { timeVisible: true },
+    });
+    const wilSeries = wilRef.current.addLineSeries({ color: '#00796b' });
+    wilSeries.setData(williams);
+
     return () => {
-      window.removeEventListener('resize', resize);
+      rsiRef.current.remove();
+      stoRef.current.remove();
+      wilRef.current.remove();
     };
-  }, [data, layers]);
-  return <Box ref={ref} sx={{ height: 120 }} className="chart-panel" />;
+  }, [rsi, stochastic, williams]);
+
+  return (
+    <div style={{ width: '100%' }}>
+      <div id="rsi-chart" style={{ marginBottom: 8 }} />
+      <div id="sto-chart" style={{ marginBottom: 8 }} />
+      <div id="wil-chart" />
+    </div>
+  );
 }
+
+OscillatorsPanel.propTypes = {
+  rsi: PropTypes.array.isRequired,
+  stochastic: PropTypes.shape({
+    k: PropTypes.array.isRequired,
+    d: PropTypes.array.isRequired,
+  }).isRequired,
+  williams: PropTypes.array.isRequired,
+};

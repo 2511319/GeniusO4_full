@@ -1,65 +1,108 @@
+// src/data/analysisValidator.js
+
+/**
+ * Проверяет структуру JSON-ответа от модели.
+ * Для каждого раздела из списка sectionRequirements убеждается,
+ * что присутствуют все необходимые поля.
+ * В случае отсутствия — выводит console.warn, но не бросает ошибку.
+ */
+
+const sectionRequirements = {
+  // Primary analysis
+  primary_analysis: ['global_trend', 'local_trend', 'patterns', 'anomalies'],
+
+  // Confidence
+  confidence_in_trading_decisions: ['level', 'reason'],
+
+  // Model Analysis layers
+  support_resistance_levels: ['date', 'level', 'explanation'],
+  trend_lines: ['start_point', 'end_point', 'explanation'],
+  fibonacci_analysis: ['start_point', 'end_point', 'levels', 'explanation'],
+  unfinished_zones: ['start_point', 'end_point', 'explanation'],
+  imbalances: ['start_point', 'end_point', 'explanation'],
+  fair_value_gaps: ['start_point', 'end_point', 'explanation'],
+  gap_analysis: ['gaps'],  // специальная обработка ниже
+  structural_edge: ['date', 'price', 'explanation'],
+  candlestick_patterns: ['date', 'type', 'explanation'],
+  divergence_analysis: ['indicator', 'type', 'date', 'explanation'],
+
+  // Other analysis sections
+  pivot_points: ['daily', 'weekly', 'monthly'],
+  indicators_analysis: [],        // произвольная структура, просто проверяем наличие
+  volume_analysis: ['volume_trends', 'significant_volume_changes'],
+  indicator_correlations: ['correlations', 'explanation'],
+  psychological_levels: ['level', 'date', 'type', 'explanation'],
+  extended_ichimoku_analysis: ['details'],
+  volatility_by_intervals: ['intervals'],
+  anomalous_candles: ['date', 'price', 'explanation'],
+
+  // Forecast & Recommendations
+  price_prediction: ['virtual_candles'],
+  recommendations: ['recommendations'],
+
+  // Risk & Feedback
+  risk_management: ['rules'],
+  feedback: ['note', 'model_configuration', 'missed_data', 'issues_encountered', 'suggestions']
+};
+
+/**
+ * Основная функция валидации.
+ * @param {object} analysis — распарсенный JSON-ответ модели.
+ */
 export function validateAnalysis(analysis) {
-  if (!analysis || typeof analysis !== 'object') return;
+  Object.entries(sectionRequirements).forEach(([sectionName, requiredFields]) => {
+    const sectionData = analysis[sectionName];
 
-  const sections = {
-    primary_analysis: ['global_trend', 'local_trend', 'patterns', 'anomalies'],
-    unfinished_zones: ['type', 'level', 'date'],
-    imbalances: ['type', 'start_point', 'end_point', 'price_range'],
-    fibonacci_analysis: ['based_on_local_trend', 'based_on_global_trend'],
-    elliott_wave_analysis: ['current_wave', 'wave_count', 'forecast'],
-    structural_edge: ['type', 'date', 'price'],
-    candlestick_patterns: ['type'],
-    divergence_analysis: ['indicator', 'type', 'date'],
-    fair_value_gaps: ['date', 'price_range'],
-    gap_analysis: ['gaps', 'comment'],
-    psychological_levels: ['levels'],
-    anomalous_candles: ['date', 'type', 'price'],
-    price_prediction: ['forecast', 'virtual_candles'],
-    recommendations: ['trading_strategies'],
-  };
+    if (sectionData == null) {
+      console.warn(`Missing section: ${sectionName}`);
+      return;
+    }
 
-  for (const [key, fields] of Object.entries(sections)) {
-    const value = analysis[key];
-    if (!value) continue;
-
-    if (Array.isArray(value)) {
-      value.forEach((item, i) => {
-        if (typeof item !== 'object') {
-          console.warn(`Раздел ${key}: запись ${i} имеет некорректный формат`);
-          return;
-        }
-        fields.forEach((f) => {
-          if (!(f in item)) {
-            console.warn(`Раздел ${key}: запись ${i} отсутствует поле ${f}`);
-          }
-        });
-        if (
-          (key === 'unfinished_zones' || key === 'gap_analysis') &&
-          (!item.start_point || !item.end_point)
-        ) {
-          console.warn('Нехватка координат для ' + key);
-        }
-      });
-    } else if (typeof value === 'object') {
-      fields.forEach((f) => {
-        if (!(f in value)) {
-          console.warn(`Раздел ${key}: отсутствует поле ${f}`);
-        }
-      });
-      if (key === 'unfinished_zones' && (!value.start_point || !value.end_point)) {
-        console.warn('Нехватка координат для unfinished_zones');
-      }
-      if (key === 'gap_analysis' && Array.isArray(value.gaps)) {
-        value.gaps.forEach((gap, i) => {
-          if (!gap.date) {
-            console.warn(`gap_analysis: запись ${i} не содержит временной границы`);
-          }
+    // Специальная обработка gap_analysis
+    if (sectionName === 'gap_analysis') {
+      if (!Array.isArray(sectionData.gaps)) {
+        console.warn(`gap_analysis.gaps should be an array`);
+      } else {
+        sectionData.gaps.forEach((gap, idx) => {
+          // Проверяем, что в каждом gap есть хотя бы поля start_point либо date/price_range
           if (!gap.start_point || !gap.end_point) {
-            console.warn('Нехватка координат для gap_analysis');
+            console.warn(`gap_analysis.gaps[${idx}] missing start_point/end_point`);
+          }
+          if (!gap.explanation) {
+            console.warn(`gap_analysis.gaps[${idx}] missing explanation`);
           }
         });
+      }
+      return;
+    }
+
+    // Массивы объектов
+    if (Array.isArray(sectionData)) {
+      sectionData.forEach((item, idx) => {
+        requiredFields.forEach(field => {
+          if (!(field in item)) {
+            console.warn(`${sectionName}[${idx}] missing field: ${field}`);
+          }
+        });
+      });
+    }
+    // Объект с вложенными разделами (pivot_points, indicators_analysis и др.)
+    else if (typeof sectionData === 'object') {
+      // Если нет конкретных requiredFields — просто проверяем наличие секции
+      if (requiredFields.length === 0) {
+        return;
+      }
+      requiredFields.forEach(field => {
+        if (!(field in sectionData)) {
+          console.warn(`${sectionName} missing field: ${field}`);
+        }
+      });
+    }
+    // Иные типы (строки, числа) — проверяем прямо
+    else {
+      if (requiredFields.length > 0) {
+        console.warn(`${sectionName} expected keys ${requiredFields.join(', ')}, but got primitive`);
       }
     }
-  }
+  });
 }
-

@@ -1,92 +1,112 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Tabs, Tab, TextField, Typography
-} from '@mui/material';
+// src/components/CommentsPanel.jsx
 
-function a11yProps(index) {
-  return {
-    id: `comments-tab-${index}`,
-    'aria-controls': `comments-tabpanel-${index}`,
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Box, Tabs, Tab, Typography, Divider } from '@mui/material';
+
+/**
+ * CommentsPanel отображает два таба:
+ * 1. Primary Analysis — тексты глобального/локального тренда, паттернов и аномалий.
+ * 2. Explanation — объяснения (explanation) для каждого активного слоя.
+ *
+ * Props:
+ * - analysis: объект с распаршенным JSON-ответом модели.
+ * - activeLayers: массив строк — ключи тех слоёв, которые включены пользователем.
+ */
+export default function CommentsPanel({ analysis, activeLayers }) {
+  const [tabIndex, setTabIndex] = React.useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setTabIndex(newValue);
   };
-}
 
-export default function CommentsPanel({ analysis, layers = [] }) {
-  const [value, setValue] = useState(0);
-  const [layerExplanations, setLayerExplanations] = useState([]);
-
-  const primary = analysis?.primary_analysis || {};
-
-  useEffect(() => {
-    if (!Array.isArray(layers)) return;
-
-    const items = layers
-      .map((layer) => {
-        const layerData = analysis?.[layer];
-        let explanation;
-        if (Array.isArray(layerData)) {
-          explanation = layerData
-            .map((item) => item?.explanation)
-            .filter(Boolean)
-            .join('\n');
-        } else {
-          explanation = layerData?.explanation;
-        }
-
-        return explanation ? { layerName: layer, explanation } : null;
-      })
-      .filter(Boolean);
-
-    setLayerExplanations(items);
-  }, [analysis, layers]);
+  // Primary analysis and confidence
+  const primary = analysis.primary_analysis || {};
+  const confidence = analysis.confidence_in_trading_decisions || {};
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Tabs value={value} onChange={(e, val) => setValue(val)} aria-label="comments tabs">
-        <Tab label="Primary" {...a11yProps(0)} />
-        <Tab label="Explanation" {...a11yProps(1)} />
+    <Box sx={{ width: '100%', bgcolor: 'background.paper', height: '100%', overflowY: 'auto' }}>
+      {/* Confidence header */}
+      <Box sx={{ p: 2 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          Confidence: {confidence.level || 'N/A'}
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          {confidence.reason || ''}
+        </Typography>
+      </Box>
+      <Divider />
+
+      {/* Tabs */}
+      <Tabs value={tabIndex} onChange={handleTabChange} aria-label="Comments tabs">
+        <Tab label="Primary Analysis" />
+        <Tab label="Explanation" />
       </Tabs>
-      {value === 0 && (
-        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            label="Глобальный тренд"
-            multiline
-            minRows={2}
-            value={primary.global_trend || ''}
-            InputProps={{ readOnly: true }}
-          />
-          <TextField
-            label="Локальный тренд"
-            multiline
-            minRows={2}
-            value={primary.local_trend || ''}
-            InputProps={{ readOnly: true }}
-          />
-          <TextField
-            label="Паттерны"
-            multiline
-            minRows={2}
-            value={primary.patterns || ''}
-            InputProps={{ readOnly: true }}
-          />
-          <TextField
-            label="Аномалии"
-            multiline
-            minRows={2}
-            value={primary.anomalies || ''}
-            InputProps={{ readOnly: true }}
-          />
+
+      {/* Primary Analysis Tab */}
+      {tabIndex === 0 && (
+        <Box sx={{ p: 2 }}>
+          {primary.global_trend && (
+            <>
+              <Typography variant="h6">Global Trend</Typography>
+              <Typography variant="body2" paragraph>{primary.global_trend}</Typography>
+            </>
+          )}
+          {primary.local_trend && (
+            <>
+              <Typography variant="h6">Local Trend</Typography>
+              <Typography variant="body2" paragraph>{primary.local_trend}</Typography>
+            </>
+          )}
+          {primary.patterns && (
+            <>
+              <Typography variant="h6">Patterns</Typography>
+              <Typography variant="body2" paragraph>{primary.patterns}</Typography>
+            </>
+          )}
+          {primary.anomalies && (
+            <>
+              <Typography variant="h6">Anomalies</Typography>
+              <Typography variant="body2" paragraph>{primary.anomalies}</Typography>
+            </>
+          )}
         </Box>
       )}
-      {value === 1 && (
+
+      {/* Explanation Tab */}
+      {tabIndex === 1 && (
         <Box sx={{ p: 2 }}>
-          {layerExplanations.map((item) => (
-            <Box key={item.layerName} sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
-              <Typography variant="subtitle1">{item.layerName}</Typography>
-              <Typography variant="body2">{item.explanation}</Typography>
-            </Box>
-          ))}
+          {activeLayers.map((layerKey) => {
+            const section = analysis[layerKey];
+            const explanation = section?.explanation;
+            if (!explanation) return null;
+
+            // Human-readable layer name (e.g. convert snake_case to Title Case)
+            const title = layerKey
+              .split('_')
+              .map(word => word[0].toUpperCase() + word.slice(1))
+              .join(' ');
+
+            return (
+              <Box key={layerKey} sx={{ mb: 3 }}>
+                <Typography variant="h6">{title}</Typography>
+                <Typography variant="body2">{explanation}</Typography>
+              </Box>
+            );
+          })}
+          {/* Если нет ни одного explanation */}
+          {activeLayers.every(key => !analysis[key]?.explanation) && (
+            <Typography variant="body2" color="textSecondary">
+              No explanations available for the selected indicators.
+            </Typography>
+          )}
         </Box>
       )}
     </Box>
   );
 }
+
+CommentsPanel.propTypes = {
+  analysis: PropTypes.object.isRequired,
+  activeLayers: PropTypes.arrayOf(PropTypes.string).isRequired,
+};
