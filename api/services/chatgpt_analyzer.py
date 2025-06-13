@@ -84,15 +84,17 @@ class ChatGPTAnalyzer:
             return text[start:end]
         return ""
 
-    def analyze(self, analysis_results: Dict[str, Any]) -> Dict[str, Any]:
+    def analyze(self, analysis_results: Dict[str, Any]) -> tuple[Dict[str, Any], bool]:
         """
         Выполняет анализ данных с помощью ChatGPT.
+        Возвращает кортеж (данные_анализа, флаг_ошибки).
+        Если полученный JSON некорректен, флаг_ошибки = True.
         """
         try:
             prompt = self.construct_prompt(analysis_results)
             if not prompt:
                 logger.warning("Промпт пустой, анализ не выполнен.")
-                return {}
+                return {}, True
 
             # Отправка запроса в модель
             response = self.client.chat.completions.create(
@@ -134,23 +136,23 @@ class ChatGPTAnalyzer:
                         self.save_response(analysis_data)
 
                     logger.info("Анализ данных выполнен успешно.")
-                    return analysis_data
+                    return analysis_data, False
                 except json.JSONDecodeError:
                     logger.error("Извлечённый JSON некорректен.")
                     with open("invalid_chatgpt_response.txt", "w", encoding="utf-8") as iv:
                         iv.write(answer)
                     logger.info("Невалидный ответ ChatGPT сохранён в invalid_chatgpt_response.txt.")
-                    return {}
+                    return {}, True
             else:
                 logger.error("Ответ ChatGPT не содержит валидного JSON.")
                 with open("invalid_chatgpt_response.txt", "w", encoding="utf-8") as iv:
                     iv.write(answer)
                 logger.info("Невалидный ответ ChatGPT сохранён в invalid_chatgpt_response.txt.")
-                return {}
+                return {}, True
 
         except Exception as e:
             logger.error(f"Ошибка при анализе данных с помощью ChatGPT: {e}")
-            return {}
+            return {}, True
 
     def save_response(
         self,

@@ -27,6 +27,7 @@ class AnalyzeResponse(BaseModel):
     analysis: dict
     ohlc: List[dict]
     indicators: List[str]
+    invalid_chatgpt_response: bool = False
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
@@ -65,7 +66,8 @@ async def analyze(req: AnalyzeRequest):
 
     # 3. Анализ ChatGPT
     analyzer = ChatGPTAnalyzer()
-    analysis = analyzer.analyze({"ohlc": ohlc}) or {}
+    analysis, invalid = analyzer.analyze({"ohlc": ohlc})
+    analysis = analysis or {}
     analysis["divergence_analysis"] = divergences
     analysis["candlestick_patterns"] = patterns
 
@@ -73,4 +75,5 @@ async def analyze(req: AnalyzeRequest):
         analysis=analysis,
         ohlc=ohlc,
         indicators=indicator_cols,
+        invalid_chatgpt_response=invalid,
     )

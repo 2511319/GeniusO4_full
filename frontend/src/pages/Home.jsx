@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import { Snackbar, Alert } from '@mui/material';
 import { parseOhlc } from '../utils/chartUtils';
 
 import IndicatorsSidebar from '../components/IndicatorsSidebar';
@@ -33,6 +34,7 @@ export default function Home() {
   const [chartType, setChartType]       = useState('candles');
   const [resolution, setResolution]     = useState('1D');
   const [legendMeta, setLegendMeta]     = useState([]);
+  const [errorOpen, setErrorOpen]       = useState(false);
 
   const token = useSelector(state => state.auth.token);
 
@@ -43,6 +45,10 @@ export default function Home() {
       interval: intervalParam,
       limit: limitParam,
     }, { headers });
+
+    if (resp.data.invalid_chatgpt_response) {
+      setErrorOpen(true);
+    }
 
     const parsed = parseOhlc(resp.data.ohlc);
     const candles = parsed.map(({ time, open, high, low, close }) => ({
@@ -114,6 +120,7 @@ export default function Home() {
     setAnalysis(resp.data.analysis);
   };
   return (
+    <>
     <div style={{ display: 'flex', height: '100vh' }}>
       <IndicatorsSidebar
         activeLayers={activeLayers}
@@ -174,5 +181,16 @@ export default function Home() {
         </div>
       </div>
     </div>
+    <Snackbar
+      open={errorOpen}
+      autoHideDuration={6000}
+      onClose={() => setErrorOpen(false)}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+    >
+      <Alert severity="warning" onClose={() => setErrorOpen(false)} sx={{ width: '100%' }}>
+        Анализ не выполнен из-за некорректного ответа модели
+      </Alert>
+    </Snackbar>
+    </>
   );
 }
