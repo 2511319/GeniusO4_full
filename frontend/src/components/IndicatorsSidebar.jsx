@@ -10,6 +10,7 @@ import {
   Checkbox,
   FormControlLabel,
   Typography,
+  Box,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -35,7 +36,7 @@ export default function IndicatorsSidebar({ activeLayers, setActiveLayers }) {
   const renderGroup = (title, keys) => (
     <Accordion key={title} defaultExpanded>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography>{title}</Typography>
+        <Typography sx={{ mt: 1, mb: 1 }}>{title}</Typography>
       </AccordionSummary>
       <AccordionDetails>
         {keys.map(key => (
@@ -60,7 +61,7 @@ export default function IndicatorsSidebar({ activeLayers, setActiveLayers }) {
       anchor="left"
       sx={{ width: 240, flexShrink: 0 }}
     >
-      <div style={{ width: 240, paddingTop: 16 }}>
+      <Box sx={{ width: 240, pt: 2, p: 1, boxSizing: 'border-box' }}>
         {renderGroup('Overlays', overlays)}
         {renderGroup('Volume', volume)}
         {renderGroup('Momentum', momentum)}
@@ -68,7 +69,7 @@ export default function IndicatorsSidebar({ activeLayers, setActiveLayers }) {
         {renderGroup('MACD', macd)}
         {renderGroup('Model Analysis', modelAnalysis)}
         {renderGroup('Forecast', forecast)}
-      </div>
+      </Box>
     </Drawer>
   );
 }

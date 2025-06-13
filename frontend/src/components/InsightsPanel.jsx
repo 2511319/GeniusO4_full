@@ -25,8 +25,9 @@ export default function InsightsPanel({ analysis }) {
       bgcolor: '#fafafa',
       overflowY: 'auto',
       p: 1,
+      boxSizing: 'border-box',
     }}>
-      <Typography variant="h6">Indicators Analysis</Typography>
+      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Indicators Analysis</Typography>
       {Object.entries(ia).map(([key, val]) => (
         typeof val === 'object' && (
           <Box key={key} sx={{ mb: 1 }}>
@@ -41,7 +42,7 @@ export default function InsightsPanel({ analysis }) {
       ))}
       <Divider sx={{ my: 1 }} />
 
-      <Typography variant="h6">Volume Analysis</Typography>
+      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Volume Analysis</Typography>
       {va.volume_trends && <Typography variant="body2">{va.volume_trends}</Typography>}
       {(va.significant_volume_changes || []).map((item,i) => (
         <Typography key={i} variant="body2">
@@ -50,11 +51,11 @@ export default function InsightsPanel({ analysis }) {
       ))}
       <Divider sx={{ my: 1 }} />
 
-      <Typography variant="h6">Indicator Correlations</Typography>
+      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Indicator Correlations</Typography>
       {ic.explanation && <Typography variant="body2">{ic.explanation}</Typography>}
       <Divider sx={{ my: 1 }} />
 
-      <Typography variant="h6">Pivot Points</Typography>
+      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Pivot Points</Typography>
       {['daily','weekly','monthly'].map(ps => (
         <Box key={ps}>
           <Typography variant="subtitle2">{ps.toUpperCase()}</Typography>
@@ -67,13 +68,13 @@ export default function InsightsPanel({ analysis }) {
       ))}
       <Divider sx={{ my: 1 }} />
 
-      <Typography variant="h6">Risk Management</Typography>
+      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Risk Management</Typography>
       {(rm.rules || []).map((rule,i) => (
         <Typography key={i} variant="body2">{rule}</Typography>
       ))}
       <Divider sx={{ my: 1 }} />
 
-      <Typography variant="h6">Feedback</Typography>
+      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Feedback</Typography>
       {fb.note && <Typography variant="body2">{fb.note}</Typography>}
       {fb.suggestions && <Typography variant="body2">{fb.suggestions}</Typography>}
     </Box>

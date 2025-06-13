@@ -24,6 +24,7 @@ export default function CommentsPanel({ analysis, activeLayers }) {
         bgcolor: '#f5f5f5',
         overflowY: 'auto',
         p: 1,
+        boxSizing: 'border-box',
       }}
     >
       <Typography variant="subtitle2">Confidence: {conf.level || 'N/A'}</Typography>
@@ -39,25 +40,25 @@ export default function CommentsPanel({ analysis, activeLayers }) {
         <Box sx={{ mt: 1 }}>
           {primary.global_trend && (
             <>
-              <Typography variant="h6">Global Trend</Typography>
+              <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Global Trend</Typography>
               <Typography variant="body2" paragraph>{primary.global_trend}</Typography>
             </>
           )}
           {primary.local_trend && (
             <>
-              <Typography variant="h6">Local Trend</Typography>
+              <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Local Trend</Typography>
               <Typography variant="body2" paragraph>{primary.local_trend}</Typography>
             </>
           )}
           {primary.patterns && (
             <>
-              <Typography variant="h6">Patterns</Typography>
+              <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Patterns</Typography>
               <Typography variant="body2" paragraph>{primary.patterns}</Typography>
             </>
           )}
           {primary.anomalies && (
             <>
-              <Typography variant="h6">Anomalies</Typography>
+              <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Anomalies</Typography>
               <Typography variant="body2" paragraph>{primary.anomalies}</Typography>
             </>
           )}
@@ -75,7 +76,7 @@ export default function CommentsPanel({ analysis, activeLayers }) {
               .join(' ');
             return (
               <Box key={layer} sx={{ mb: 2 }}>
-                <Typography variant="h6">{title}</Typography>
+                <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>{title}</Typography>
                 <Typography variant="body2">{expl}</Typography>
               </Box>
             );
