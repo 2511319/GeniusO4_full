@@ -6,7 +6,17 @@ import CommentIcon from '@mui/icons-material/Comment';
 
 export default function ChartControls({ type, onChange, setSidebarOpen, setCommentsOpen }) {
   return (
-    <Box sx={{ px: 1, py: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      zIndex: 2,
+      px: 1,
+      py: 0.5,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1,
+    }}>
       <IconButton onClick={() => setSidebarOpen(o => !o)} size="small">
         <MenuIcon />
       </IconButton>

@@ -59,7 +59,7 @@ export default function IndicatorsSidebar({ activeLayers, setActiveLayers }) {
     <Drawer
       variant="permanent"
       anchor="left"
-      sx={{ width: 240, flexShrink: 0 }}
+      sx={{ width: 240, flexShrink: 0, zIndex: 1 }}
     >
       <Box sx={{ width: 240, pt: 2, p: 1, boxSizing: 'border-box' }}>
         {renderGroup('Overlays', overlays)}
