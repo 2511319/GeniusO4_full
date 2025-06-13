@@ -50,7 +50,7 @@ def test_analyze_success(monkeypatch):
         return df
 
     def fake_analyze(self, payload):
-        return {'summary': 'ok'}
+        return {'summary': 'ok'}, False
 
     monkeypatch.setattr('routers.analysis.fetch_ohlcv', fake_fetch)
     monkeypatch.setattr('routers.analysis.ChatGPTAnalyzer.analyze', fake_analyze)
@@ -65,8 +65,9 @@ def test_analyze_success(monkeypatch):
     r = client.post('/api/analyze', json=payload, headers=headers)
     assert r.status_code == 200
     data = r.json()
-    for key in ['analysis', 'ohlc', 'indicators']:
+    for key in ['analysis', 'ohlc', 'indicators', 'invalid_chatgpt_response']:
         assert key in data
+    assert data['invalid_chatgpt_response'] is False
 
 def test_analyze_returns_limit_candles(monkeypatch):
     token = jwt.encode({'sub': 'tester'}, app_module.SECRET_KEY, algorithm='HS256')
@@ -101,7 +102,7 @@ def test_analyze_returns_limit_candles(monkeypatch):
 
     monkeypatch.setattr('routers.analysis.fetch_ohlcv', fake_fetch)
     monkeypatch.setattr('routers.analysis.DataProcessor', DummyProcessor)
-    monkeypatch.setattr('routers.analysis.ChatGPTAnalyzer.analyze', lambda self, payload: {'summary': 'ok'})
+    monkeypatch.setattr('routers.analysis.ChatGPTAnalyzer.analyze', lambda self, payload: ({'summary': 'ok'}, False))
 
     payload = {
         'symbol': 'BTCUSDT',
@@ -116,3 +117,4 @@ def test_analyze_returns_limit_candles(monkeypatch):
     assert len(data['ohlc']) == limit
     assert data['ohlc'][0]['Open'] == df.iloc[-limit]['Open']
     assert data['ohlc'][-1]['Open'] == df.iloc[-1]['Open']
+    assert data['invalid_chatgpt_response'] is False
