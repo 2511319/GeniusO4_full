@@ -184,7 +184,7 @@ export default function Home({ sidebarOpen, commentsOpen, setSidebarOpen, setCom
       </Box>
 
       {commentsOpen && (
-        <Box sx={{ width: 300, flexShrink: 0 }}>
+        <Box sx={{ width: 300, flexShrink: 0, zIndex: 1 }}>
           <CommentsPanel
             analysis={analysis}
             activeLayers={activeLayers}

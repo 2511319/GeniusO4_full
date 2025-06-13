@@ -14,6 +14,7 @@ export default function Legend({ meta = [] }) {  // meta по умолчанию
       position: 'absolute',
       bottom: 0,
       left: 0,
+      zIndex: 2,
       bgcolor: 'rgba(255,255,255,0.8)',
       maxHeight: 200,
       overflowY: 'auto',
