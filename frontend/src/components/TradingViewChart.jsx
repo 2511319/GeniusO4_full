@@ -65,7 +65,18 @@ export default function TradingViewChart({
     vs.setData(rawVolumeData);
     seriesStore.current.volume = vs;
 
-    return () => chartRef.current.remove();
+    const handleResize = () => {
+      chartRef.current.resize(
+        containerRef.current.clientWidth,
+        containerRef.current.clientHeight
+      );
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      chartRef.current.remove();
+    };
   }, []);
 
   useEffect(() => { seriesStore.current.price?.setData(priceData); }, [priceData]);
