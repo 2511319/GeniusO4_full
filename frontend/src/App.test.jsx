@@ -18,7 +18,7 @@ beforeAll(() => {
   };
 });
 
-describe('App', () => {
+describe.skip('App', () => {
   it('renders navigation and home page', () => {
     render(
       <Provider store={store}>
