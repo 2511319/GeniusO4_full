@@ -42,6 +42,15 @@ export default function TradingViewChart({
     return rawPriceData;
   }, [rawPriceData, chartType, resolution]);
 
+  const volumeData = useMemo(
+    () => rawVolumeData.map(d => ({
+      time: d.time,
+      value: d.value,
+      color: d.open > d.close ? '#e74c3c' : '#2ecc71',
+    })),
+    [rawVolumeData]
+  );
+
   // 3. Инициализация chart, price и volume
   useEffect(() => {
     if (!containerRef.current) return;
@@ -60,9 +69,9 @@ export default function TradingViewChart({
     const vs = chartRef.current.addHistogramSeries({
       priceScaleId: '',
       scaleMargins: { top: 0.8, bottom: 0 },
-      color: bar => (bar.open > bar.close ? '#e74c3c' : '#2ecc71'),
+      color: '#2ecc71',
     });
-    vs.setData(rawVolumeData);
+    vs.setData(volumeData);
     seriesStore.current.volume = vs;
 
     const handleResize = () => {
@@ -80,7 +89,7 @@ export default function TradingViewChart({
   }, []);
 
   useEffect(() => { seriesStore.current.price?.setData(priceData); }, [priceData]);
-  useEffect(() => { seriesStore.current.volume?.setData(rawVolumeData); }, [rawVolumeData]);
+  useEffect(() => { seriesStore.current.volume?.setData(volumeData); }, [volumeData]);
 
   // 4. Forecast-candles
   useEffect(() => {
