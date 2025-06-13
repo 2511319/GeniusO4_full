@@ -180,7 +180,7 @@ export default function Home() {
             <InsightsPanel analysis={analysis} />
           </Drawer>
         </div>
-        <div style={{ flex: 0 }}>
+        <div style={{ flex: '0 0 auto', overflowY: 'auto', maxHeight: 250 }}>
           <VolumePanel
             volumeData={data.volume}
             obvData={analysis.OBV || []}
