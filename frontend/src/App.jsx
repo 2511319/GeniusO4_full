@@ -4,7 +4,7 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import ColorModeProvider, { ColorModeContext } from './ColorModeContext';
+import ColorModeProvider, { ColorModeContext } from './components/ColorModeContext';
 import Home from './pages/Home';
 import About from './pages/About';
 
