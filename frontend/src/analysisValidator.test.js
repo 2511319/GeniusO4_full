@@ -1,13 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
-import { validateAnalysis } from './analysisValidator';
+import { validateAnalysis } from './data/analysisValidator';
 
 describe('validateAnalysis unfinished_zones', () => {
   it('warns when coordinates missing', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     validateAnalysis({
-      unfinished_zones: [{ type: 'a', level: 1, date: 'd' }]
+      unfinished_zones: [{ type: 'a', level: 1, date: 'd', explanation: 'e' }]
     });
-    expect(warn).toHaveBeenCalledWith('Нехватка координат для unfinished_zones');
+    expect(warn).toHaveBeenCalledWith('unfinished_zones[0] missing field: start_point');
+    expect(warn).toHaveBeenCalledWith('unfinished_zones[0] missing field: end_point');
     warn.mockRestore();
   });
 
@@ -18,11 +19,14 @@ describe('validateAnalysis unfinished_zones', () => {
         type: 'a',
         level: 1,
         date: 'd',
+        explanation: 'e',
         start_point: { x: 1, y: 2 },
         end_point: { x: 2, y: 3 }
       }]
     });
-    expect(warn).not.toHaveBeenCalled();
+    const messages = warn.mock.calls.map(c => c[0]);
+    expect(messages).not.toContain('unfinished_zones[0] missing field: start_point');
+    expect(messages).not.toContain('unfinished_zones[0] missing field: end_point');
     warn.mockRestore();
   });
 });
@@ -33,7 +37,8 @@ describe('validateAnalysis gap_analysis', () => {
     validateAnalysis({
       gap_analysis: { gaps: [{ date: 'd', price_range: [1, 2] }], comment: '' }
     });
-    expect(warn).toHaveBeenCalledWith('Нехватка координат для gap_analysis');
+    expect(warn).toHaveBeenCalledWith('gap_analysis.gaps[0] missing start_point/end_point');
+    expect(warn).toHaveBeenCalledWith('gap_analysis.gaps[0] missing explanation');
     warn.mockRestore();
   });
 
@@ -41,15 +46,18 @@ describe('validateAnalysis gap_analysis', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     validateAnalysis({
       gap_analysis: {
-        gaps: [{
-          date: 'd',
-          start_point: { x: 1, y: 2 },
-          end_point: { x: 3, y: 4 }
-        }],
-        comment: ''
-      }
-    });
-    expect(warn).not.toHaveBeenCalled();
+          gaps: [{
+            date: 'd',
+            start_point: { x: 1, y: 2 },
+            end_point: { x: 3, y: 4 },
+            explanation: 'e'
+          }],
+          comment: ''
+        }
+      });
+    const messages = warn.mock.calls.map(c => c[0]);
+    expect(messages).not.toContain('gap_analysis.gaps[0] missing start_point/end_point');
+    expect(messages).not.toContain('gap_analysis.gaps[0] missing explanation');
     warn.mockRestore();
   });
 });
