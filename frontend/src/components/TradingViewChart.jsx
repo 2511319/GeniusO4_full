@@ -22,9 +22,12 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
   analysis,
   activeLayers,
   chartType,
+  setChartType,
   resolution,
   onSeriesMetaChange,
   legendMeta,
+  setSidebarOpen,
+  setCommentsOpen,
 }, ref) {
   const containerRef = useRef(null);
   const chartRef     = useRef(null);
@@ -303,7 +306,12 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
   return (
     <Box sx={{position:'relative',width:'100%',height:'100%'}}>
       <Box ref={containerRef} sx={{width:'100%',height:'100%'}}/>
-      <ChartControls containerRef={containerRef} chartRef={chartRef} seriesStore={seriesStore}/>
+      <ChartControls
+        type={chartType}
+        onChange={setChartType}
+        setSidebarOpen={setSidebarOpen}
+        setCommentsOpen={setCommentsOpen}
+      />
       <Legend meta={legendMeta} />
     </Box>
   );
@@ -315,9 +323,12 @@ TradingViewChart.propTypes = {
   analysis:          PropTypes.object.isRequired,
   activeLayers:      PropTypes.arrayOf(PropTypes.string).isRequired,
   chartType:         PropTypes.oneOf(['candles','heikin','renko']).isRequired,
+  setChartType:      PropTypes.func,
   resolution:        PropTypes.string.isRequired,
   onSeriesMetaChange:PropTypes.func,
   legendMeta: PropTypes.array,
+  setSidebarOpen: PropTypes.func,
+  setCommentsOpen: PropTypes.func,
 };
 
 export default TradingViewChart;
