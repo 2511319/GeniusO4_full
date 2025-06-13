@@ -31,7 +31,16 @@ export default function InsightsPanel({ analysis }) {
     }}>
       <Typography variant="h6">Indicators Analysis</Typography>
       {Object.entries(ia).map(([key, val]) => (
-        <Typography key={key} variant="body2">{key}: {val}</Typography>
+        typeof val === 'object' && (
+          <Box key={key} sx={{ mb: 1 }}>
+            <Typography variant="subtitle2">{key}</Typography>
+            {Object.entries(val).map(([field, value]) => (
+              <Typography key={field} variant="body2">
+                {field}: {value}
+              </Typography>
+            ))}
+          </Box>
+        )
       ))}
       <Divider sx={{ my: 1 }} />
 
