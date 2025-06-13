@@ -273,7 +273,6 @@ export default function TradingViewChart({
     <Box sx={{position:'relative',width:'100%',height:'100%'}}>
       <Box ref={containerRef} sx={{width:'100%',height:'100%'}}/>
       <ChartControls containerRef={containerRef} chartRef={chartRef} seriesStore={seriesStore}/>
-      <Legend/>
       <Legend meta={legendMeta} />
     </Box>
   );
