@@ -1,5 +1,5 @@
 import React from 'react';
-import TradingViewChart from './components/TradingViewChart';
+import TradingViewChart from './TradingViewChart';
 
 export default function ChartWrapper({ data = [], layers = [], forecast = [], analysis = {}, ...rest }) {
   const price = data;

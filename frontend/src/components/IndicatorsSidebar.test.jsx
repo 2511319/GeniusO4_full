@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import IndicatorsSidebar from './components/IndicatorsSidebar';
+import IndicatorsSidebar from './IndicatorsSidebar';
 
 describe('IndicatorsSidebar', () => {
   it('renders groups in correct order and handles toggles', () => {

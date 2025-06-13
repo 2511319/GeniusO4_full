@@ -1,7 +1,7 @@
 import { render, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import TradingViewChart from './TradingViewChart';
+import TradingViewChart from './TradingViewChartWrapper';
 
 const mockCreateRay = vi.fn();
 const mockAddLineSeries = vi.fn(() => ({ setData: vi.fn(), applyOptions: vi.fn() }));

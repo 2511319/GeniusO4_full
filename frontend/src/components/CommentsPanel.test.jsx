@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import CommentsPanel from './components/CommentsPanel';
+import CommentsPanel from './CommentsPanel';
 
 describe('CommentsPanel', () => {
   it('renders layer explanations', () => {

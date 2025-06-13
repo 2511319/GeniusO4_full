@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import { Provider } from 'react-redux';
-import { store } from './store';
-import App from './App';
+import { store } from '../store';
+import App from '../App';
 import { describe, it, expect, vi, beforeAll } from 'vitest';
 import React from 'react';
 
-vi.mock('./TradingViewChart', () => ({ default: () => <div data-testid="chart" /> }));
+vi.mock('./TradingViewChartWrapper', () => ({ default: () => <div data-testid="chart" /> }));
 
 beforeAll(() => {
   window.matchMedia = window.matchMedia || function () {
