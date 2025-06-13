@@ -11,7 +11,6 @@ import InsightsPanel    from '../components/InsightsPanel';
 import VolumePanel      from '../components/VolumePanel';
 import OscillatorsPanel from '../components/OscillatorsPanel';
 import MACDPanel        from '../components/MACDPanel';
-import Legend           from '../components/Legend';  // ← добавлен импорт
 import {
   overlays,
   volume,
