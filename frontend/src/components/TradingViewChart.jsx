@@ -145,7 +145,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
 
     // удалить старые
     Object.keys(seriesStore.current)
-      .filter(k => /(MA_|VWAP|Bollinger|Moving_Average_Envelope|Parabolic_SAR|Ichimoku_)/.test(k))
+      .filter(k => /(MA_|VWAP|Bollinger|Moving_Average_Envelope|Parabolic_SAR|Ichimoku_|Volume|OBV|RSI|Stochastic_Oscillator|Williams_%R|ATR|MACD)/.test(k))
       .forEach(k => {
         chartRef.current.removeSeries(seriesStore.current[k]);
         delete seriesStore.current[k];
