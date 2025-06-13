@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import CommentsPanel from './CommentsPanel';
+import CommentsPanel from './components/CommentsPanel';
 
 describe('CommentsPanel', () => {
   it('renders layer explanations', () => {
@@ -11,14 +11,14 @@ describe('CommentsPanel', () => {
       trend_lines: { explanation: 'Trend lines info' },
       divergence_analysis: { explanation: 'Divergence details' }
     };
-    const layers = ['trend_lines', 'divergence_analysis'];
-    render(<CommentsPanel analysis={analysis} layers={layers} />);
+    const activeLayers = ['trend_lines', 'divergence_analysis'];
+    render(<CommentsPanel analysis={analysis} activeLayers={activeLayers} />);
 
     fireEvent.click(screen.getByRole('tab', { name: /Explanation/i }));
 
-    expect(screen.getByText('trend_lines')).toBeInTheDocument();
+    expect(screen.getByText('Trend Lines')).toBeInTheDocument();
     expect(screen.getByText('Trend lines info')).toBeInTheDocument();
-    expect(screen.getByText('divergence_analysis')).toBeInTheDocument();
+    expect(screen.getByText('Divergence Analysis')).toBeInTheDocument();
     expect(screen.getByText('Divergence details')).toBeInTheDocument();
   });
 });

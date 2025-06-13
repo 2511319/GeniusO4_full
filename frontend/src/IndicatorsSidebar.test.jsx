@@ -2,22 +2,16 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import IndicatorsSidebar from './IndicatorsSidebar';
+import IndicatorsSidebar from './components/IndicatorsSidebar';
 
 describe('IndicatorsSidebar', () => {
   it('renders groups in correct order and handles toggles', () => {
-    const toggleLayer = vi.fn();
-    const setShowSR = vi.fn();
-    const setShowTrends = vi.fn();
+    const setActiveLayers = vi.fn();
 
     render(
       <IndicatorsSidebar
-        layers={[]}
-        toggleLayer={toggleLayer}
-        showSR={false}
-        setShowSR={setShowSR}
-        showTrends={false}
-        setShowTrends={setShowTrends}
+        activeLayers={[]}
+        setActiveLayers={setActiveLayers}
       />
     );
 
@@ -33,12 +27,12 @@ describe('IndicatorsSidebar', () => {
     ]);
 
     fireEvent.click(screen.getByLabelText('MA_20'));
-    expect(toggleLayer).toHaveBeenCalledWith('MA_20');
+    expect(setActiveLayers).toHaveBeenCalled();
+    const toggleMA = setActiveLayers.mock.calls[0][0];
+    expect(toggleMA([])).toEqual(['MA_20']);
 
-    fireEvent.click(screen.getByLabelText('Algo-SRlevel'));
-    expect(setShowSR).toHaveBeenCalledWith(true);
-
-    fireEvent.click(screen.getByLabelText('Trend lines'));
-    expect(setShowTrends).toHaveBeenCalledWith(true);
+    fireEvent.click(screen.getByLabelText('trend_lines'));
+    const toggleTrends = setActiveLayers.mock.calls[1][0];
+    expect(toggleTrends([])).toEqual(['trend_lines']);
   });
 });
