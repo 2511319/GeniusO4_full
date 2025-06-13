@@ -12,6 +12,15 @@ import VolumePanel      from '../components/VolumePanel';
 import OscillatorsPanel from '../components/OscillatorsPanel';
 import MACDPanel        from '../components/MACDPanel';
 import Legend           from '../components/Legend';  // ← добавлен импорт
+import {
+  overlays,
+  volume,
+  momentum,
+  volatility,
+  macd,
+  modelAnalysis,
+  forecast,
+} from '../data/indicatorGroups';
 
 export default function Home() {
   const [data, setData]                 = useState({ candles: [], volume: [] });
@@ -24,29 +33,28 @@ export default function Home() {
   const [resolution, setResolution]     = useState('1D');
   const [legendMeta, setLegendMeta]     = useState([]);
 
+  async function fetchAll(symbolParam, intervalParam, limitParam) {
+    const respData = await axios.get('/api/market-data');
+    const respAnal = await axios.get('/api/model-analysis', {
+      params: { symbol: symbolParam, interval: intervalParam, limit: limitParam }
+    });
+    setData(respData.data);
+    setAnalysis(respAnal.data);
+    setActiveLayers(Object.keys(respAnal.data));
+    setActiveLayers([
+      ...overlays,
+      ...volume,
+      ...momentum,
+      ...volatility,
+      ...macd,
+      ...modelAnalysis,
+      ...forecast,
+    ]);
+  }
+
   useEffect(() => {
-    async function fetchAll() {
-      const respData = await axios.get('/api/market-data');
-      const respAnal = await axios.get('/api/model-analysis', {
-        params: { symbol, interval, limit }
-      });
-      setData(respData.data);
-      setAnalysis(respAnal.data);
-      // Изначально включаем все слои из ответа
-      setActiveLayers(Object.keys(respAnal.data));
-      // Включаем все слои по умолчанию
-      setActiveLayers([
-        ...overlays,
-        ...volume,
-        ...momentum,
-        ...volatility,
-        ...macd,
-        ...modelAnalysis,
-        ...forecast,
-      ]);
-    }
-    fetchAll();
-  }, [/* toggleSeriesVisibility */]);
+    fetchAll(symbol, interval, limit);
+  }, []);
 
   const handleLegendMeta = useCallback(metaItem => {
     setLegendMeta(prev => {
@@ -57,7 +65,7 @@ export default function Home() {
         { ...metaItem, visible: true, onToggle: () => toggleSeriesVisibility(metaItem.key) },
       ];
     });
-  }, [/* toggleSeriesVisibility определите в коде, чтобы скрывать/показывать серию */]);
+  }, [toggleSeriesVisibility]);
 
   // Заготовка функции скрытия/показа серии (надо реализовать в TradingViewChart через callback или context)
   const toggleSeriesVisibility = (key) => {
@@ -69,11 +77,9 @@ export default function Home() {
     // TODO: вызвать внутри ChartControls или TradingViewChart логику show/hide для seriesStore.current[key]
   };
 
-   const onAnalyze = ({ symbol, interval, limit }) => {
-     // просто сбросим стейт, чтобы useEffect запустил новый запрос
-     setAnalysis({});
-     setData(prev => ({ ...prev }));
-   };
+  const onAnalyze = ({ symbol, interval, limit }) => {
+    fetchAll(symbol, interval, limit);
+  };
 
   const onLoadTest = async () => {
     const resp = await axios.get('/api/dev_logs/latest');
