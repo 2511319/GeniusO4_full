@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { Snackbar, Alert, Drawer, IconButton, Divider } from '@mui/material';
+import { Snackbar, Alert, Drawer, IconButton, Divider, Box } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { parseOhlc } from '../utils/chartUtils';
@@ -125,7 +125,7 @@ export default function Home() {
   };
   return (
     <>
-    <div style={{ display: 'flex', height: '100vh' }}>
+    <Box display="flex" gap={2} height="100vh" p={1}>
       <IndicatorsSidebar
         activeLayers={activeLayers}
         setActiveLayers={setActiveLayers}
@@ -169,7 +169,8 @@ export default function Home() {
             anchor="right"
             open={rightOpen}
             onClose={() => setRightOpen(false)}
-            PaperProps={{ sx: { width: 300 } }}
+            sx={{ width: 300, flexShrink: 0 }}
+            PaperProps={{ sx: { width: 300, p: 1 } }}
           >
             <IconButton onClick={() => setRightOpen(false)}>
               <ChevronRightIcon />
@@ -202,7 +203,7 @@ export default function Home() {
           />
         </div>
       </div>
-    </div>
+    </Box>
     <Snackbar
       open={errorOpen}
       autoHideDuration={6000}
