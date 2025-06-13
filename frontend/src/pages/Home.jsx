@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
+import { parseOhlc } from '../utils/chartUtils';
 
 import IndicatorsSidebar from '../components/IndicatorsSidebar';
 import AnalysisControls   from '../components/AnalysisControls';
@@ -32,14 +34,29 @@ export default function Home() {
   const [resolution, setResolution]     = useState('1D');
   const [legendMeta, setLegendMeta]     = useState([]);
 
+  const token = useSelector(state => state.auth.token);
+
   async function fetchAll(symbolParam, intervalParam, limitParam) {
-    const respData = await axios.get('/api/market-data');
-    const respAnal = await axios.get('/api/model-analysis', {
-      params: { symbol: symbolParam, interval: intervalParam, limit: limitParam }
-    });
-    setData(respData.data);
-    setAnalysis(respAnal.data);
-    setActiveLayers(Object.keys(respAnal.data));
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const resp = await axios.post('/api/analyze', {
+      symbol: symbolParam,
+      interval: intervalParam,
+      limit: limitParam,
+    }, { headers });
+
+    const parsed = parseOhlc(resp.data.ohlc);
+    const candles = parsed.map(({ time, open, high, low, close }) => ({
+      time, open, high, low, close,
+    }));
+    const volumeData = parsed.map(d => ({
+      time: d.time,
+      value: Number(d.Volume),
+      open: d.open,
+      close: d.close,
+    }));
+
+    setData({ candles, volume: volumeData });
+    setAnalysis(resp.data.analysis);
     setActiveLayers([
       ...overlays,
       ...volume,
@@ -81,8 +98,20 @@ export default function Home() {
   };
 
   const onLoadTest = async () => {
-    const resp = await axios.get('/api/dev_logs/latest');
-    setAnalysis(resp.data);
+    const resp = await axios.get('/api/testdata');
+    const parsed = parseOhlc(resp.data.ohlc);
+    const candles = parsed.map(({ time, open, high, low, close }) => ({
+      time, open, high, low, close,
+    }));
+    const volumeData = parsed.map(d => ({
+      time: d.time,
+      value: Number(d.Volume),
+      open: d.open,
+      close: d.close,
+    }));
+
+    setData({ candles, volume: volumeData });
+    setAnalysis(resp.data.analysis);
   };
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
