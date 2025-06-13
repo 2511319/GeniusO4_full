@@ -20,10 +20,7 @@ export default function InsightsPanel({ analysis }) {
 
   return (
     <Box sx={{
-      position: 'absolute',
-      bottom: 0,
-      right: 0,
-      width: 300,
+      width: '100%',
       maxHeight: '40%',
       bgcolor: '#fafafa',
       overflowY: 'auto',

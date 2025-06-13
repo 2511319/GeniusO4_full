@@ -20,11 +20,7 @@ export default function CommentsPanel({ analysis, activeLayers }) {
   return (
     <Box
       sx={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: 300,
-        height: '100%',
+        width: '100%',
         bgcolor: '#f5f5f5',
         overflowY: 'auto',
         p: 1,

@@ -3,7 +3,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { Snackbar, Alert } from '@mui/material';
+import { Snackbar, Alert, Drawer, IconButton, Divider } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { parseOhlc } from '../utils/chartUtils';
 
 import IndicatorsSidebar from '../components/IndicatorsSidebar';
@@ -35,6 +37,7 @@ export default function Home() {
   const [resolution, setResolution]     = useState('1D');
   const [legendMeta, setLegendMeta]     = useState([]);
   const [errorOpen, setErrorOpen]       = useState(false);
+  const [rightOpen, setRightOpen]       = useState(false);
 
   const token = useSelector(state => state.auth.token);
 
@@ -153,12 +156,29 @@ export default function Home() {
             legendMeta={legendMeta}
           />
 
-          <CommentsPanel
-            analysis={analysis}
-            activeLayers={activeLayers}
-          />
+          <IconButton
+            onClick={() => setRightOpen(true)}
+            sx={{ position: 'absolute', top: 8, right: 8 }}
+          >
+            <ChevronLeftIcon />
+          </IconButton>
 
-          <InsightsPanel analysis={analysis} />
+          <Drawer
+            anchor="right"
+            open={rightOpen}
+            onClose={() => setRightOpen(false)}
+            PaperProps={{ sx: { width: 300 } }}
+          >
+            <IconButton onClick={() => setRightOpen(false)}>
+              <ChevronRightIcon />
+            </IconButton>
+            <CommentsPanel
+              analysis={analysis}
+              activeLayers={activeLayers}
+            />
+            <Divider sx={{ my: 1 }} />
+            <InsightsPanel analysis={analysis} />
+          </Drawer>
         </div>
         <div style={{ flex: 0 }}>
           <VolumePanel
