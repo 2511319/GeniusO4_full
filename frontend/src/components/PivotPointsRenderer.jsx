@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { parseToUnix } from '../utils/chartUtils';
 
 /**
  * Отдельный компонент, подписывающийся на chartRef и рисующий
@@ -21,17 +22,19 @@ export default function PivotPointsRenderer({ chartRef, pivotPoints, onRegister 
           lineStyle: 3, // пунктир
         });
         line.setData([
-          { time: pt.date, value: pt.pivot },
-          { time: pt.date, value: pt.pivot + 0.0001 }, // небольшое смещение, чтобы линия отобразилась
+          { time: parseToUnix(pt.date), value: pt.pivot },
+          { time: parseToUnix(pt.date), value: pt.pivot + 0.0001 }, // небольшое смещение, чтобы линия отобразилась
         ]);
         // Маркер
-        line.setMarkers([{
-          time: pt.date,
-          position: 'belowBar',
-          color: '#FFA500',
-          shape: 'circle',
-          text: 'P',
-        }]);
+        line.setMarkers([
+          {
+            time: parseToUnix(pt.date),
+            position: 'belowBar',
+            color: '#FFA500',
+            shape: 'circle',
+            text: 'P',
+          }
+        ]);
         onRegister(`pivot_${period}_${idx}`, line, '#FFA500', true, 'P');
       });
     });

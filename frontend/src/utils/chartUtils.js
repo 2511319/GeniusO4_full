@@ -1,4 +1,8 @@
 
+export function parseToUnix(dateString) {
+  return Math.floor(new Date(dateString).getTime() / 1000);
+}
+
 export function computeHeikinAshi(raw) {
   if (!raw?.length) return [];
   const res = [];
@@ -96,7 +100,7 @@ export function parseOhlc(raw) {
   return raw.map((d) => {
     const { 'Open Time': openTime, Open, High, Low, Close, ...rest } = d;
     return {
-      time: Math.floor(new Date(openTime).getTime() / 1000),
+      time: parseToUnix(openTime),
       open: Number(Open),
       high: Number(High),
       low: Number(Low),
@@ -109,7 +113,7 @@ export function parseOhlc(raw) {
 export function parsePatterns(raw) {
   if (!Array.isArray(raw)) return [];
   return raw.map(({ date, price, type }) => ({
-    time: Math.floor(new Date(date).getTime() / 1000),
+    time: parseToUnix(date),
     price: Number(price),
     type,
   }));
@@ -118,7 +122,7 @@ export function parsePatterns(raw) {
 export function parseVirtualCandles(raw) {
   if (!Array.isArray(raw)) return [];
   return raw.map(({ date, open, high, low, close }) => ({
-    time: Math.floor(new Date(date).getTime() / 1000),
+    time: parseToUnix(date),
     open: Number(open),
     high: Number(high),
     low: Number(low),
