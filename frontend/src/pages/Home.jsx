@@ -3,9 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { Snackbar, Alert, Drawer, IconButton, Divider } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { Box, Snackbar, Alert, Divider } from '@mui/material';
 import { parseOhlc } from '../utils/chartUtils';
 
 import IndicatorsSidebar from '../components/IndicatorsSidebar';
@@ -37,7 +35,6 @@ export default function Home() {
   const [resolution, setResolution]     = useState('1D');
   const [legendMeta, setLegendMeta]     = useState([]);
   const [errorOpen, setErrorOpen]       = useState(false);
-  const [rightOpen, setRightOpen]       = useState(false);
   const chartApiRef                     = useRef(null);
 
   const token = useSelector(state => state.auth.token);
@@ -125,14 +122,16 @@ export default function Home() {
   };
   return (
     <>
-    <div style={{ display: 'flex', height: '100vh' }}>
-      <IndicatorsSidebar
-        activeLayers={activeLayers}
-        setActiveLayers={setActiveLayers}
-      />
+    <Box display="flex" gap={2} height="100vh" p={1}>
+      <Box sx={{ width: 240, flexShrink: 0 }}>
+        <IndicatorsSidebar
+          activeLayers={activeLayers}
+          setActiveLayers={setActiveLayers}
+        />
+      </Box>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <div style={{ flex: 0 }}>
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Box sx={{ flex: 0 }}>
           {/* Добавляем панель селекторов и кнопок */}
           <AnalysisControls
             symbol={symbol}
@@ -144,8 +143,8 @@ export default function Home() {
             onAnalyze={onAnalyze}
             onLoadTest={onLoadTest}
           />
-        </div>
-        <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+        </Box>
+        <Box sx={{ flex: 1, position: 'relative', minHeight: 0 }}>
           <TradingViewChart
             ref={chartApiRef}
             rawPriceData={data.candles}
@@ -157,32 +156,8 @@ export default function Home() {
             onSeriesMetaChange={handleLegendMeta}
             legendMeta={legendMeta}
           />
-
-          <IconButton
-            onClick={() => setRightOpen(true)}
-            sx={{ position: 'absolute', top: 8, right: 8 }}
-          >
-            <ChevronLeftIcon />
-          </IconButton>
-
-          <Drawer
-            anchor="right"
-            open={rightOpen}
-            onClose={() => setRightOpen(false)}
-            PaperProps={{ sx: { width: 300 } }}
-          >
-            <IconButton onClick={() => setRightOpen(false)}>
-              <ChevronRightIcon />
-            </IconButton>
-            <CommentsPanel
-              analysis={analysis}
-              activeLayers={activeLayers}
-            />
-            <Divider sx={{ my: 1 }} />
-            <InsightsPanel analysis={analysis} />
-          </Drawer>
-        </div>
-        <div style={{ flex: '0 0 auto', overflowY: 'auto', maxHeight: 250 }}>
+        </Box>
+        <Box sx={{ flex: '0 0 auto', overflowY: 'auto', maxHeight: 250 }}>
           <VolumePanel
             volumeData={data.volume}
             obvData={analysis.OBV || []}
@@ -200,9 +175,18 @@ export default function Home() {
             signal={analysis.MACD_signal || []}
             histogram={analysis.MACD_hist || []}
           />
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+
+      <Box sx={{ width: 300, flexShrink: 0 }}>
+        <CommentsPanel
+          analysis={analysis}
+          activeLayers={activeLayers}
+        />
+        <Divider sx={{ my: 1 }} />
+        <InsightsPanel analysis={analysis} />
+      </Box>
+    </Box>
     <Snackbar
       open={errorOpen}
       autoHideDuration={6000}
