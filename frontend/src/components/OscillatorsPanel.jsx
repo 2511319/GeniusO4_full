@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { Box } from '@mui/material';
 import { createChart } from 'lightweight-charts';
 
 /** Рендер RSI, Stochastic и Williams %R в отдельных панелях */
@@ -52,11 +53,11 @@ export default function OscillatorsPanel({ rsi, stochastic, williams }) {
   }, [rsi, stochastic, williams]);
 
   return (
-    <div>
-      <div ref={rsiRef} style={{ marginBottom: 8 }} />
-      <div ref={stoRef} style={{ marginBottom: 8 }} />
-      <div ref={willRef} />
-    </div>
+    <Box>
+      <Box ref={rsiRef} sx={{ mb: 1 }} />
+      <Box ref={stoRef} sx={{ mb: 1 }} />
+      <Box ref={willRef} />
+    </Box>
   );
 }
 
