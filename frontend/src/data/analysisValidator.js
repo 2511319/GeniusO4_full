@@ -2,19 +2,20 @@
 
 /**
  * Проверка обязательных полей в ответе модели.
- * НЕ бросает ошибки, только console.warn при отсутствии.
+ * Не бросает исключения, а выводит console.warn.
  */
 
 const sectionRequirements = {
   primary_analysis: ['global_trend', 'local_trend', 'patterns', 'anomalies'],
   confidence_in_trading_decisions: ['level', 'reason'],
 
-  // Технические индикаторы (только проверка наличия секции)
+  // Технические индикаторы: проверяем только наличие секции
   MA_20: [], MA_50: [], MA_100: [], MA_200: [],
-  VWAP: [], Bollinger_Middle: [], Bollinger_Upper: [], Bollinger_Lower: [],
+  VWAP: [],
+  Bollinger_Middle: [], Bollinger_Upper: [], Bollinger_Lower: [],
   Moving_Average_Envelope_Upper: [], Moving_Average_Envelope_Lower: [],
-  Parabolic_SAR: [], Ichimoku_Conversion_Line: [], Ichimoku_Base_Line: [],
-  Ichimoku_A: [], Ichimoku_B: [],
+  Parabolic_SAR: [],
+  Ichimoku_Conversion_Line: [], Ichimoku_Base_Line: [], Ichimoku_A: [], Ichimoku_B: [],
 
   // Model Analysis
   support_resistance_levels: ['date', 'level', 'explanation'],
@@ -23,14 +24,15 @@ const sectionRequirements = {
   unfinished_zones: ['start_point', 'end_point', 'explanation'],
   imbalances: ['start_point', 'end_point', 'explanation'],
   fair_value_gaps: ['start_point', 'end_point', 'explanation'],
-  gap_analysis: ['gaps'], // см. ниже
+  gap_analysis: ['gaps'], // далее проверяем содержимое gaps
+
   structural_edge: ['date', 'price', 'explanation'],
   candlestick_patterns: ['date', 'type', 'explanation'],
   divergence_analysis: ['indicator', 'type', 'date', 'explanation'],
 
   // Прочие разделы
   pivot_points: ['daily', 'weekly', 'monthly'],
-  indicators_analysis: [],      // любая структура
+  indicators_analysis: [],
   volume_analysis: ['volume_trends', 'significant_volume_changes'],
   indicator_correlations: ['correlations', 'explanation'],
   psychological_levels: ['level', 'date', 'type', 'explanation'],
@@ -54,10 +56,9 @@ export function validateAnalysis(analysis) {
       console.warn(`Missing section: ${section}`);
       return;
     }
-    // Специальная обработка gap_analysis
     if (section === 'gap_analysis') {
       if (!Array.isArray(data.gaps)) {
-        console.warn(`gap_analysis.gaps should be an array`);
+        console.warn('gap_analysis.gaps should be an array');
       } else {
         data.gaps.forEach((gap, i) => {
           if (!gap.start_point || !gap.end_point) {
@@ -70,18 +71,15 @@ export function validateAnalysis(analysis) {
       }
       return;
     }
-    // Массив секций
     if (Array.isArray(data)) {
-      data.forEach((item, idx) =>
+      data.forEach((item, idx) => {
         fields.forEach(f => {
           if (!(f in item)) {
             console.warn(`${section}[${idx}] missing field: ${f}`);
           }
-        })
-      );
-    }
-    // Объект-структура
-    else if (typeof data === 'object') {
+        });
+      });
+    } else if (typeof data === 'object') {
       fields.forEach(f => {
         if (!(f in data)) {
           console.warn(`${section} missing field: ${f}`);

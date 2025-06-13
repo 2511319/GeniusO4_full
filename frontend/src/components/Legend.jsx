@@ -1,51 +1,65 @@
+// src/components/Legend.jsx
+
 import React from 'react';
-import { Box } from '@mui/material';
+import PropTypes from 'prop-types';
+import { Box, Typography, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 
-export default function Legend({ items, onToggle }) {
-  if (!items.length) return null;
-
+/**
+ * Legend — простая легенда, в которую передаётся массив meta:
+ * [{ key, name, color, dashed, icon, visible }, ...]
+ */
+export default function Legend({ meta = [] }) {  // meta по умолчанию = []
   return (
-    <Box
-      sx={{
-        position: 'absolute',
-        bottom: 8,
-        left: 8,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        color: '#fff',
-        borderRadius: 1,
-        p: 1,
-        fontSize: '12px',
-        zIndex: 30,
-      }}
-    >
-      {items.map(({ name, color, icon, visible }) => (
-        <Box
-          key={name}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            mb: 0.5,
-            cursor: 'pointer',
-            opacity: visible ? 1 : 0.5,
-          }}
-          onClick={() => onToggle && onToggle(name)}
-        >
-          {icon ? (
-            <Box component="span" sx={{ mr: 1, color }}>{icon}</Box>
-          ) : (
-            <Box
-              sx={{
-                width: 12,
-                height: 12,
-                mr: 1,
-                border: `2px solid ${color}`,
-                backgroundColor: visible ? color : 'transparent',
-              }}
+    <Box sx={{
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      bgcolor: 'rgba(255,255,255,0.8)',
+      maxHeight: 200,
+      overflowY: 'auto',
+      p: 1,
+      borderRadius: 1,
+    }}>
+      <Typography variant="subtitle2" gutterBottom>Legend</Typography>
+      <List dense disablePadding>
+        {meta.map(item => (
+          <ListItem
+            key={item.key}
+            button
+            onClick={item.onToggle}  // onToggle можно добавить в meta
+          >
+            <ListItemIcon>
+              <Box
+                sx={{
+                  width: 12,
+                  height: 12,
+                  bgcolor: item.color,
+                  border: item.dashed ? '1px dashed' : 'none',
+                  display: 'inline-block',
+                }}
+              >
+                {item.icon && <Typography component="span" sx={{ fontSize: 10 }}>{item.icon}</Typography>}
+              </Box>
+            </ListItemIcon>
+            <ListItemText
+              primary={item.name}
+              sx={{ textDecoration: item.visible ? 'none' : 'line-through' }}
             />
-          )}
-          {name}
-        </Box>
-      ))}
+          </ListItem>
+        ))}
+      </List>
     </Box>
   );
 }
+
+Legend.propTypes = {
+  meta: PropTypes.arrayOf(PropTypes.shape({
+    key:     PropTypes.string.isRequired,
+    name:    PropTypes.string.isRequired,
+    color:   PropTypes.string,
+    dashed:  PropTypes.bool,
+    icon:    PropTypes.string,
+    visible: PropTypes.bool,
+    onToggle:PropTypes.func,
+  })),
+};

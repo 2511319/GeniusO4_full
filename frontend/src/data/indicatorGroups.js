@@ -63,7 +63,7 @@ export const forecast = [
 ];
 
 /**
- * Экспорт всех групп для удобного импорта
+ * Экспорт всех групп
  */
 export default {
   overlays,

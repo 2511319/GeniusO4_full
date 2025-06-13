@@ -3,45 +3,82 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
+import IndicatorsSidebar from '../components/IndicatorsSidebar';
+import AnalysisControls   from '../components/AnalysisControls';
 import TradingViewChart   from '../components/TradingViewChart';
-import IndicatorsSidebar  from '../components/IndicatorsSidebar';
-import CommentsPanel      from '../components/CommentsPanel';
-import VolumePanel        from '../components/VolumePanel';
-import OscillatorsPanel   from '../components/OscillatorsPanel';
-import MACDPanel          from '../components/MACDPanel';
-import InsightsPanel      from '../components/InsightsPanel';
+import CommentsPanel    from '../components/CommentsPanel';
+import InsightsPanel    from '../components/InsightsPanel';
+import VolumePanel      from '../components/VolumePanel';
+import OscillatorsPanel from '../components/OscillatorsPanel';
+import MACDPanel        from '../components/MACDPanel';
+import Legend           from '../components/Legend';  // ← добавлен импорт
 
 export default function Home() {
   const [data, setData]                 = useState({ candles: [], volume: [] });
   const [analysis, setAnalysis]         = useState({});
   const [activeLayers, setActiveLayers] = useState([]);
+  const [symbol, setSymbol]             = useState('BTCUSDT');
+  const [interval, setInterval]         = useState('4h');
+  const [limit, setLimit]               = useState(144);
   const [chartType, setChartType]       = useState('candles');
   const [resolution, setResolution]     = useState('1D');
   const [legendMeta, setLegendMeta]     = useState([]);
 
-  // Загрузка данных и анализа
   useEffect(() => {
     async function fetchAll() {
       const respData = await axios.get('/api/market-data');
-      const respAnal = await axios.get('/api/model-analysis');
+      const respAnal = await axios.get('/api/model-analysis', {
+        params: { symbol, interval, limit }
+      });
       setData(respData.data);
       setAnalysis(respAnal.data);
-      // Изначально включаем все базовые и modelAnalysis слои
+      // Изначально включаем все слои из ответа
+      setActiveLayers(Object.keys(respAnal.data));
+      // Включаем все слои по умолчанию
       setActiveLayers([
-        ...Object.keys(analysis ? analysis : {})
+        ...overlays,
+        ...volume,
+        ...momentum,
+        ...volatility,
+        ...macd,
+        ...modelAnalysis,
+        ...forecast,
       ]);
     }
     fetchAll();
-  }, []);
+  }, [/* toggleSeriesVisibility */]);
 
-  // Колбек для Legend: обновляем легенду при регистрации серии
-  const handleLegendMeta = useCallback(meta => {
+  const handleLegendMeta = useCallback(metaItem => {
     setLegendMeta(prev => {
-      const without = prev.filter(item => item.key !== meta.key);
-      return [...without, meta];
+      const without = prev.filter(item => item.key !== metaItem.key);
+      // Добавляем новое или обновлённое описание слоя, помечаем как видимое по умолчанию
+      return [
+        ...without,
+        { ...metaItem, visible: true, onToggle: () => toggleSeriesVisibility(metaItem.key) },
+      ];
     });
-  }, []);
+  }, [/* toggleSeriesVisibility определите в коде, чтобы скрывать/показывать серию */]);
 
+  // Заготовка функции скрытия/показа серии (надо реализовать в TradingViewChart через callback или context)
+  const toggleSeriesVisibility = (key) => {
+    setLegendMeta(prev =>
+      prev.map(item =>
+        item.key === key ? { ...item, visible: !item.visible } : item
+      )
+    );
+    // TODO: вызвать внутри ChartControls или TradingViewChart логику show/hide для seriesStore.current[key]
+  };
+
+   const onAnalyze = ({ symbol, interval, limit }) => {
+     // просто сбросим стейт, чтобы useEffect запустил новый запрос
+     setAnalysis({});
+     setData(prev => ({ ...prev }));
+   };
+
+  const onLoadTest = async () => {
+    const resp = await axios.get('/api/dev_logs/latest');
+    setAnalysis(resp.data);
+  };
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <IndicatorsSidebar
@@ -50,6 +87,17 @@ export default function Home() {
       />
 
       <div style={{ flex: 1, position: 'relative' }}>
+        {/* Добавляем панель селекторов и кнопок */}
+        <AnalysisControls
+          symbol={symbol}
+          setSymbol={setSymbol}
+          interval={interval}
+          setInterval={setInterval}
+          limit={limit}
+          setLimit={setLimit}
+          onAnalyze={onAnalyze}
+          onLoadTest={onLoadTest}
+        />
         <TradingViewChart
           rawPriceData={data.candles}
           rawVolumeData={data.volume}
@@ -58,7 +106,15 @@ export default function Home() {
           chartType={chartType}
           resolution={resolution}
           onSeriesMetaChange={handleLegendMeta}
+          legendMeta={legendMeta}
         />
+
+        <CommentsPanel
+          analysis={analysis}
+          activeLayers={activeLayers}
+        />
+
+        <InsightsPanel analysis={analysis} />
 
         <div style={{ position: 'absolute', bottom: 0, width: '100%' }}>
           <VolumePanel
@@ -79,15 +135,6 @@ export default function Home() {
             histogram={analysis.MACD_hist || []}
           />
         </div>
-
-        <CommentsPanel
-          analysis={analysis}
-          activeLayers={activeLayers}
-        />
-
-        <InsightsPanel
-          analysis={analysis}
-        />
       </div>
     </div>
   );
