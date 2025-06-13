@@ -56,6 +56,16 @@ export default function Home() {
     fetchAll(symbol, interval, limit);
   }, []);
 
+  // Заготовка функции скрытия/показа серии (надо реализовать в TradingViewChart через callback или context)
+  const toggleSeriesVisibility = (key) => {
+    setLegendMeta(prev =>
+      prev.map(item =>
+        item.key === key ? { ...item, visible: !item.visible } : item
+      )
+    );
+    // TODO: вызвать внутри ChartControls или TradingViewChart логику show/hide для seriesStore.current[key]
+  };
+
   const handleLegendMeta = useCallback(metaItem => {
     setLegendMeta(prev => {
       const without = prev.filter(item => item.key !== metaItem.key);
@@ -66,16 +76,6 @@ export default function Home() {
       ];
     });
   }, [toggleSeriesVisibility]);
-
-  // Заготовка функции скрытия/показа серии (надо реализовать в TradingViewChart через callback или context)
-  const toggleSeriesVisibility = (key) => {
-    setLegendMeta(prev =>
-      prev.map(item =>
-        item.key === key ? { ...item, visible: !item.visible } : item
-      )
-    );
-    // TODO: вызвать внутри ChartControls или TradingViewChart логику show/hide для seriesStore.current[key]
-  };
 
   const onAnalyze = ({ symbol, interval, limit }) => {
     fetchAll(symbol, interval, limit);
