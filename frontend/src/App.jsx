@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { CssBaseline, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -10,6 +10,8 @@ import About from './pages/About';
 
 function InnerApp() {
   const { mode, toggle } = useContext(ColorModeContext);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [commentsOpen, setCommentsOpen] = useState(true);
 
   return (
     <>
@@ -27,7 +29,14 @@ function InnerApp() {
 
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={
+            <Home
+              sidebarOpen={sidebarOpen}
+              commentsOpen={commentsOpen}
+              setSidebarOpen={setSidebarOpen}
+              setCommentsOpen={setCommentsOpen}
+            />
+          } />
           <Route path="/about" element={<About />} />
         </Routes>
       </BrowserRouter>

@@ -24,7 +24,7 @@ import {
   forecast,
 } from '../data/indicatorGroups';
 
-export default function Home() {
+export default function Home({ sidebarOpen, commentsOpen, setSidebarOpen, setCommentsOpen }) {
   const [data, setData]                 = useState({ candles: [], volume: [] });
   const [analysis, setAnalysis]         = useState({});
   const [activeLayers, setActiveLayers] = useState([]);
@@ -123,12 +123,14 @@ export default function Home() {
   return (
     <>
     <Box display="flex" gap={2} height="100vh" p={1}>
-      <Box sx={{ width: 240, flexShrink: 0 }}>
-        <IndicatorsSidebar
-          activeLayers={activeLayers}
-          setActiveLayers={setActiveLayers}
-        />
-      </Box>
+      {sidebarOpen && (
+        <Box sx={{ width: 240, flexShrink: 0 }}>
+          <IndicatorsSidebar
+            activeLayers={activeLayers}
+            setActiveLayers={setActiveLayers}
+          />
+        </Box>
+      )}
 
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Box sx={{ flex: 0 }}>
@@ -152,9 +154,12 @@ export default function Home() {
             analysis={analysis}
             activeLayers={activeLayers}
             chartType={chartType}
+            setChartType={setChartType}
             resolution={resolution}
             onSeriesMetaChange={handleLegendMeta}
             legendMeta={legendMeta}
+            setSidebarOpen={setSidebarOpen}
+            setCommentsOpen={setCommentsOpen}
           />
         </Box>
         <Box sx={{ flex: '0 0 auto', overflowY: 'auto', maxHeight: 250 }}>
@@ -178,14 +183,16 @@ export default function Home() {
         </Box>
       </Box>
 
-      <Box sx={{ width: 300, flexShrink: 0 }}>
-        <CommentsPanel
-          analysis={analysis}
-          activeLayers={activeLayers}
-        />
-        <Divider sx={{ my: 1 }} />
-        <InsightsPanel analysis={analysis} />
-      </Box>
+      {commentsOpen && (
+        <Box sx={{ width: 300, flexShrink: 0 }}>
+          <CommentsPanel
+            analysis={analysis}
+            activeLayers={activeLayers}
+          />
+          <Divider sx={{ my: 1 }} />
+          <InsightsPanel analysis={analysis} />
+        </Box>
+      )}
     </Box>
     <Snackbar
       open={errorOpen}
