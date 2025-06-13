@@ -13,6 +13,7 @@ const theme = createTheme({
     fontFamily: "Roboto, 'Helvetica', 'Arial', sans-serif",
     h6: { fontWeight: 600 },
   },
+  spacing: 8,
 });
 
 export default theme;
