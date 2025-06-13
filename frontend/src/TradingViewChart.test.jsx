@@ -185,6 +185,22 @@ describe.skip('TradingViewChart', () => {
     await waitFor(() => expect(mockAddCandlestickSeries.mock.results[0].value.setRegions).toHaveBeenCalled());
   });
 
+  it('recreates series when layer checkbox toggled', async () => {
+    const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1 }];
+    const analysis = { MA_20: [{ date: '2024-01-01', value: 1 }] };
+    const { rerender } = render(
+      <TradingViewChart data={data} layers={['MA_20']} analysis={analysis} />
+    );
+    await waitFor(() => expect(mockAddLineSeries).toHaveBeenCalledTimes(1));
+    const chart = createChart.mock.results[0].value;
+
+    rerender(<TradingViewChart data={data} layers={[]} analysis={analysis} />);
+    await waitFor(() => expect(chart.removeSeries).toHaveBeenCalled());
+
+    rerender(<TradingViewChart data={data} layers={['MA_20']} analysis={analysis} />);
+    await waitFor(() => expect(mockAddLineSeries).toHaveBeenCalledTimes(2));
+  });
+
   it('toggles series visibility from legend', async () => {
     const data = [{ time: 1, open: 1, high: 2, low: 0, close: 1, RSI: 70 }];
     const applyOptions = vi.fn();
