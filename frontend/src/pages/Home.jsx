@@ -1,6 +1,6 @@
 // src/pages/Home.jsx
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { Snackbar, Alert, Drawer, IconButton, Divider } from '@mui/material';
@@ -38,6 +38,7 @@ export default function Home() {
   const [legendMeta, setLegendMeta]     = useState([]);
   const [errorOpen, setErrorOpen]       = useState(false);
   const [rightOpen, setRightOpen]       = useState(false);
+  const chartApiRef                     = useRef(null);
 
   const token = useSelector(state => state.auth.token);
 
@@ -88,7 +89,7 @@ export default function Home() {
         item.key === key ? { ...item, visible: !item.visible } : item
       )
     );
-    // TODO: вызвать внутри ChartControls или TradingViewChart логику show/hide для seriesStore.current[key]
+    chartApiRef.current?.toggleSeries(key);
   };
 
   const handleLegendMeta = useCallback(metaItem => {
@@ -146,6 +147,7 @@ export default function Home() {
         </div>
         <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
           <TradingViewChart
+            ref={chartApiRef}
             rawPriceData={data.candles}
             rawVolumeData={data.volume}
             analysis={analysis}

@@ -1,7 +1,7 @@
 // src/components/TradingViewChart.jsx
 
 import React, {
-  useEffect, useRef, useMemo, useState, useCallback,
+  useEffect, useRef, useMemo, useState, useCallback, useImperativeHandle,
 } from 'react';
 import PropTypes from 'prop-types';
 import { createChart, CrosshairMode } from 'lightweight-charts';
@@ -16,7 +16,7 @@ import { computeHeikinAshi, computeRenko, parseToUnix } from '../utils/chartUtil
 const prettify = key =>
   key.split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
 
-export default function TradingViewChart({
+const TradingViewChart = React.forwardRef(function TradingViewChart({
   rawPriceData,
   rawVolumeData,
   analysis,
@@ -25,10 +25,19 @@ export default function TradingViewChart({
   resolution,
   onSeriesMetaChange,
   legendMeta,
-}) {
+}, ref) {
   const containerRef = useRef(null);
   const chartRef     = useRef(null);
   const seriesStore  = useRef({});
+
+  useImperativeHandle(ref, () => ({
+    toggleSeries: (key) => {
+      const s = seriesStore.current[key];
+      if (!s || !s.applyOptions) return;
+      const visible = s.options?.().visible !== false;
+      s.applyOptions({ visible: !visible });
+    },
+  }));
 
   const [forecast] = useState(analysis.price_prediction?.virtual_candles || []);
 
@@ -51,7 +60,7 @@ export default function TradingViewChart({
     [rawVolumeData]
   );
 
-  // 3. Инициализация chart, price и volume
+  // 3. Инициализация chart и price
   useEffect(() => {
     if (!containerRef.current) return;
     chartRef.current = createChart(containerRef.current, {
@@ -65,14 +74,6 @@ export default function TradingViewChart({
     const ps = chartRef.current.addCandlestickSeries();
     ps.setData(priceData);
     seriesStore.current.price = ps;
-
-    const vs = chartRef.current.addHistogramSeries({
-      priceScaleId: '',
-      scaleMargins: { top: 0.8, bottom: 0 },
-      color: '#2ecc71',
-    });
-    vs.setData(volumeData);
-    seriesStore.current.volume = vs;
 
     const handleResize = () => {
       chartRef.current.resize(
@@ -89,7 +90,28 @@ export default function TradingViewChart({
   }, []);
 
   useEffect(() => { seriesStore.current.price?.setData(priceData); }, [priceData]);
-  useEffect(() => { seriesStore.current.volume?.setData(volumeData); }, [volumeData]);
+
+  // Обновление серии объёма при смене слоя или данных
+  useEffect(() => {
+    if (!chartRef.current) return;
+    let vs = seriesStore.current.volume;
+    const shouldShow = activeLayers.includes('Volume');
+    if (shouldShow) {
+      if (!vs) {
+        vs = chartRef.current.addHistogramSeries({
+          priceScaleId: '',
+          scaleMargins: { top: 0.8, bottom: 0 },
+          color: '#2ecc71',
+        });
+        seriesStore.current.volume = vs;
+      }
+      vs.setData(volumeData);
+      vs.applyOptions({ visible: true });
+    } else if (vs) {
+      vs.applyOptions({ visible: false });
+    }
+    onSeriesMetaChange?.({ key: 'Volume', name: 'Volume', color: '#2ecc71', icon: '▉' });
+  }, [activeLayers, volumeData]);
 
   // 4. Forecast-candles
   useEffect(() => {
@@ -285,7 +307,7 @@ export default function TradingViewChart({
       <Legend meta={legendMeta} />
     </Box>
   );
-}
+});
 
 TradingViewChart.propTypes = {
   rawPriceData:      PropTypes.array.isRequired,
@@ -297,3 +319,5 @@ TradingViewChart.propTypes = {
   onSeriesMetaChange:PropTypes.func,
   legendMeta: PropTypes.array,
 };
+
+export default TradingViewChart;
