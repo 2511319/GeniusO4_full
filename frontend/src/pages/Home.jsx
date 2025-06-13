@@ -92,37 +92,40 @@ export default function Home() {
         setActiveLayers={setActiveLayers}
       />
 
-      <div style={{ flex: 1, position: 'relative' }}>
-        {/* Добавляем панель селекторов и кнопок */}
-        <AnalysisControls
-          symbol={symbol}
-          setSymbol={setSymbol}
-          interval={interval}
-          setInterval={setInterval}
-          limit={limit}
-          setLimit={setLimit}
-          onAnalyze={onAnalyze}
-          onLoadTest={onLoadTest}
-        />
-        <TradingViewChart
-          rawPriceData={data.candles}
-          rawVolumeData={data.volume}
-          analysis={analysis}
-          activeLayers={activeLayers}
-          chartType={chartType}
-          resolution={resolution}
-          onSeriesMetaChange={handleLegendMeta}
-          legendMeta={legendMeta}
-        />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={{ flex: 0 }}>
+          {/* Добавляем панель селекторов и кнопок */}
+          <AnalysisControls
+            symbol={symbol}
+            setSymbol={setSymbol}
+            interval={interval}
+            setInterval={setInterval}
+            limit={limit}
+            setLimit={setLimit}
+            onAnalyze={onAnalyze}
+            onLoadTest={onLoadTest}
+          />
+        </div>
+        <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+          <TradingViewChart
+            rawPriceData={data.candles}
+            rawVolumeData={data.volume}
+            analysis={analysis}
+            activeLayers={activeLayers}
+            chartType={chartType}
+            resolution={resolution}
+            onSeriesMetaChange={handleLegendMeta}
+            legendMeta={legendMeta}
+          />
 
-        <CommentsPanel
-          analysis={analysis}
-          activeLayers={activeLayers}
-        />
+          <CommentsPanel
+            analysis={analysis}
+            activeLayers={activeLayers}
+          />
 
-        <InsightsPanel analysis={analysis} />
-
-        <div style={{ position: 'absolute', bottom: 0, width: '100%' }}>
+          <InsightsPanel analysis={analysis} />
+        </div>
+        <div style={{ flex: 0 }}>
           <VolumePanel
             volumeData={data.volume}
             obvData={analysis.OBV || []}
