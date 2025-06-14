@@ -3,22 +3,18 @@ import '@testing-library/jest-dom/vitest';
 import { Provider } from 'react-redux';
 import { store } from '../store';
 import App from '../App';
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 
 vi.mock('./TradingViewChartWrapper', () => ({ default: () => <div data-testid="chart" /> }));
+vi.mock('axios', () => ({
+  default: {
+    post: vi.fn(() => Promise.resolve({ data: { ohlc: [], analysis: {} } })),
+    get: vi.fn(() => Promise.resolve({ data: { ohlc: [] } })),
+  }
+}));
 
-beforeAll(() => {
-  window.matchMedia = window.matchMedia || function () {
-    return {
-      matches: false,
-      addListener: () => {},
-      removeListener: () => {},
-    };
-  };
-});
-
-describe.skip('App', () => {
+describe('App', () => {
   it('renders navigation and home page', () => {
     render(
       <Provider store={store}>
