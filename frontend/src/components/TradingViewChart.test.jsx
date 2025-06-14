@@ -19,11 +19,12 @@ vi.mock('lightweight-charts', () => ({
     resize: vi.fn(),
     timeScale: () => ({ fitContent: mockFitContent }),
   })),
+  CrosshairMode: { Normal: 0 }
 }));
 
 import { createChart } from 'lightweight-charts';
 
-describe.skip('TradingViewChart', () => {
+describe('TradingViewChart', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
