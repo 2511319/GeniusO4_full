@@ -1,5 +1,5 @@
 // src/components/AnalysisControls.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -10,6 +10,7 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
+import Spinner from './Spinner';
 
 export default function AnalysisControls({
   symbol,
@@ -21,6 +22,16 @@ export default function AnalysisControls({
   onAnalyze,
   onLoadTest,
 }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleAnalyze = async () => {
+    setLoading(true);
+    try {
+      await onAnalyze({ symbol, interval, limit });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, bgcolor: '#fafafa' }}>
       <FormControl size="small">
@@ -63,9 +74,25 @@ export default function AnalysisControls({
 
       <Button
         variant="contained"
-        onClick={() => onAnalyze({ symbol, interval, limit })}
+        onClick={handleAnalyze}
+        disabled={loading}
       >
-        Analyze
+        {loading ? (
+          <Box
+            sx={{
+              width: 24,
+              height: 24,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Spinner size={16} />
+          </Box>
+        ) : (
+          'Analyze'
+        )}
       </Button>
 
       {import.meta.env.DEV && (
