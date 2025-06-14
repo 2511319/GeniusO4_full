@@ -2,6 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
 import { Box, Typography, Divider } from '@mui/material';
 
 /**
@@ -18,15 +19,27 @@ export default function InsightsPanel({ analysis }) {
   const rm = analysis.risk_management || {};
   const fb = analysis.feedback || {};
 
+  const [show, setShow] = React.useState(false);
+
+  React.useEffect(() => {
+    if (analysis && Object.keys(analysis).length) {
+      setShow(true);
+    }
+  }, [analysis]);
+
   return (
-    <Box sx={{
-      width: '100%',
-      maxHeight: '40%',
-      bgcolor: '#fafafa',
-      overflowY: 'auto',
-      p: 1,
-      boxSizing: 'border-box',
-    }}>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={show ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+    >
+      <Box sx={{
+        width: '100%',
+        maxHeight: '40%',
+        bgcolor: '#fafafa',
+        overflowY: 'auto',
+        p: 1,
+        boxSizing: 'border-box',
+      }}>
       <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Indicators Analysis</Typography>
       {Object.entries(ia).map(([key, val]) => (
         typeof val === 'object' && (
@@ -77,7 +90,8 @@ export default function InsightsPanel({ analysis }) {
       <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Feedback</Typography>
       {fb.note && <Typography variant="body2">{fb.note}</Typography>}
       {fb.suggestions && <Typography variant="body2">{fb.suggestions}</Typography>}
-    </Box>
+      </Box>
+    </motion.div>
   );
 }
 
