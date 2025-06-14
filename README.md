@@ -19,6 +19,7 @@ This document describes the architecture, components, data flow, and coding conv
    - VolumePanel
    - OscillatorsPanel
    - MACDPanel
+   - Spinner
 7. Indicator Categories and Grouping
 8. Tooltip Rules
 9. Virtual Candles (Forecast)
@@ -123,6 +124,9 @@ npm run dev
 ### VolumePanel
 ### OscillatorsPanel
 ### MACDPanel
+
+### Spinner
+- Small SVG component used for loading state animations.
 
 Example usage of side panel flags:
 ```jsx
