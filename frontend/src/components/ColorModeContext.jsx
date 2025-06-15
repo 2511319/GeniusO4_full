@@ -1,12 +1,9 @@
-import React, { createContext, useMemo, useState } from 'react';
-import { createTheme, ThemeProvider } from '@mui/material';
+import React, { createContext, useEffect, useMemo, useState } from 'react';
 
-export const ColorModeContext = createContext({ toggle: () => {} });
+export const ColorModeContext = createContext({ mode: 'dark', toggle: () => {} });
 
 export default function ColorModeProvider({ children }) {
-  const [mode, setMode] = useState(() =>
-    localStorage.getItem('ui-theme') || 'dark',
-  );
+  const [mode, setMode] = useState(() => localStorage.getItem('ui-theme') || 'dark');
 
   const colorMode = useMemo(
     () => ({
@@ -21,28 +18,18 @@ export default function ColorModeProvider({ children }) {
     [mode],
   );
 
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode,
-          primary: { main: '#1976d2' },
-          background: {
-            default: mode === 'dark' ? '#121212' : '#fafafa',
-            paper: mode === 'dark' ? '#1d1d1d' : '#ffffff',
-          },
-        },
-        typography: {
-          fontFamily: "Roboto,'Helvetica','Arial',sans-serif",
-          h6: { fontWeight: 600 },
-        },
-      }),
-    [mode],
-  );
+  useEffect(() => {
+    const root = document.documentElement;
+    if (mode === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [mode]);
 
   return (
     <ColorModeContext.Provider value={colorMode}>
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+      {children}
     </ColorModeContext.Provider>
   );
 }
