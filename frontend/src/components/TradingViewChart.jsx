@@ -315,13 +315,17 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
           zIndex: 0,
         }}
       />
-      <ChartControls
-        type={chartType}
-        onChange={setChartType}
-        setSidebarOpen={setSidebarOpen}
-        setCommentsOpen={setCommentsOpen}
-      />
-      <Legend meta={legendMeta} />
+      <Box sx={{ position: 'absolute', top: 8, left: 8, zIndex: 3, bgcolor: 'rgba(255,255,255,0.6)', borderRadius: 1 }}>
+        <ChartControls
+          type={chartType}
+          onChange={setChartType}
+          setSidebarOpen={setSidebarOpen}
+          setCommentsOpen={setCommentsOpen}
+        />
+      </Box>
+      <Box sx={{ position: 'absolute', bottom: 8, right: 8, zIndex: 2, bgcolor: 'rgba(255,255,255,0.6)', borderRadius: 1 }}>
+        <Legend meta={legendMeta} />
+      </Box>
     </Box>
   );
 });
