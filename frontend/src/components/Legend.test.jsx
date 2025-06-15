@@ -19,4 +19,15 @@ describe('Legend', () => {
   );
   screen.getByText('Volume');
   });
+
+  it('renders items horizontally when orientation is horizontal', () => {
+    render(
+      <Legend
+        orientation="horizontal"
+        meta={[{ key: 'v', name: 'Volume', color: '#000', visible: true }]}
+      />
+    );
+    const list = screen.getByRole('list');
+    expect(list).toHaveStyle({ flexDirection: 'row' });
+  });
 });
