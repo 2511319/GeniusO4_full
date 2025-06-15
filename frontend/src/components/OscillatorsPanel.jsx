@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import { createChart } from 'lightweight-charts';
 
 /** Рендер RSI, Stochastic и Williams %R в отдельных панелях */
@@ -10,13 +10,17 @@ export default function OscillatorsPanel({ rsi, stochastic, williams }) {
   const rsiRef     = useRef();
   const stoRef     = useRef();
   const willRef    = useRef();
+  const theme      = useTheme();
 
   useEffect(() => {
     // RSI
     const rsiChart = createChart(rsiRef.current, {
       width:  rsiRef.current.clientWidth,
       height: 120,
-      layout: { backgroundColor: '#fff', textColor: '#000' },
+      layout: {
+        backgroundColor: theme.palette.background.default,
+        textColor: theme.palette.text.primary,
+      },
       grid: { vertLines: { visible: false }, horzLines: { color: '#eee' } },
     });
     const rsiSeries = rsiChart.addLineSeries({ color: '#ff5722' });
@@ -27,7 +31,10 @@ export default function OscillatorsPanel({ rsi, stochastic, williams }) {
     const stoChart = createChart(stoRef.current, {
       width:  stoRef.current.clientWidth,
       height: 120,
-      layout: { backgroundColor: '#fff', textColor: '#000' },
+      layout: {
+        backgroundColor: theme.palette.background.default,
+        textColor: theme.palette.text.primary,
+      },
       grid: { vertLines: { visible: false }, horzLines: { color: '#eee' } },
     });
     const kSeries = stoChart.addLineSeries({ color: '#2962ff' });
@@ -39,7 +46,10 @@ export default function OscillatorsPanel({ rsi, stochastic, williams }) {
     const wilChart = createChart(willRef.current, {
       width:  willRef.current.clientWidth,
       height: 120,
-      layout: { backgroundColor: '#fff', textColor: '#000' },
+      layout: {
+        backgroundColor: theme.palette.background.default,
+        textColor: theme.palette.text.primary,
+      },
       grid: { vertLines: { visible: false }, horzLines: { color: '#eee' } },
     });
     const wilSeries = wilChart.addLineSeries({ color: '#00796b' });
@@ -50,7 +60,7 @@ export default function OscillatorsPanel({ rsi, stochastic, williams }) {
       stoChart.remove();
       wilChart.remove();
     };
-  }, [rsi, stochastic, williams]);
+  }, [rsi, stochastic, williams, theme]);
 
   return (
     <Box>
