@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { createChart } from 'lightweight-charts';
+import { createBasicChart } from '../utils/chartUtils';
 import { useTheme } from '@mui/material';
 
 /** Рендер MACD, Signal и Histogram */
@@ -11,15 +11,17 @@ export default function MACDPanel({ macd, signal, histogram }) {
   const theme = useTheme();
 
   useEffect(() => {
-    const chart = createChart(ref.current, {
-      width:  ref.current.clientWidth,
-      height: 120,
-      layout: {
-        backgroundColor: theme.palette.background.default,
-        textColor: theme.palette.text.primary,
-      },
-      grid: { vertLines: { visible: false }, horzLines: { color: '#eee' } },
-    });
+    const chart = createBasicChart(
+      ref.current,
+      ref.current.clientWidth,
+      120,
+      {
+        layout: {
+          backgroundColor: theme.palette.background.default,
+          textColor: theme.palette.text.primary,
+        },
+      }
+    );
 
     const macdSeries   = chart.addLineSeries({ color: '#007aff', lineWidth: 2 });
     const signalSeries = chart.addLineSeries({ color: '#ff3b30', lineWidth: 1 });
