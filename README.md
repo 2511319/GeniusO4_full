@@ -97,7 +97,7 @@ npm run dev
 
 ### IndicatorsSidebar
 - Left sliding panel listing indicator groups.
-- Uses MUI Accordion and Checkbox controls.
+- Built with Tailwind classes and Headless UI Disclosure panels.
 - Categories (in strict order):
   1. Overlays
   2. Volume
