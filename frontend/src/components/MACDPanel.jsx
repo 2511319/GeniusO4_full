@@ -3,12 +3,10 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { createBasicChart } from '../utils/chartUtils';
-import { useTheme } from '@mui/material';
 
 /** Рендер MACD, Signal и Histogram */
 export default function MACDPanel({ macd, signal, histogram }) {
   const ref = useRef();
-  const theme = useTheme();
 
   useEffect(() => {
     const chart = createBasicChart(
@@ -17,8 +15,8 @@ export default function MACDPanel({ macd, signal, histogram }) {
       120,
       {
         layout: {
-          backgroundColor: theme.palette.background.default,
-          textColor: theme.palette.text.primary,
+          backgroundColor: '#ffffff',
+          textColor: '#000000',
         },
       }
     );
@@ -37,7 +35,7 @@ export default function MACDPanel({ macd, signal, histogram }) {
     histSeries.setData(histogram);
 
     return () => chart.remove();
-  }, [macd, signal, histogram, theme]);
+  }, [macd, signal, histogram]);
 
   return <div ref={ref} style={{ width: '100%', height: 120 }} />;
 }
