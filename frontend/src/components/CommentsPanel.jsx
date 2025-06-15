@@ -2,7 +2,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Tabs, Tab, Typography, Divider } from '@mui/material';
+import { Tab } from '@headlessui/react';
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
 
 /**
  * Панель комментариев
@@ -12,83 +16,90 @@ import { Box, Tabs, Tab, Typography, Divider } from '@mui/material';
 export default function CommentsPanel({ analysis, activeLayers }) {
   const [tab, setTab] = React.useState(0);
 
-  const handleChange = (e, newVal) => setTab(newVal);
-
   const primary = analysis.primary_analysis || {};
-  const conf    = analysis.confidence_in_trading_decisions || {};
+  const conf = analysis.confidence_in_trading_decisions || {};
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        bgcolor: '#f5f5f5',
-        overflowY: 'auto',
-        p: 1,
-        boxSizing: 'border-box',
-      }}
-    >
-      <Typography variant="subtitle2">Confidence: {conf.level || 'N/A'}</Typography>
-      <Typography variant="body2" color="textSecondary">{conf.reason}</Typography>
-      <Divider sx={{ my: 1 }} />
+    <div className="w-full bg-gray-100 overflow-y-auto p-2 box-border text-sm">
+      <h6 className="text-xs font-semibold">Confidence: {conf.level || 'N/A'}</h6>
+      <div className="text-xs text-gray-500">{conf.reason}</div>
+      <hr className="my-2 border-gray-300" />
 
-      <Tabs value={tab} onChange={handleChange}>
-        <Tab label="Primary Analysis" />
-        <Tab label="Explanation" />
-      </Tabs>
+      <Tab.Group selectedIndex={tab} onChange={setTab}>
+        <Tab.List className="flex space-x-2 border-b">
+          <Tab
+            className={({ selected }) =>
+              classNames(
+                'py-1 px-2 text-sm',
+                selected ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-600'
+              )
+            }
+          >
+            Primary Analysis
+          </Tab>
+          <Tab
+            className={({ selected }) =>
+              classNames(
+                'py-1 px-2 text-sm',
+                selected ? 'border-b-2 border-blue-500 font-medium' : 'text-gray-600'
+              )
+            }
+          >
+            Explanation
+          </Tab>
+        </Tab.List>
+        <Tab.Panels>
+          <Tab.Panel className="mt-2">
+            {primary.global_trend && (
+              <>
+                <h6 className="text-sm font-semibold mt-1 mb-1">Global Trend</h6>
+                <div className="text-sm mb-2">{primary.global_trend}</div>
+              </>
+            )}
+            {primary.local_trend && (
+              <>
+                <h6 className="text-sm font-semibold mt-1 mb-1">Local Trend</h6>
+                <div className="text-sm mb-2">{primary.local_trend}</div>
+              </>
+            )}
+            {primary.patterns && (
+              <>
+                <h6 className="text-sm font-semibold mt-1 mb-1">Patterns</h6>
+                <div className="text-sm mb-2">{primary.patterns}</div>
+              </>
+            )}
+            {primary.anomalies && (
+              <>
+                <h6 className="text-sm font-semibold mt-1 mb-1">Anomalies</h6>
+                <div className="text-sm mb-2">{primary.anomalies}</div>
+              </>
+            )}
+          </Tab.Panel>
 
-      {tab === 0 && (
-        <Box sx={{ mt: 1 }}>
-          {primary.global_trend && (
-            <>
-              <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Global Trend</Typography>
-              <Typography variant="body2" paragraph>{primary.global_trend}</Typography>
-            </>
-          )}
-          {primary.local_trend && (
-            <>
-              <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Local Trend</Typography>
-              <Typography variant="body2" paragraph>{primary.local_trend}</Typography>
-            </>
-          )}
-          {primary.patterns && (
-            <>
-              <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Patterns</Typography>
-              <Typography variant="body2" paragraph>{primary.patterns}</Typography>
-            </>
-          )}
-          {primary.anomalies && (
-            <>
-              <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Anomalies</Typography>
-              <Typography variant="body2" paragraph>{primary.anomalies}</Typography>
-            </>
-          )}
-        </Box>
-      )}
-
-      {tab === 1 && (
-        <Box sx={{ mt: 1 }}>
-          {activeLayers.map((layer) => {
-            const expl = analysis[layer]?.explanation;
-            if (!expl) return null;
-            const title = layer
-              .split('_')
-              .map(w => w[0].toUpperCase() + w.slice(1))
-              .join(' ');
-            return (
-              <Box key={layer} sx={{ mb: 2 }}>
-                <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>{title}</Typography>
-                <Typography variant="body2">{expl}</Typography>
-              </Box>
-            );
-          })}
-          {activeLayers.every(l => !analysis[l]?.explanation) && (
-            <Typography variant="body2" color="textSecondary">
-              No explanations for selected indicators.
-            </Typography>
-          )}
-        </Box>
-      )}
-    </Box>
+          <Tab.Panel className="mt-2">
+            {activeLayers.map((layer) => {
+              const expl = analysis[layer]?.explanation;
+              if (!expl) return null;
+              const title = layer
+                .split('_')
+                .map((w) => w[0].toUpperCase() + w.slice(1))
+                .join(' ');
+              return (
+                <div key={layer} className="mb-2">
+                  <h6 className="text-sm font-semibold mt-1 mb-1">{title}</h6>
+                  <div className="text-sm">{expl}</div>
+                </div>
+              );
+            })}
+            {activeLayers.every((l) => !analysis[l]?.explanation) && (
+              <div className="text-xs text-gray-500">
+                No explanations for selected indicators.
+              </div>
+            )}
+          </Tab.Panel>
+        </Tab.Panels>
+      </Tab.Group>
+    </div>
   );
 }
 
