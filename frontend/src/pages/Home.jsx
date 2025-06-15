@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { Box, Snackbar, Alert, Divider } from '@mui/material';
+
 import { parseOhlc } from '../utils/chartUtils';
 
 import IndicatorsSidebar from '../components/IndicatorsSidebar';
@@ -37,6 +37,13 @@ export default function Home({ sidebarOpen, commentsOpen, setSidebarOpen, setCom
   const [errorOpen, setErrorOpen]       = useState(false);
   const chartApiRef                     = useRef(null);
   const fetchTimer                      = useRef(null);
+
+  useEffect(() => {
+    if (errorOpen) {
+      const timer = setTimeout(() => setErrorOpen(false), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorOpen]);
 
   const token = useSelector(state => state.auth.token);
 
@@ -146,18 +153,18 @@ export default function Home({ sidebarOpen, commentsOpen, setSidebarOpen, setCom
   };
   return (
     <>
-    <Box display="flex" gap={2} height="100vh" p={1}>
+    <div className="flex gap-2 h-screen p-2">
       {sidebarOpen && (
-        <Box sx={{ width: 240, flexShrink: 0 }}>
+        <div className="w-[240px] flex-shrink-0">
           <IndicatorsSidebar
             activeLayers={activeLayers}
             setActiveLayers={setActiveLayers}
           />
-        </Box>
+        </div>
       )}
 
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <Box sx={{ flex: 0 }}>
+      <div className="flex flex-col flex-1 h-full">
+        <div className="flex-none">
           {/* Добавляем панель селекторов и кнопок */}
           <AnalysisControls
             symbol={symbol}
@@ -169,8 +176,8 @@ export default function Home({ sidebarOpen, commentsOpen, setSidebarOpen, setCom
             onAnalyze={onAnalyze}
             onLoadTest={onLoadTest}
           />
-        </Box>
-        <Box sx={{ flex: 1, position: 'relative', minHeight: 0 }}>
+        </div>
+        <div className="relative flex-1 min-h-0">
           <TradingViewChart
             ref={chartApiRef}
             rawPriceData={data.candles}
@@ -185,8 +192,8 @@ export default function Home({ sidebarOpen, commentsOpen, setSidebarOpen, setCom
             setSidebarOpen={setSidebarOpen}
             setCommentsOpen={setCommentsOpen}
           />
-        </Box>
-        <Box sx={{ flex: '0 0 auto', overflowY: 'auto', maxHeight: 250 }}>
+        </div>
+        <div className="flex-none overflow-y-auto max-h-[250px]">
           <VolumePanel
             volumeData={data.volume}
             obvData={analysis.OBV || []}
@@ -204,30 +211,33 @@ export default function Home({ sidebarOpen, commentsOpen, setSidebarOpen, setCom
             signal={analysis.MACD_signal || []}
             histogram={analysis.MACD_hist || []}
           />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {commentsOpen && (
-        <Box sx={{ width: 300, flexShrink: 0, zIndex: 1 }}>
+        <div className="w-[300px] flex-shrink-0 z-10">
           <CommentsPanel
             analysis={analysis}
             activeLayers={activeLayers}
           />
-          <Divider sx={{ my: 1 }} />
+          <hr className="my-1 border-gray-300" />
           <InsightsPanel analysis={analysis} />
-        </Box>
+        </div>
       )}
-    </Box>
-    <Snackbar
-      open={errorOpen}
-      autoHideDuration={6000}
-      onClose={() => setErrorOpen(false)}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-    >
-      <Alert severity="warning" onClose={() => setErrorOpen(false)} sx={{ width: '100%' }}>
-        Анализ не выполнен из-за некорректного ответа модели
-      </Alert>
-    </Snackbar>
+    </div>
+    {errorOpen && (
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 transition-opacity duration-300">
+        <div className="relative bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-2 rounded shadow">
+          <button
+            className="absolute top-1 right-1 text-yellow-800"
+            onClick={() => setErrorOpen(false)}
+          >
+            ✕
+          </button>
+          Анализ не выполнен из-за некорректного ответа модели
+        </div>
+      </div>
+    )}
     </>
   );
 }
