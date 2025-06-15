@@ -35,7 +35,7 @@ The GeniusO4 application visualizes financial data and analysis overlays returne
 - React (version 18)  
 - JavaScript (ES6) or TypeScript  
 - `lightweight-charts` — используется для отрисовки интерактивных свечей
-- Material-UI for user interface controls  
+ - Tailwind CSS и Headless UI для пользовательских элементов управления
 - Axios or Fetch API for data requests  
 - Redux or React Context for state management  
 - Jest and React Testing Library for unit tests  
@@ -62,7 +62,7 @@ The GeniusO4 application visualizes financial data and analysis overlays returne
 ## 4. How to Run
 Run backend and frontend together:
 ```bash
-python run.py dev
+python run.py --mode dev
 ```
 The script starts FastAPI on port 8000 and the Vite dev server on 5173.
 
