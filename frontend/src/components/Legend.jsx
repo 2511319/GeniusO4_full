@@ -8,21 +8,29 @@ import { Box, Typography, List, ListItem, ListItemIcon, ListItemText } from '@mu
  * Legend — простая легенда, в которую передаётся массив meta:
  * [{ key, name, color, dashed, icon, visible }, ...]
  */
-export default function Legend({ meta = [] }) {  // meta по умолчанию = []
+export default function Legend({ meta = [], orientation = 'vertical' }) {  // meta по умолчанию = []
   return (
-    <Box sx={{
+    <Box sx={(theme) => ({
       position: 'absolute',
       bottom: 0,
       left: 0,
       zIndex: 2,
-      bgcolor: 'rgba(255,255,255,0.8)',
+      bgcolor: theme.palette.background.paper,
       maxHeight: 200,
       overflowY: 'auto',
-      p: 1,
-      borderRadius: 1,
-    }}>
+      p: theme.spacing(1),
+      borderRadius: theme.shape.borderRadius,
+    })}>
       <Typography variant="subtitle2" gutterBottom>Legend</Typography>
-      <List dense disablePadding>
+      <List
+        dense
+        disablePadding
+        sx={{
+          display: 'flex',
+          flexDirection: orientation === 'horizontal' ? 'row' : 'column',
+          flexWrap: orientation === 'horizontal' ? 'wrap' : 'nowrap',
+        }}
+      >
         {meta.map(item => (
           <ListItem
             key={item.key}
@@ -63,4 +71,5 @@ Legend.propTypes = {
     visible: PropTypes.bool,
     onToggle:PropTypes.func,
   })),
+  orientation: PropTypes.oneOf(['vertical', 'horizontal']),
 };
