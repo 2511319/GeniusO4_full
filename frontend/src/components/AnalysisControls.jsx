@@ -1,11 +1,8 @@
 // src/components/AnalysisControls.jsx
 import React, { useState, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Button,
-} from '@mui/material';
 import { Listbox, Transition } from '@headlessui/react';
+import Button from './Button';
 import Spinner from './Spinner';
 
 export default function AnalysisControls({
@@ -29,8 +26,8 @@ export default function AnalysisControls({
     }
   };
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, bgcolor: '#fafafa' }}>
-      <Box>
+    <div className="flex items-center gap-2 p-2 bg-gray-50">
+      <div>
         <label className="block text-xs text-gray-600">Symbol</label>
         <select
           className="border border-gray-300 rounded px-2 py-1 text-sm"
@@ -41,9 +38,9 @@ export default function AnalysisControls({
           <option value="ETHUSDT">ETHUSDT</option>
           <option value="BNBUSDT">BNBUSDT</option>
         </select>
-      </Box>
+      </div>
 
-      <Box className="relative">
+      <div className="relative">
         <Listbox value={interval} onChange={onIntervalChange}>
           {({ open }) => (
             <>
@@ -73,9 +70,9 @@ export default function AnalysisControls({
             </>
           )}
         </Listbox>
-      </Box>
+      </div>
 
-      <Box>
+      <div>
         <label className="block text-xs text-gray-600">Limit</label>
         <input
           type="number"
@@ -83,40 +80,24 @@ export default function AnalysisControls({
           value={limit}
           onChange={e => onLimitChange(Number(e.target.value))}
         />
-      </Box>
+      </div>
 
-      <Button
-        variant="contained"
-        onClick={handleAnalyze}
-        disabled={loading}
-      >
+      <Button onClick={handleAnalyze} disabled={loading}>
         {loading ? (
-          <Box
-            sx={{
-              width: 24,
-              height: 24,
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <div className="w-6 h-6 rounded-full flex items-center justify-center">
             <Spinner size={16} />
-          </Box>
+          </div>
         ) : (
           'Analyze'
         )}
       </Button>
 
       {import.meta.env.DEV && (
-        <Button
-          variant="outlined"
-          onClick={onLoadTest}
-        >
+        <Button variant="secondary" onClick={onLoadTest}>
           Load Test
         </Button>
       )}
-    </Box>
+    </div>
   );
 }
 

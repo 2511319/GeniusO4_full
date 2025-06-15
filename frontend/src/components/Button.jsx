@@ -6,7 +6,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function Button({ variant = 'primary', onClick, children }) {
+export default function Button({ variant = 'primary', onClick, disabled = false, children }) {
   const base = 'px-4 py-2 rounded text-sm font-medium focus:outline-none';
   const variants = {
     primary: 'bg-blue-500 text-white hover:bg-blue-600',
@@ -18,9 +18,9 @@ export default function Button({ variant = 'primary', onClick, children }) {
   return (
     <button
       type="button"
-      className={classNames(base, variants[variant])}
+      className={classNames(base, variants[variant], disabled ? 'opacity-50 cursor-not-allowed' : '')}
       onClick={onClick}
-      disabled={isLoading}
+      disabled={isLoading || disabled}
     >
       {isLoading ? 'Loading...' : children}
     </button>
@@ -30,5 +30,6 @@ export default function Button({ variant = 'primary', onClick, children }) {
 Button.propTypes = {
   variant: PropTypes.oneOf(['primary', 'secondary', 'loading']),
   onClick: PropTypes.func,
+  disabled: PropTypes.bool,
   children: PropTypes.node,
 };
