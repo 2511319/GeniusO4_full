@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { createChart } from 'lightweight-charts';
+import { createBasicChart } from '../utils/chartUtils';
 import { useTheme } from '@mui/material';
 
 /**
@@ -21,17 +21,19 @@ export default function VolumePanel({ volumeData, obvData }) {
   );
 
   useEffect(() => {
-    const chart = createChart(ref.current, {
-      width: ref.current.clientWidth,
-      height: 160,
-      layout: {
-        backgroundColor: theme.palette.background.default,
-        textColor: theme.palette.text.primary,
-      },
-      grid: { vertLines: { visible: false }, horzLines: { color: '#eee' } },
-      rightPriceScale: { scaleMargins: { top: 0.3, bottom: 0 } },
-      timeScale: { timeVisible: true },
-    });
+    const chart = createBasicChart(
+      ref.current,
+      ref.current.clientWidth,
+      160,
+      {
+        layout: {
+          backgroundColor: theme.palette.background.default,
+          textColor: theme.palette.text.primary,
+        },
+        rightPriceScale: { scaleMargins: { top: 0.3, bottom: 0 } },
+        timeScale: { timeVisible: true },
+      }
+    );
 
     const volSeries = chart.addHistogramSeries({
       priceScaleId: '',

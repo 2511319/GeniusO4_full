@@ -1,3 +1,5 @@
+import { createChart } from 'lightweight-charts';
+
 
 export function parseToUnix(dateString) {
   return Math.floor(new Date(dateString).getTime() / 1000);
@@ -129,3 +131,23 @@ export function parseVirtualCandles(raw) {
     close: Number(close)
   }));
 }
+
+export function createBasicChart(ref, width, height, opts = {}) {
+  const { layout = {}, grid = {}, ...rest } = opts;
+  return createChart(ref, {
+    width,
+    height,
+    layout: {
+      backgroundColor: '#fff',
+      textColor: '#000',
+      ...layout,
+    },
+    grid: {
+      vertLines: { visible: false, ...(grid.vertLines || {}) },
+      horzLines: { color: '#eee', ...(grid.horzLines || {}) },
+      ...grid,
+    },
+    ...rest,
+  });
+}
+
