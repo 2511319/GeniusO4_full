@@ -3,12 +3,14 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { createChart } from 'lightweight-charts';
+import { useTheme } from '@mui/material';
 
 /**
  * Рендерит объём и OBV в одном чарте.
  */
 export default function VolumePanel({ volumeData, obvData }) {
   const ref = useRef();
+  const theme = useTheme();
   const coloredVolume = useMemo(
     () => volumeData.map(d => ({
       time: d.time,
@@ -22,7 +24,10 @@ export default function VolumePanel({ volumeData, obvData }) {
     const chart = createChart(ref.current, {
       width: ref.current.clientWidth,
       height: 160,
-      layout: { backgroundColor: '#fff', textColor: '#000' },
+      layout: {
+        backgroundColor: theme.palette.background.default,
+        textColor: theme.palette.text.primary,
+      },
       grid: { vertLines: { visible: false }, horzLines: { color: '#eee' } },
       rightPriceScale: { scaleMargins: { top: 0.3, bottom: 0 } },
       timeScale: { timeVisible: true },
@@ -42,7 +47,7 @@ export default function VolumePanel({ volumeData, obvData }) {
     obvSeries.setData(obvData);
 
     return () => chart.remove();
-  }, [coloredVolume, obvData]);
+  }, [coloredVolume, obvData, theme]);
 
   return <div ref={ref} style={{ width: '100%', height: 160 }} />;
 }

@@ -3,16 +3,21 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { createChart } from 'lightweight-charts';
+import { useTheme } from '@mui/material';
 
 /** Рендер MACD, Signal и Histogram */
 export default function MACDPanel({ macd, signal, histogram }) {
   const ref = useRef();
+  const theme = useTheme();
 
   useEffect(() => {
     const chart = createChart(ref.current, {
       width:  ref.current.clientWidth,
       height: 120,
-      layout: { backgroundColor: '#fff', textColor: '#000' },
+      layout: {
+        backgroundColor: theme.palette.background.default,
+        textColor: theme.palette.text.primary,
+      },
       grid: { vertLines: { visible: false }, horzLines: { color: '#eee' } },
     });
 
@@ -30,7 +35,7 @@ export default function MACDPanel({ macd, signal, histogram }) {
     histSeries.setData(histogram);
 
     return () => chart.remove();
-  }, [macd, signal, histogram]);
+  }, [macd, signal, histogram, theme]);
 
   return <div ref={ref} style={{ width: '100%', height: 120 }} />;
 }
