@@ -5,7 +5,6 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import { createChart, CrosshairMode } from 'lightweight-charts';
-import { Box } from '@mui/material';
 
 import ChartControls from './ChartControls';
 import Legend        from './Legend';
@@ -325,29 +324,23 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
   },[analysis,activeLayers,renderModelLayer]);
 
   return (
-    <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-      <Box
+    <div className="relative w-full h-full">
+      <div
         ref={containerRef}
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 0,
-        }}
+        className="absolute inset-0 w-full h-full z-0"
       />
-      <Box sx={{ position: 'absolute', top: 8, left: 8, zIndex: 3, bgcolor: 'rgba(255,255,255,0.6)', borderRadius: 1 }}>
+      <div className="absolute top-2 left-2 z-30 bg-white/60 rounded">
         <ChartControls
           type={chartType}
           onChange={setChartType}
           setSidebarOpen={setSidebarOpen}
           setCommentsOpen={setCommentsOpen}
         />
-      </Box>
-      <Box sx={{ position: 'absolute', bottom: 8, right: 8, zIndex: 2, bgcolor: 'rgba(255,255,255,0.6)', borderRadius: 1 }}>
+      </div>
+      <div className="absolute bottom-2 right-2 z-20 bg-white/60 rounded">
         <Legend meta={legendMeta} />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 });
 
