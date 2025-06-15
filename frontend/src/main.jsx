@@ -4,12 +4,15 @@ import { Provider } from 'react-redux';
 
 import App from './App';
 import { store } from './store';
+import ColorModeProvider from './components/ColorModeContext';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <ColorModeProvider>
+        <App />
+      </ColorModeProvider>
     </Provider>
   </React.StrictMode>
 );
