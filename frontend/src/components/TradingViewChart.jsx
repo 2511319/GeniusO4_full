@@ -148,6 +148,10 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
   // 5. Технические overlay
   useEffect(() => {
     const ind = analysis;
+    const hasData = k => Array.isArray(ind[k]) && ind[k].length;
+    const warnIfMissing = k => {
+      if (activeLayers.includes(k) && !hasData(k)) console.warn('No data for ' + k);
+    };
     const register = (k,s,c,d,i) => {
       seriesStore.current[k] = s;
       onSeriesMetaChange?.({ key:k, name:prettify(k), color:c, dashed:d, icon:i });
@@ -163,72 +167,88 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
 
     // MA
     [['MA_20','#2979ff'],['MA_50','#0288d1'],['MA_100','#0277bd'],['MA_200','#01579b']].forEach(([key,color])=>{
-      if(activeLayers.includes(key)&&Array.isArray(ind[key])){
-        const s=chartRef.current.addLineSeries({ color, lineWidth:1 });
-        s.setData(ind[key].map(p=>({time:parseToUnix(p.date),value:p.value})));
-        chartRef.current.timeScale().fitContent();
-        register(key,s,color,false,'─');
+      if(activeLayers.includes(key)){
+        if(hasData(key)){
+          const s=chartRef.current.addLineSeries({ color, lineWidth:1 });
+          s.setData(ind[key].map(p=>({time:parseToUnix(p.date),value:p.value})));
+          chartRef.current.timeScale().fitContent();
+          register(key,s,color,false,'─');
+        } else warnIfMissing(key);
       }
     });
 
     // VWAP
-    if(activeLayers.includes('VWAP')&&Array.isArray(ind.VWAP)){
-      const s=chartRef.current.addLineSeries({ color:'#ff9800', lineWidth:1 });
-      s.setData(ind.VWAP.map(p=>({time:parseToUnix(p.date),value:p.value})));
-      chartRef.current.timeScale().fitContent();
-      register('VWAP',s,'#ff9800',false,'─');
+    if(activeLayers.includes('VWAP')){
+      if(hasData('VWAP')){
+        const s=chartRef.current.addLineSeries({ color:'#ff9800', lineWidth:1 });
+        s.setData(ind.VWAP.map(p=>({time:parseToUnix(p.date),value:p.value})));
+        chartRef.current.timeScale().fitContent();
+        register('VWAP',s,'#ff9800',false,'─');
+      } else warnIfMissing('VWAP');
     }
 
     // Bollinger Bands
     [['Bollinger_Middle','#9e9e9e',0],['Bollinger_Upper','#bdbdbd',2],['Bollinger_Lower','#bdbdbd',2]]
       .forEach(([key,color,style])=>{
-        if(activeLayers.includes(key)&&Array.isArray(ind[key])){
-          const s=chartRef.current.addLineSeries({ color, lineWidth:1, lineStyle:style });
-          s.setData(ind[key].map(p=>({time:parseToUnix(p.date),value:p.value})));
-          chartRef.current.timeScale().fitContent();
-          register(key,s,color,style!==0,'─');
+        if(activeLayers.includes(key)){
+          if(hasData(key)){
+            const s=chartRef.current.addLineSeries({ color, lineWidth:1, lineStyle:style });
+            s.setData(ind[key].map(p=>({time:parseToUnix(p.date),value:p.value})));
+            chartRef.current.timeScale().fitContent();
+            register(key,s,color,style!==0,'─');
+          } else warnIfMissing(key);
         }
       });
 
     // Envelope
     ['Moving_Average_Envelope_Upper','Moving_Average_Envelope_Lower'].forEach(key=>{
-      if(activeLayers.includes(key)&&Array.isArray(ind[key])){
-        const color='#4caf50';
-        const s=chartRef.current.addLineSeries({ color, lineWidth:1, lineStyle:2 });
-        s.setData(ind[key].map(p=>({time:parseToUnix(p.date),value:p.value})));
-        chartRef.current.timeScale().fitContent();
-        register(key,s,color,true,'─');
+      if(activeLayers.includes(key)){
+        if(hasData(key)){
+          const color='#4caf50';
+          const s=chartRef.current.addLineSeries({ color, lineWidth:1, lineStyle:2 });
+          s.setData(ind[key].map(p=>({time:parseToUnix(p.date),value:p.value})));
+          chartRef.current.timeScale().fitContent();
+          register(key,s,color,true,'─');
+        } else warnIfMissing(key);
       }
     });
 
     // Parabolic SAR
-    if(activeLayers.includes('Parabolic_SAR')&&Array.isArray(ind.Parabolic_SAR)){
-      const s=chartRef.current.addLineSeries({ lineWidth:0 });
-      s.setMarkers(ind.Parabolic_SAR.map(p=>({
-        time:parseToUnix(p.date),
-        position:p.value>priceData[priceData.length-1].low?'aboveBar':'belowBar',
-        color:'#ffeb3b',
-        shape:'circle'
-      })));
-      chartRef.current.timeScale().fitContent();
-      register('Parabolic_SAR',s,'#ffeb3b',false,'•');
+    if(activeLayers.includes('Parabolic_SAR')){
+      if(hasData('Parabolic_SAR')){
+        const s=chartRef.current.addLineSeries({ lineWidth:0 });
+        s.setMarkers(ind.Parabolic_SAR.map(p=>({
+          time:parseToUnix(p.date),
+          position:p.value>priceData[priceData.length-1].low?'aboveBar':'belowBar',
+          color:'#ffeb3b',
+          shape:'circle'
+        })));
+        chartRef.current.timeScale().fitContent();
+        register('Parabolic_SAR',s,'#ffeb3b',false,'•');
+      } else warnIfMissing('Parabolic_SAR');
     }
 
     // Ichimoku
-    if(activeLayers.includes('Ichimoku_Conversion_Line')&&Array.isArray(ind.Ichimoku_Conversion_Line)){
-      const s=chartRef.current.addLineSeries({ color:'#d32f2f',lineWidth:1 });
-      s.setData(ind.Ichimoku_Conversion_Line.map(p=>({time:parseToUnix(p.date),value:p.value})));
-      chartRef.current.timeScale().fitContent();
-      register('Ichimoku_Conversion_Line',s,'#d32f2f',false,'─');
+    if(activeLayers.includes('Ichimoku_Conversion_Line')){
+      if(hasData('Ichimoku_Conversion_Line')){
+        const s=chartRef.current.addLineSeries({ color:'#d32f2f',lineWidth:1 });
+        s.setData(ind.Ichimoku_Conversion_Line.map(p=>({time:parseToUnix(p.date),value:p.value})));
+        chartRef.current.timeScale().fitContent();
+        register('Ichimoku_Conversion_Line',s,'#d32f2f',false,'─');
+      } else warnIfMissing('Ichimoku_Conversion_Line');
     }
-    if(activeLayers.includes('Ichimoku_Base_Line')&&Array.isArray(ind.Ichimoku_Base_Line)){
-      const s=chartRef.current.addLineSeries({ color:'#1976d2',lineWidth:1 });
-      s.setData(ind.Ichimoku_Base_Line.map(p=>({time:parseToUnix(p.date),value:p.value})));
-      chartRef.current.timeScale().fitContent();
-      register('Ichimoku_Base_Line',s,'#1976d2',false,'─');
+    if(activeLayers.includes('Ichimoku_Base_Line')){
+      if(hasData('Ichimoku_Base_Line')){
+        const s=chartRef.current.addLineSeries({ color:'#1976d2',lineWidth:1 });
+        s.setData(ind.Ichimoku_Base_Line.map(p=>({time:parseToUnix(p.date),value:p.value})));
+        chartRef.current.timeScale().fitContent();
+        register('Ichimoku_Base_Line',s,'#1976d2',false,'─');
+      } else warnIfMissing('Ichimoku_Base_Line');
     }
+    if(activeLayers.includes('Ichimoku_A')) warnIfMissing('Ichimoku_A');
+    if(activeLayers.includes('Ichimoku_B')) warnIfMissing('Ichimoku_B');
     if(activeLayers.includes('Ichimoku_A')&&activeLayers.includes('Ichimoku_B')
-       &&Array.isArray(ind.Ichimoku_A)&&Array.isArray(ind.Ichimoku_B)){
+       &&hasData('Ichimoku_A')&&hasData('Ichimoku_B')){
       const cloud=chartRef.current.addAreaSeries({
         topColor:'rgba(156,39,176,0.2)',
         bottomColor:'rgba(156,39,176,0.05)',
