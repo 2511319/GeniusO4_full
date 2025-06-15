@@ -2,7 +2,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Typography, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 
 /**
  * Legend — простая легенда, в которую передаётся массив meta:
@@ -10,54 +9,31 @@ import { Box, Typography, List, ListItem, ListItemIcon, ListItemText } from '@mu
  */
 export default function Legend({ meta = [], orientation = 'vertical' }) {  // meta по умолчанию = []
   return (
-    <Box sx={(theme) => ({
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      zIndex: 2,
-      bgcolor: theme.palette.background.paper,
-      maxHeight: 200,
-      overflowY: 'auto',
-      p: theme.spacing(1),
-      borderRadius: theme.shape.borderRadius,
-    })}>
-      <Typography variant="subtitle2" gutterBottom>Legend</Typography>
-      <List
-        dense
-        disablePadding
-        sx={{
-          display: 'flex',
-          flexDirection: orientation === 'horizontal' ? 'row' : 'column',
-          flexWrap: orientation === 'horizontal' ? 'wrap' : 'nowrap',
-        }}
+    <div className="absolute bottom-0 left-0 z-20 bg-white max-h-[200px] overflow-y-auto p-1 rounded">
+      <h6 className="text-xs font-semibold mb-1">Legend</h6>
+      <ul
+        className={`flex ${orientation === 'horizontal' ? 'flex-row flex-wrap' : 'flex-col'} list-none p-0 m-0`}
       >
         {meta.map(item => (
-          <ListItem
+          <li
             key={item.key}
-            button
             onClick={item.onToggle}  // onToggle можно добавить в meta
+            className="flex items-center cursor-pointer px-1 py-0.5"
           >
-            <ListItemIcon>
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  bgcolor: item.color,
-                  border: item.dashed ? '1px dashed' : 'none',
-                  display: 'inline-block',
-                }}
-              >
-                {item.icon && <Typography component="span" sx={{ fontSize: 10 }}>{item.icon}</Typography>}
-              </Box>
-            </ListItemIcon>
-            <ListItemText
-              primary={item.name}
-              sx={{ textDecoration: item.visible ? 'none' : 'line-through' }}
-            />
-          </ListItem>
+            <span
+              className="inline-block w-3 h-3 mr-1"
+              style={{
+                backgroundColor: item.color,
+                border: item.dashed ? '1px dashed' : 'none',
+              }}
+            >
+              {item.icon && <span className="text-[10px]">{item.icon}</span>}
+            </span>
+            <span className={item.visible ? '' : 'line-through'}>{item.name}</span>
+          </li>
         ))}
-      </List>
-    </Box>
+      </ul>
+    </div>
   );
 }
 
