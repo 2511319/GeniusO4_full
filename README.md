@@ -19,6 +19,7 @@ This document describes the architecture, components, data flow, and coding conv
    - VolumePanel
    - OscillatorsPanel
    - MACDPanel
+   - Spinner
 7. Indicator Categories and Grouping
 8. Tooltip Rules
 9. Virtual Candles (Forecast)
@@ -28,12 +29,12 @@ This document describes the architecture, components, data flow, and coding conv
 13. License
 
 ## 1. Introduction
-The GeniusO4 application visualizes financial data and analysis overlays returned by a machine learning model. It uses the TradingView Charting Library for rendering interactive charts. This README provides detailed information about file organization, component responsibilities, and data contracts.
+The GeniusO4 application visualizes financial data and analysis overlays returned by a machine learning model. It uses the `lightweight-charts` library для отрисовки интерактивных свечей. This README provides detailed information about file organization, component responsibilities, and data contracts.
 
 ## 2. Technology Stack
 - React (version 18)  
 - JavaScript (ES6) or TypeScript  
-- TradingView Charting Library  
+- `lightweight-charts` — используется для отрисовки интерактивных свечей
 - Material-UI for user interface controls  
 - Axios or Fetch API for data requests  
 - Redux or React Context for state management  
@@ -123,6 +124,9 @@ npm run dev
 ### VolumePanel
 ### OscillatorsPanel
 ### MACDPanel
+
+### Spinner
+- Small SVG component used for loading state animations.
 
 Example usage of side panel flags:
 ```jsx

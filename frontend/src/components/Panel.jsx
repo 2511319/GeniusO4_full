@@ -1,0 +1,60 @@
+// src/components/Panel.jsx
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { Menu, Transition } from '@headlessui/react';
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
+
+export default function Panel({ label, items = [] }) {
+  return (
+    <Menu as="div" className="relative inline-block text-left">
+      <div>
+        <Menu.Button className="inline-flex justify-center w-full rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600">
+          {label}
+        </Menu.Button>
+      </div>
+      <Transition
+        as={Fragment}
+        enter="transition ease-out duration-100"
+        enterFrom="transform opacity-0 scale-95"
+        enterTo="transform opacity-100 scale-100"
+        leave="transition ease-in duration-75"
+        leaveFrom="opacity-100 scale-100"
+        leaveTo="opacity-0 scale-95"
+      >
+        <Menu.Items className="absolute right-0 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="py-1">
+            {items.map(item => (
+              <Menu.Item key={item.label}>
+                {({ active }) => (
+                  <button
+                    type="button"
+                    onClick={item.onClick}
+                    className={classNames(
+                      active ? 'bg-gray-100' : '',
+                      'block px-4 py-2 text-sm text-gray-700 w-full text-left'
+                    )}
+                  >
+                    {item.label}
+                  </button>
+                )}
+              </Menu.Item>
+            ))}
+          </div>
+        </Menu.Items>
+      </Transition>
+    </Menu>
+  );
+}
+
+Panel.propTypes = {
+  label: PropTypes.string.isRequired,
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      onClick: PropTypes.func,
+    })
+  ),
+};
