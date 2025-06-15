@@ -36,10 +36,11 @@ export default function Home({ sidebarOpen, commentsOpen, setSidebarOpen, setCom
   const [legendMeta, setLegendMeta]     = useState([]);
   const [errorOpen, setErrorOpen]       = useState(false);
   const chartApiRef                     = useRef(null);
+  const fetchTimer                      = useRef(null);
 
   const token = useSelector(state => state.auth.token);
 
-  async function fetchAll(symbolParam, intervalParam, limitParam) {
+  const fetchAll = useCallback(async (symbolParam, intervalParam, limitParam) => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const resp = await axios.post('/api/analyze', {
       symbol: symbolParam,
@@ -73,11 +74,34 @@ export default function Home({ sidebarOpen, commentsOpen, setSidebarOpen, setCom
       ...modelAnalysis,
       ...forecast,
     ]);
-  }
+  }, [token]);
+
+  const scheduleFetch = useCallback((sym, intv, lim) => {
+    if (fetchTimer.current) clearTimeout(fetchTimer.current);
+    fetchTimer.current = setTimeout(() => {
+      fetchAll(sym, intv, lim);
+    }, 300);
+  }, [fetchAll]);
 
   useEffect(() => {
     fetchAll(symbol, interval, limit);
-  }, []);
+  }, []); // initial load
+
+  const handleIntervalChange = useCallback(
+    (val) => {
+      setInterval(val);
+      scheduleFetch(symbol, val, limit);
+    },
+    [symbol, limit, scheduleFetch]
+  );
+
+  const handleLimitChange = useCallback(
+    (val) => {
+      setLimit(val);
+      scheduleFetch(symbol, interval, val);
+    },
+    [symbol, interval, scheduleFetch]
+  );
 
   // Заготовка функции скрытия/показа серии (надо реализовать в TradingViewChart через callback или context)
   const toggleSeriesVisibility = (key) => {
@@ -139,9 +163,9 @@ export default function Home({ sidebarOpen, commentsOpen, setSidebarOpen, setCom
             symbol={symbol}
             setSymbol={setSymbol}
             interval={interval}
-            setInterval={setInterval}
+            onIntervalChange={handleIntervalChange}
             limit={limit}
-            setLimit={setLimit}
+            onLimitChange={handleLimitChange}
             onAnalyze={onAnalyze}
             onLoadTest={onLoadTest}
           />
