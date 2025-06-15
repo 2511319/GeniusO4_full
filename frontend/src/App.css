@@ -4,7 +4,6 @@
 
 .container {
   padding: calc(var(--spacing-unit) * 1.25);
-  font-family: Arial, sans-serif;
 }
 
 .form-group {
