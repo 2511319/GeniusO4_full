@@ -3,7 +3,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
-import { Box, Typography, Divider } from '@mui/material';
 
 /**
  * Панель Insights для прочих разделов анализа:
@@ -32,65 +31,58 @@ export default function InsightsPanel({ analysis }) {
       initial={{ opacity: 0, y: 10 }}
       animate={show ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
     >
-      <Box sx={{
-        width: '100%',
-        maxHeight: '40%',
-        bgcolor: '#fafafa',
-        overflowY: 'auto',
-        p: 1,
-        boxSizing: 'border-box',
-      }}>
-      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Indicators Analysis</Typography>
+      <div className="w-full max-h-[40%] bg-gray-50 overflow-y-auto p-1 box-border">
+      <h6 className="text-sm font-semibold mt-1 mb-1">Indicators Analysis</h6>
       {Object.entries(ia).map(([key, val]) => (
         typeof val === 'object' && (
-          <Box key={key} sx={{ mb: 1 }}>
-            <Typography variant="subtitle2">{key}</Typography>
+          <div key={key} className="mb-1">
+            <div className="text-xs font-semibold">{key}</div>
             {Object.entries(val).map(([field, value]) => (
-              <Typography key={field} variant="body2">
+              <div key={field} className="text-sm">
                 {field}: {value}
-              </Typography>
+              </div>
             ))}
-          </Box>
+          </div>
         )
       ))}
-      <Divider sx={{ my: 1 }} />
+      <hr className="my-1 border-gray-200" />
 
-      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Volume Analysis</Typography>
-      {va.volume_trends && <Typography variant="body2">{va.volume_trends}</Typography>}
+      <h6 className="text-sm font-semibold mt-1 mb-1">Volume Analysis</h6>
+      {va.volume_trends && <div className="text-sm">{va.volume_trends}</div>}
       {(va.significant_volume_changes || []).map((item,i) => (
-        <Typography key={i} variant="body2">
+        <div key={i} className="text-sm">
           {item.date}: {item.explanation}
-        </Typography>
+        </div>
       ))}
-      <Divider sx={{ my: 1 }} />
+      <hr className="my-1 border-gray-200" />
 
-      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Indicator Correlations</Typography>
-      {ic.explanation && <Typography variant="body2">{ic.explanation}</Typography>}
-      <Divider sx={{ my: 1 }} />
+      <h6 className="text-sm font-semibold mt-1 mb-1">Indicator Correlations</h6>
+      {ic.explanation && <div className="text-sm">{ic.explanation}</div>}
+      <hr className="my-1 border-gray-200" />
 
-      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Pivot Points</Typography>
+      <h6 className="text-sm font-semibold mt-1 mb-1">Pivot Points</h6>
       {['daily','weekly','monthly'].map(ps => (
-        <Box key={ps}>
-          <Typography variant="subtitle2">{ps.toUpperCase()}</Typography>
+        <div key={ps}>
+          <div className="text-xs font-semibold">{ps.toUpperCase()}</div>
           {(pp[ps] || []).map((p,i) => (
-            <Typography key={i} variant="body2">
+            <div key={i} className="text-sm">
               {p.date}: Pivot={p.pivot}, S1={p.support1}, R1={p.resistance1}
-            </Typography>
+            </div>
           ))}
-        </Box>
+        </div>
       ))}
-      <Divider sx={{ my: 1 }} />
+      <hr className="my-1 border-gray-200" />
 
-      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Risk Management</Typography>
+      <h6 className="text-sm font-semibold mt-1 mb-1">Risk Management</h6>
       {(rm.rules || []).map((rule,i) => (
-        <Typography key={i} variant="body2">{rule}</Typography>
+        <div key={i} className="text-sm">{rule}</div>
       ))}
-      <Divider sx={{ my: 1 }} />
+      <hr className="my-1 border-gray-200" />
 
-      <Typography variant="h6" sx={{ mt: 1, mb: 1 }}>Feedback</Typography>
-      {fb.note && <Typography variant="body2">{fb.note}</Typography>}
-      {fb.suggestions && <Typography variant="body2">{fb.suggestions}</Typography>}
-      </Box>
+      <h6 className="text-sm font-semibold mt-1 mb-1">Feedback</h6>
+      {fb.note && <div className="text-sm">{fb.note}</div>}
+      {fb.suggestions && <div className="text-sm">{fb.suggestions}</div>}
+      </div>
     </motion.div>
   );
 }

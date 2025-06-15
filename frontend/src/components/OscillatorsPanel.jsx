@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Box, useTheme } from '@mui/material';
+// Используем простые элементы вместо MUI
+
 import { createBasicChart } from '../utils/chartUtils';
 
 /** Рендер RSI, Stochastic и Williams %R в отдельных панелях */
@@ -10,7 +11,6 @@ export default function OscillatorsPanel({ rsi, stochastic, williams }) {
   const rsiRef     = useRef();
   const stoRef     = useRef();
   const willRef    = useRef();
-  const theme      = useTheme();
 
   useEffect(() => {
     // RSI
@@ -20,8 +20,8 @@ export default function OscillatorsPanel({ rsi, stochastic, williams }) {
       120,
       {
         layout: {
-          backgroundColor: theme.palette.background.default,
-          textColor: theme.palette.text.primary,
+          backgroundColor: '#ffffff',
+          textColor: '#000000',
         },
       }
     );
@@ -36,8 +36,8 @@ export default function OscillatorsPanel({ rsi, stochastic, williams }) {
       120,
       {
         layout: {
-          backgroundColor: theme.palette.background.default,
-          textColor: theme.palette.text.primary,
+          backgroundColor: '#ffffff',
+          textColor: '#000000',
         },
       }
     );
@@ -53,8 +53,8 @@ export default function OscillatorsPanel({ rsi, stochastic, williams }) {
       120,
       {
         layout: {
-          backgroundColor: theme.palette.background.default,
-          textColor: theme.palette.text.primary,
+          backgroundColor: '#ffffff',
+          textColor: '#000000',
         },
       }
     );
@@ -66,14 +66,14 @@ export default function OscillatorsPanel({ rsi, stochastic, williams }) {
       stoChart.remove();
       wilChart.remove();
     };
-  }, [rsi, stochastic, williams, theme]);
+  }, [rsi, stochastic, williams]);
 
   return (
-    <Box>
-      <Box ref={rsiRef} sx={{ mb: 1 }} />
-      <Box ref={stoRef} sx={{ mb: 1 }} />
-      <Box ref={willRef} />
-    </Box>
+    <div>
+      <div ref={rsiRef} className="mb-1" />
+      <div ref={stoRef} className="mb-1" />
+      <div ref={willRef} />
+    </div>
   );
 }
 
