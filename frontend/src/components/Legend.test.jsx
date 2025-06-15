@@ -27,7 +27,8 @@ describe('Legend', () => {
         meta={[{ key: 'v', name: 'Volume', color: '#000', visible: true }]}
       />
     );
-    const list = screen.getByRole('list');
-    expect(list).toHaveStyle({ flexDirection: 'row' });
+    const lists = screen.getAllByRole('list');
+    const list = lists[lists.length - 1];
+    expect(list).toHaveClass('flex-row');
   });
 });
