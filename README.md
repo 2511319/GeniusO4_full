@@ -7,6 +7,7 @@ This document describes the architecture, components, data flow, and coding conv
 2. Technology Stack
 3. Project Structure
 4. How to Run
+   - Frontend V2 (experimental)
 5. Data Flow and JSON Schema
 6. UI Components
    - TradingViewChart
@@ -45,6 +46,7 @@ The GeniusO4 application visualizes financial data and analysis overlays returne
 .
 ├── api/            # FastAPI backend
 ├── frontend/       # React application
+├── frontend_v2/    # React + TypeScript (experimental)
 │   ├── src
 │   │   ├── components/
 │   │   ├── pages/
@@ -69,6 +71,13 @@ The script starts FastAPI on port 8000 and the Vite dev server on 5173.
 To launch only the React app:
 ```bash
 cd frontend
+npm install
+npm run dev
+```
+
+### Frontend V2 (experimental)
+```bash
+cd frontend_v2
 npm install
 npm run dev
 ```
