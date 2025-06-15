@@ -2,17 +2,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Drawer,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Checkbox,
-  FormControlLabel,
-  Typography,
-  Box,
-} from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Disclosure } from '@headlessui/react';
+import { ChevronUpIcon } from '@heroicons/react/24/outline';
 
 import groups, {
   overlays,
@@ -34,43 +25,43 @@ export default function IndicatorsSidebar({ activeLayers, setActiveLayers }) {
   };
 
   const renderGroup = (title, keys) => (
-    <Accordion key={title} defaultExpanded>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography sx={{ mt: 1, mb: 1 }}>{title}</Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        {keys.map(key => (
-          <FormControlLabel
-            key={key}
-            control={
-              <Checkbox
-                checked={activeLayers.includes(key)}
-                onChange={() => toggle(key)}
-              />
-            }
-            label={key}
-          />
-        ))}
-      </AccordionDetails>
-    </Accordion>
+    <Disclosure as="div" key={title} defaultOpen>
+      {({ open }) => (
+        <>
+          <Disclosure.Button className="w-full flex justify-between items-center py-1 text-sm font-medium">
+            <span>{title}</span>
+            <ChevronUpIcon
+              className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`}
+            />
+          </Disclosure.Button>
+          <Disclosure.Panel className="pl-2 space-y-1">
+            {keys.map(key => (
+              <label key={key} className="flex items-center gap-1 text-sm">
+                <input
+                  type="checkbox"
+                  checked={activeLayers.includes(key)}
+                  onChange={() => toggle(key)}
+                  className="rounded"
+                />
+                {key}
+              </label>
+            ))}
+          </Disclosure.Panel>
+        </>
+      )}
+    </Disclosure>
   );
 
   return (
-    <Drawer
-      variant="permanent"
-      anchor="left"
-      sx={{ width: 240, flexShrink: 0, zIndex: 1 }}
-    >
-      <Box sx={{ width: 240, pt: 2, p: 1, boxSizing: 'border-box' }}>
-        {renderGroup('Overlays', overlays)}
-        {renderGroup('Volume', volume)}
-        {renderGroup('Momentum', momentum)}
-        {renderGroup('Volatility', volatility)}
-        {renderGroup('MACD', macd)}
-        {renderGroup('Model Analysis', modelAnalysis)}
-        {renderGroup('Forecast', forecast)}
-      </Box>
-    </Drawer>
+    <div className="w-60 h-full fixed left-0 top-0 bg-white shadow overflow-y-auto p-2 transition-transform">
+      {renderGroup('Overlays', overlays)}
+      {renderGroup('Volume', volume)}
+      {renderGroup('Momentum', momentum)}
+      {renderGroup('Volatility', volatility)}
+      {renderGroup('MACD', macd)}
+      {renderGroup('Model Analysis', modelAnalysis)}
+      {renderGroup('Forecast', forecast)}
+    </div>
   );
 }
 
