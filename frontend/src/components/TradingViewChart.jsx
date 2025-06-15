@@ -76,6 +76,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
     });
     const ps = chartRef.current.addCandlestickSeries();
     ps.setData(priceData);
+    chartRef.current.timeScale().fitContent();
     seriesStore.current.price = ps;
 
     const handleResize = () => {
@@ -92,7 +93,12 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
     };
   }, []);
 
-  useEffect(() => { seriesStore.current.price?.setData(priceData); }, [priceData]);
+  useEffect(() => {
+    if (seriesStore.current.price) {
+      seriesStore.current.price.setData(priceData);
+      chartRef.current.timeScale().fitContent();
+    }
+  }, [priceData]);
 
   // Обновление серии объёма при смене слоя или данных
   useEffect(() => {
@@ -109,6 +115,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
         seriesStore.current.volume = vs;
       }
       vs.setData(volumeData);
+      chartRef.current.timeScale().fitContent();
       vs.applyOptions({ visible: true });
     } else if (vs) {
       vs.applyOptions({ visible: false });
@@ -128,6 +135,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
         borderVisible: true, priceFormat: { type: 'ohlc' }, lastValueVisible: false,
       });
       fs.setData(forecast);
+      chartRef.current.timeScale().fitContent();
       seriesStore.current.forecast = fs;
       onSeriesMetaChange?.({
         key: 'price_prediction',
@@ -159,6 +167,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
       if(activeLayers.includes(key)&&Array.isArray(ind[key])){
         const s=chartRef.current.addLineSeries({ color, lineWidth:1 });
         s.setData(ind[key].map(p=>({time:parseToUnix(p.date),value:p.value})));
+        chartRef.current.timeScale().fitContent();
         register(key,s,color,false,'─');
       }
     });
@@ -166,7 +175,8 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
     // VWAP
     if(activeLayers.includes('VWAP')&&Array.isArray(ind.VWAP)){
       const s=chartRef.current.addLineSeries({ color:'#ff9800', lineWidth:1 });
-      s.setData(ind.VWAP.map(p=>({time:parseToUnix(p.date),value:p.value}))); 
+      s.setData(ind.VWAP.map(p=>({time:parseToUnix(p.date),value:p.value})));
+      chartRef.current.timeScale().fitContent();
       register('VWAP',s,'#ff9800',false,'─');
     }
 
@@ -176,6 +186,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
         if(activeLayers.includes(key)&&Array.isArray(ind[key])){
           const s=chartRef.current.addLineSeries({ color, lineWidth:1, lineStyle:style });
           s.setData(ind[key].map(p=>({time:parseToUnix(p.date),value:p.value})));
+          chartRef.current.timeScale().fitContent();
           register(key,s,color,style!==0,'─');
         }
       });
@@ -186,6 +197,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
         const color='#4caf50';
         const s=chartRef.current.addLineSeries({ color, lineWidth:1, lineStyle:2 });
         s.setData(ind[key].map(p=>({time:parseToUnix(p.date),value:p.value})));
+        chartRef.current.timeScale().fitContent();
         register(key,s,color,true,'─');
       }
     });
@@ -199,18 +211,21 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
         color:'#ffeb3b',
         shape:'circle'
       })));
+      chartRef.current.timeScale().fitContent();
       register('Parabolic_SAR',s,'#ffeb3b',false,'•');
     }
 
     // Ichimoku
     if(activeLayers.includes('Ichimoku_Conversion_Line')&&Array.isArray(ind.Ichimoku_Conversion_Line)){
       const s=chartRef.current.addLineSeries({ color:'#d32f2f',lineWidth:1 });
-      s.setData(ind.Ichimoku_Conversion_Line.map(p=>({time:parseToUnix(p.date),value:p.value}))); 
+      s.setData(ind.Ichimoku_Conversion_Line.map(p=>({time:parseToUnix(p.date),value:p.value})));
+      chartRef.current.timeScale().fitContent();
       register('Ichimoku_Conversion_Line',s,'#d32f2f',false,'─');
     }
     if(activeLayers.includes('Ichimoku_Base_Line')&&Array.isArray(ind.Ichimoku_Base_Line)){
       const s=chartRef.current.addLineSeries({ color:'#1976d2',lineWidth:1 });
-      s.setData(ind.Ichimoku_Base_Line.map(p=>({time:parseToUnix(p.date),value:p.value}))); 
+      s.setData(ind.Ichimoku_Base_Line.map(p=>({time:parseToUnix(p.date),value:p.value})));
+      chartRef.current.timeScale().fitContent();
       register('Ichimoku_Base_Line',s,'#1976d2',false,'─');
     }
     if(activeLayers.includes('Ichimoku_A')&&activeLayers.includes('Ichimoku_B')
@@ -220,7 +235,8 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
         bottomColor:'rgba(156,39,176,0.05)',
         lineColor:'rgba(156,39,176,0.6)'
       });
-      cloud.setData(ind.Ichimoku_A.map(p=>({time:parseToUnix(p.date),value:p.value}))); 
+      cloud.setData(ind.Ichimoku_A.map(p=>({time:parseToUnix(p.date),value:p.value})));
+      chartRef.current.timeScale().fitContent();
       register('Ichimoku_Cloud',cloud,'rgba(156,39,176,0.6)',false,'▧');
     }
   },[analysis,activeLayers,priceData]);
@@ -238,6 +254,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
       arr.forEach((it,i)=>{
         const s=chartRef.current.addLineSeries({color:it.type==='support'?'green':'red',lineWidth:1});
         s.setData([{time:parseToUnix(it.date),value:it.level},{time:priceData[priceData.length-1].time,value:it.level}]);
+        chartRef.current.timeScale().fitContent();
         register(`${layer}_${i}`,s,s.options().color,false,'─');
       });
       return;
@@ -246,6 +263,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
       arr.forEach((it,i)=>{
         const s=chartRef.current.addLineSeries({color:it.type==='ascending'?'green':'red',lineWidth:2});
         s.setData([{time:parseToUnix(it.start_point.date),value:it.start_point.price},{time:parseToUnix(it.end_point.date),value:it.end_point.price}]);
+        chartRef.current.timeScale().fitContent();
         register(`${layer}_${i}`,s,s.options().color,false,'─');
       });
       return;
@@ -255,6 +273,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
         fib.levels.forEach((lvl,j)=>{
           const s=chartRef.current.addLineSeries({color:lvl.color,lineStyle:2,lineWidth:1});
           s.setData([{time:parseToUnix(fib.start_point.date),value:lvl.value},{time:parseToUnix(fib.end_point.date),value:lvl.value}]);
+          chartRef.current.timeScale().fitContent();
           register(`${layer}_${i}_${j}`,s,lvl.color,true,'─');
         });
       });
@@ -275,6 +294,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
           s.setData([{time:parseToUnix(z.date),value:low},{time:parseToUnix(z.date),value:high}]);
           console.warn(`Missing coords for ${layer}[${i}], fallback used`);
         }
+        chartRef.current.timeScale().fitContent();
         register(`${layer}_${i}`,s,'rgba(0,123,255,0.5)',false,'▧');
       });
     });
@@ -283,6 +303,7 @@ const TradingViewChart = React.forwardRef(function TradingViewChart({
       arr.forEach((it,i)=>{
         const s=chartRef.current.addLineSeries({lineWidth:0});
         s.setMarkers([{time:parseToUnix(it.date),position:'aboveBar',color:'#ff00ff',shape:'circle',text:it.type[0]||''}]);
+        chartRef.current.timeScale().fitContent();
         register(`${layer}_${i}`,s,'#ff00ff',false,'●');
       });
     });
