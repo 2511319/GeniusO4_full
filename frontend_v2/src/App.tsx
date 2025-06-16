@@ -1,9 +1,10 @@
 import TradingViewChart from './components/TradingViewChart'
+import type { UTCTimestamp } from 'lightweight-charts'
 
 const sampleData = [
-  { time: 1640995200, open: 100, high: 105, low: 95, close: 102 },
-  { time: 1641081600, open: 102, high: 110, low: 101, close: 108 },
-  { time: 1641168000, open: 108, high: 112, low: 107, close: 111 },
+  { time: 1640995200 as UTCTimestamp, open: 100, high: 105, low: 95, close: 102 },
+  { time: 1641081600 as UTCTimestamp, open: 102, high: 110, low: 101, close: 108 },
+  { time: 1641168000 as UTCTimestamp, open: 108, high: 112, low: 107, close: 111 },
 ]
 
 export default function App() {
