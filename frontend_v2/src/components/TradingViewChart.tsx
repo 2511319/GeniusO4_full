@@ -22,7 +22,8 @@ export default function TradingViewChart({ data }: Props) {
       width: containerRef.current.clientWidth,
       height: containerRef.current.clientHeight,
     })
-    const series = chart.addCandlestickSeries()
+    // cast chart to any to access addCandlestickSeries API
+    const series = (chart as any).addCandlestickSeries()
     series.setData(data)
     chart.timeScale().fitContent()
     return () => {
