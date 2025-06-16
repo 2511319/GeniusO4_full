@@ -23,6 +23,7 @@ export default function TradingViewChart({ data }: Props) {
       height: containerRef.current.clientHeight,
     })
     // cast chart to any to access addCandlestickSeries API
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const series = (chart as any).addCandlestickSeries()
     series.setData(data)
     chart.timeScale().fitContent()
