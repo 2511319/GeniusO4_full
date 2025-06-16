@@ -354,7 +354,7 @@ class DataProcessor:
         if nulls:
             logger.debug(f"После очистки осталось {nulls} NaN, заменяем на None")
         # Заменяем NaN и NaT на None для корректной сериализации в JSON
-        ohlc_data = ohlc_data.where(pd.notnull(ohlc_data), None)
+        ohlc_data = ohlc_data.astype(object).where(pd.notnull(ohlc_data), None)
 
         ohlc_data = ohlc_data.to_dict(orient='records')
         return ohlc_data
@@ -370,4 +370,9 @@ class DataProcessor:
             self.drop_null_indicators()
         self.sanitize()
         self.find_candlestick_patterns()
+        # Финальная замена NaN и бесконечных значений для корректной сериализации
+        self.df.replace([np.inf, -np.inf], np.nan, inplace=True)
+        self.df.ffill(inplace=True)
+        self.df.bfill(inplace=True)
+        self.df = self.df.astype(object).where(pd.notnull(self.df), None)
         return self.df
