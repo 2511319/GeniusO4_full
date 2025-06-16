@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { createChart, type IChartApi } from 'lightweight-charts'
+import { createChart, CandlestickSeries, type IChartApi, type UTCTimestamp } from 'lightweight-charts'
 
 type Candle = {
-  time: number
+  time: UTCTimestamp
   open: number
   high: number
   low: number
@@ -16,7 +16,7 @@ interface Props {
 export default function TradingViewChart({ data }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const chartRef = useRef<IChartApi | null>(null)
-  const seriesRef = useRef<ReturnType<IChartApi['addCandlestickSeries']> | null>(null)
+  const seriesRef = useRef<ReturnType<IChartApi['addSeries']> | null>(null)
 
   useEffect(() => {
     if (!containerRef.current || chartRef.current) return
@@ -24,7 +24,7 @@ export default function TradingViewChart({ data }: Props) {
       width: containerRef.current.clientWidth,
       height: containerRef.current.clientHeight,
     })
-    seriesRef.current = chartRef.current.addCandlestickSeries()
+    seriesRef.current = chartRef.current.addSeries(CandlestickSeries)
     return () => {
       chartRef.current?.remove()
       chartRef.current = null
