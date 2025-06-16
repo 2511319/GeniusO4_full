@@ -71,6 +71,7 @@ The script starts FastAPI on port 8000 and the Vite dev server on 5173.
 To launch only the React app:
 ```bash
 cd frontend
+# Требуется Node.js 20
 npm install
 npm run dev
 ```
@@ -78,6 +79,7 @@ npm run dev
 ### Frontend V2 (experimental)
 ```bash
 cd frontend_v2
+# Требуется Node.js 20
 npm install
 npm run dev
 ```
