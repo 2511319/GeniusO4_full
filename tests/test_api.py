@@ -118,3 +118,44 @@ def test_analyze_returns_limit_candles(monkeypatch):
     assert data['ohlc'][0]['Open'] == df.iloc[-limit]['Open']
     assert data['ohlc'][-1]['Open'] == df.iloc[-1]['Open']
     assert data['invalid_chatgpt_response'] is False
+
+
+def test_analyze_no_nan_values(monkeypatch):
+    token = jwt.encode({'sub': 'tester'}, app_module.SECRET_KEY, algorithm='HS256')
+
+    df = pd.DataFrame({
+        'Open Time': pd.date_range('2021-01-01', periods=1, freq='h'),
+        'Open': [1],
+        'High': [2],
+        'Low': [0],
+        'Close': [1],
+        'Volume': [10],
+        'Quote Asset Volume': [10],
+        'Number of Trades': [1],
+        'Ignore': [0],
+        'Taker Buy Base Asset Volume': [5],
+        'Taker Buy Quote Asset Volume': [50]
+    })
+
+    async def fake_fetch(symbol, interval, limit):
+        return df
+
+    def fake_analyze(self, payload):
+        return {'summary': 'ok'}, False
+
+    monkeypatch.setattr('routers.analysis.fetch_ohlcv', fake_fetch)
+    monkeypatch.setattr('routers.analysis.ChatGPTAnalyzer.analyze', fake_analyze)
+
+    payload = {
+        'symbol': 'BTCUSDT',
+        'interval': '4h',
+        'limit': 1,
+        'indicators': []
+    }
+    headers = {'Authorization': f'Bearer {token}'}
+    r = client.post('/api/analyze', json=payload, headers=headers)
+    assert r.status_code == 200
+    # Проверяем, что в ответе нет строк 'NaN' и 'Infinity'
+    text = r.text
+    assert 'NaN' not in text
+    assert 'Infinity' not in text
