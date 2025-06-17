@@ -2,7 +2,7 @@
 
 import json
 from typing import Dict, Any
-from config.config import OPENAI_API_KEY, logger
+from backend.config.config import OPENAI_API_KEY, logger
 from openai import OpenAI
 import re
 import os

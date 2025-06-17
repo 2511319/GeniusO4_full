@@ -3,7 +3,7 @@
 import json
 import pandas as pd
 from typing import Dict, Any, List
-from config.config import logger
+from backend.config.config import logger
 from statsmodels.tsa.seasonal import seasonal_decompose
 from scipy.stats import shapiro
 import math

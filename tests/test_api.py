@@ -4,9 +4,9 @@ import os
 import pandas as pd
 import jwt
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'api'))
-import app as app_module
-from app import app
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from backend import app as app_module
+from backend.app import app
 
 # Используем экземпляр приложения из модуля `app_module`, чтобы избежать
 # конфликтов версий библиотеки httpx, с которой работает FastAPI.
@@ -53,8 +53,8 @@ def test_analyze_success(monkeypatch):
     def fake_analyze(self, payload):
         return {'summary': 'ok'}
 
-    monkeypatch.setattr('routers.analysis.fetch_ohlcv', fake_fetch)
-    monkeypatch.setattr('routers.analysis.ChatGPTAnalyzer.analyze', fake_analyze)
+    monkeypatch.setattr('backend.routers.analysis.fetch_ohlcv', fake_fetch)
+    monkeypatch.setattr('backend.routers.analysis.ChatGPTAnalyzer.analyze', fake_analyze)
 
     payload = {
         'symbol': 'BTCUSDT',
@@ -100,9 +100,9 @@ def test_analyze_returns_limit_candles(monkeypatch):
         def get_ohlc_data(self, num_candles):
             return self.df.tail(num_candles).to_dict(orient='records')
 
-    monkeypatch.setattr('routers.analysis.fetch_ohlcv', fake_fetch)
-    monkeypatch.setattr('routers.analysis.DataProcessor', DummyProcessor)
-    monkeypatch.setattr('routers.analysis.ChatGPTAnalyzer.analyze', lambda self, payload: {'summary': 'ok'})
+    monkeypatch.setattr('backend.routers.analysis.fetch_ohlcv', fake_fetch)
+    monkeypatch.setattr('backend.routers.analysis.DataProcessor', DummyProcessor)
+    monkeypatch.setattr('backend.routers.analysis.ChatGPTAnalyzer.analyze', lambda self, payload: {'summary': 'ok'})
 
     payload = {
         'symbol': 'BTCUSDT',

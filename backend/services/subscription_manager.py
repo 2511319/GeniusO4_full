@@ -1,6 +1,6 @@
 # src/analysis/subscription_manager.py
 
-from config.config import db, logger
+from backend.config.config import db, logger
 from datetime import datetime, timedelta
 
 def create_subscription(username, level='premium', duration_days=30):

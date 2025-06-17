@@ -6,7 +6,7 @@ set -e
 export $(grep -v '^#' .env.prod | xargs)
 
 # 2) строим и пушим образы
-docker build -t gcr.io/$GCP_PROJECT_ID/chartgenius-api:latest -f api/Dockerfile .
+docker build -t gcr.io/$GCP_PROJECT_ID/chartgenius-api:latest -f backend/Dockerfile .
 docker build -t gcr.io/$GCP_PROJECT_ID/chartgenius-frontend:latest -f frontend/Dockerfile .
 
 docker push gcr.io/$GCP_PROJECT_ID/chartgenius-api:latest

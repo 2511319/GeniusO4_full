@@ -1,10 +1,10 @@
-# api/app.py
+# backend/app.py
 import os
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 # ↓ относительный импорт
-from routers.analysis import router as analysis_router
+from backend.routers.analysis import router as analysis_router
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt

@@ -5,7 +5,7 @@ import numpy as np
 import json
 from typing import Dict, Any, List
 import math
-from config.config import logger
+from backend.config.config import logger
 import ta  # Технический анализ
 
 

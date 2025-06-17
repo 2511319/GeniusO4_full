@@ -1,7 +1,7 @@
 import os
-from services.providers.openai_provider import OpenAIProvider
-from services.providers.google_provider import GoogleVertexAIProvider
-from services.providers.huggingface_provider import HuggingFaceProvider
+from backend.services.providers.openai_provider import OpenAIProvider
+from backend.services.providers.google_provider import GoogleVertexAIProvider
+from backend.services.providers.huggingface_provider import HuggingFaceProvider
 
 class LLMService:
     def __init__(self):
