@@ -14,10 +14,10 @@ jobs:
         run: |
           pip install flake8
           flake8 api
-      - name: Lint UI
+      - name: Lint frontend
         run: |
           pip install flake8
-          flake8 ui
+          flake8 frontend
       - name: Run API tests
         run: |
           pip install -r api/requirements.txt pytest
@@ -30,6 +30,6 @@ jobs:
       - name: Build API image
         run: |
           docker build -t geniuso4-api:latest api
-      - name: Build UI image
+      - name: Build frontend image
         run: |
-          docker build -t geniuso4-ui:latest ui
+          docker build -t geniuso4-ui:latest frontend
