@@ -4,13 +4,13 @@ services:
   api:
     build:
       context: .
-      dockerfile: api/Dockerfile
+      dockerfile: backend/Dockerfile
     ports:
       - "${API_PORT:-8000}:8000"
     environment:
       - ENV_FILE=.env.docker
     volumes:
-      - ./api/dev_logs:/app/api/dev_logs
+      - ./backend/dev_logs:/app/backend/dev_logs
 
   frontend:
     build:

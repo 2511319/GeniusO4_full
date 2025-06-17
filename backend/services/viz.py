@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from typing import List, Dict, Any
-from config.config import logger
+from backend.config.config import logger
 
 def create_chart(selected_elements: List[str], df: pd.DataFrame, analysis_data: Dict[str, Any]) -> go.Figure:
     try:

@@ -20,7 +20,7 @@ jobs:
           flake8 frontend
       - name: Run API tests
         run: |
-          pip install -r api/requirements.txt pytest
+          pip install -r backend/requirements.txt pytest
           pytest
       - name: Run frontend tests
         run: |
@@ -29,7 +29,7 @@ jobs:
           npm test -- --run
       - name: Build API image
         run: |
-          docker build -t geniuso4-api:latest api
+          docker build -t geniuso4-api:latest backend
       - name: Build frontend image
         run: |
           docker build -t geniuso4-ui:latest frontend

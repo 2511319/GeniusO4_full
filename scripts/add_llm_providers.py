@@ -3,8 +3,8 @@
 import os
 
 # Куда кладём файлы
-BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "api", "services", "providers"))
-LLM_SERVICE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "api", "services"))
+BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend", "services", "providers"))
+LLM_SERVICE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend", "services"))
 
 # Содержимое файлов
 FILES = {
@@ -96,9 +96,9 @@ class HuggingFaceProvider(LLMProvider):
 LLM_SERVICE = {
     "llm_service.py": '''\
 import os
-from services.providers.openai_provider import OpenAIProvider
-from services.providers.google_provider import GoogleVertexAIProvider
-from services.providers.huggingface_provider import HuggingFaceProvider
+from backend.services.providers.openai_provider import OpenAIProvider
+from backend.services.providers.google_provider import GoogleVertexAIProvider
+from backend.services.providers.huggingface_provider import HuggingFaceProvider
 
 class LLMService:
     def __init__(self):

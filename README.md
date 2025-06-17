@@ -4,7 +4,7 @@
 
 ## Структура проекта
 
-- `api` — серверные функции на FastAPI.
+- `backend` — серверные функции на FastAPI.
 - `frontend` — клиентское приложение на React.
 
 ## Запуск
@@ -14,9 +14,9 @@
 Установите зависимости и запустите приложения:
 
 ```bash
-pip install -r api/requirements.txt
+pip install -r backend/requirements.txt
 npm install
-uvicorn api.app:app --reload
+uvicorn backend.app:app --reload
 npm run dev
 ```
 
