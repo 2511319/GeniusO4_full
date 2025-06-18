@@ -73,15 +73,32 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
     const toUnix = (d) => {
       if (!d) return null;
-      const parsed = new Date(
-        typeof d === 'string' ? d.replace(' ', 'T') + 'Z' : d
-      );
-      const t = Math.floor(parsed.getTime() / 1000);
-      if (!t || Number.isNaN(t)) {
-        console.warn('Не удалось распознать дату', d);
+
+      try {
+        let parsed;
+        if (typeof d === 'string') {
+          // Handle various date string formats
+          parsed = new Date(d.includes('T') ? d : d.replace(' ', 'T') + 'Z');
+        } else if (typeof d === 'number') {
+          // Handle Unix timestamp (seconds or milliseconds)
+          parsed = new Date(d > 1e10 ? d : d * 1000);
+        } else {
+          parsed = new Date(d);
+        }
+
+        const t = Math.floor(parsed.getTime() / 1000);
+
+        // Validate timestamp is reasonable (between 2000 and 2100)
+        if (!t || Number.isNaN(t) || t < 946684800 || t > 4102444800) {
+          console.warn('Invalid or unreasonable timestamp:', d, 'parsed to:', t);
+          return null;
+        }
+
+        return t;
+      } catch (error) {
+        console.warn('Error parsing date:', d, error);
         return null;
       }
-      return t;
     };
 
     const buildSeriesData = (field) => {
@@ -114,7 +131,8 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       height: containerSize.height,
       layout: {
         background: { color: '#121212' },
-        textColor:  '#c7c7c7',
+        textColor: '#e0e0e0', // Better contrast for text
+        fontSize: 12, // Normalized font size
       },
       grid: {
         vertLines: { color: '#2a2a2a' },
@@ -128,6 +146,20 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         axisPressedMouseMove: true,
         mouseWheel: true,
         pinch: true,
+      },
+      // Improved time scale options
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+        borderColor: '#485158',
+      },
+      // Better price scale formatting
+      rightPriceScale: {
+        borderColor: '#485158',
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.1,
+        },
       },
     });
     chartRef.current.main = mainChart;
@@ -215,8 +247,12 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       const levels = analysis.psychological_levels?.levels || [];
       const lastTime = candleData[candleData.length - 1]?.time;
       levels.forEach((l) => {
-        const color = l.type === 'Support' ? 'blue' : 'orange';
-        const series = mainChart.addLineSeries({ color, lineStyle: 2 });
+        const color = l.type === 'Support' ? '#4CAF50' : '#FF9800'; // Better contrast colors
+        const series = mainChart.addLineSeries({
+          color,
+          lineWidth: 2, // Improved line thickness
+          lineStyle: 1 // Solid line instead of dotted for better visibility
+        });
         series.setData([
           { time: toUnix(l.date), value: l.level },
           { time: lastTime, value: l.level },
@@ -330,9 +366,9 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         if (startTime && endTime) {
           Object.entries(levels).forEach(([level, price]) => {
             const series = mainChart.addLineSeries({
-              color: 'rgba(255, 165, 0, 0.7)',
-              lineStyle: 2,
-              lineWidth: 1,
+              color: 'rgba(255, 165, 0, 0.8)', // Better opacity
+              lineStyle: 1, // Solid line for better visibility
+              lineWidth: 2, // Improved thickness
             });
             series.setData([
               { time: startTime, value: price },
@@ -354,9 +390,11 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         const endPrice = wave.end_point?.price;
 
         if (startTime && endTime && startPrice && endPrice) {
+          const waveColor = `hsl(${(index * 60) % 360}, 70%, 60%)`; // Slightly brighter
           const series = mainChart.addLineSeries({
-            color: `hsl(${(index * 60) % 360}, 70%, 50%)`,
-            lineWidth: 2,
+            color: waveColor,
+            lineWidth: 3, // Thicker lines for better visibility
+            lineStyle: 1, // Solid line
           });
           series.setData([
             { time: startTime, value: startPrice },
@@ -364,11 +402,11 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
           ]);
           chartRef.current.overlays.push(series);
 
-          // Добавление маркера с номером волны
+          // Добавление маркера с номером волны с улучшенной видимостью
           markers.push({
             time: startTime,
             position: 'aboveBar',
-            color: `hsl(${(index * 60) % 360}, 70%, 50%)`,
+            color: waveColor,
             shape: 'circle',
             text: `W${wave.wave_number}`,
           });
@@ -500,16 +538,16 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         const bottomPrice = fvg.bottom_price;
 
         if (startTime && endTime && topPrice && bottomPrice) {
-          // Создаем прямоугольную зону
+          // Создаем прямоугольную зону с улучшенной визуализацией
           const topSeries = mainChart.addLineSeries({
-            color: 'rgba(255, 255, 0, 0.3)',
-            lineWidth: 1,
-            lineStyle: 2,
+            color: 'rgba(255, 255, 0, 0.6)', // Better opacity
+            lineWidth: 2, // Improved thickness
+            lineStyle: 1, // Solid line for better visibility
           });
           const bottomSeries = mainChart.addLineSeries({
-            color: 'rgba(255, 255, 0, 0.3)',
-            lineWidth: 1,
-            lineStyle: 2,
+            color: 'rgba(255, 255, 0, 0.6)', // Better opacity
+            lineWidth: 2, // Improved thickness
+            lineStyle: 1, // Solid line for better visibility
           });
 
           topSeries.setData([
@@ -523,11 +561,11 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
           chartRef.current.overlays.push(topSeries, bottomSeries);
 
-          // Добавляем маркер
+          // Добавляем маркер с улучшенной видимостью
           markers.push({
             time: startTime,
             position: 'inBar',
-            color: 'yellow',
+            color: '#FFD700', // Better gold color
             shape: 'square',
             text: 'FVG',
           });
@@ -643,18 +681,18 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     if (layers.includes('pivot_points')) {
       const pivots = analysis.pivot_points || {};
 
-      // Основной пивот
+      // Основной пивот с улучшенной визуализацией
       if (pivots.pivot) {
         const pivotLevel = pivots.pivot.level;
-        if (pivotLevel && data.length > 0) {
+        if (pivotLevel && candleData.length > 0) {
           const series = mainChart.addLineSeries({
-            color: 'rgba(255, 255, 0, 0.8)',
+            color: '#FFD700', // Better gold color
             lineWidth: 3,
-            lineStyle: 1,
+            lineStyle: 1, // Solid line for main pivot
           });
           series.setData([
-            { time: data[0].time, value: pivotLevel },
-            { time: data[data.length - 1].time, value: pivotLevel },
+            { time: candleData[0].time, value: pivotLevel },
+            { time: candleData[candleData.length - 1].time, value: pivotLevel },
           ]);
           chartRef.current.overlays.push(series);
         }
@@ -717,22 +755,51 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       });
     }
 
+    // CRITICAL BUG FIX: Sort markers by time in ascending order before setting them
+    // The lightweight-charts library requires markers to be sorted chronologically
     if (markers.length) {
-      candleSeries.setMarkers(markers.filter((m) => m.time));
+      const validMarkers = markers
+        .filter((m) => m.time && typeof m.time === 'number' && !isNaN(m.time))
+        .sort((a, b) => a.time - b.time); // Sort in ascending chronological order
+
+      if (validMarkers.length > 0) {
+        try {
+          candleSeries.setMarkers(validMarkers);
+        } catch (error) {
+          console.error('Error setting markers:', error);
+          console.log('Markers data:', validMarkers.slice(0, 5)); // Log first 5 markers for debugging
+        }
+      }
     }
 
     let panelChart = null;
     let firstPanelSeries = null;
     if (panelLayers.length) {
       panelChart = createChart(panelRef.current, {
-        height: 200,
+        width: containerSize.width, // Coordinate width with main chart
+        height: Math.max(150, containerSize.height * panelRatio), // Better height calculation
         layout: {
           background: { color: '#121212' },
-          textColor:  '#c7c7c7',
+          textColor: '#e0e0e0', // Match main chart text color
+          fontSize: 12, // Normalized font size
         },
         grid: {
           vertLines: { color: '#2a2a2a' },
           horzLines: { color: '#2a2a2a' },
+        },
+        // Coordinate time scale with main chart
+        timeScale: {
+          timeVisible: true,
+          secondsVisible: false,
+          borderColor: '#485158',
+        },
+        // Better price scale formatting
+        rightPriceScale: {
+          borderColor: '#485158',
+          scaleMargins: {
+            top: 0.05,
+            bottom: 0.05,
+          },
         },
       });
       chartRef.current.panel = panelChart;
