@@ -168,7 +168,7 @@ export default function Home() {
 
         {/* график */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 1 }}>
+          <Paper sx={{ p: 1, height: 'fit-content' }}>
             <TradingViewChart data={data} layers={layers} analysis={analysis} />
           </Paper>
         </Grid>
@@ -176,10 +176,64 @@ export default function Home() {
         {/* результаты */}
         <Grid item xs={12} md={3}>
           <Paper sx={{ p: 2, maxHeight: '82vh', overflow: 'auto' }}>
-            <AnalysisSections analysis={analysis} />
+            <AnalysisSections analysis={analysis} activeLayers={layers} />
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Блок прогнозов и рекомендаций внизу */}
+      {analysis && (analysis.price_prediction || analysis.recommendations) && (
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h5" gutterBottom color="primary">
+                📈 Прогнозы и торговые рекомендации
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Grid container spacing={3}>
+                {analysis.price_prediction && (
+                  <Grid item xs={12} md={6}>
+                    <Box sx={{
+                      p: 2,
+                      bgcolor: 'background.paper',
+                      borderRadius: 2,
+                      border: '1px solid',
+                      borderColor: 'primary.light'
+                    }}>
+                      <Typography variant="h6" gutterBottom color="primary">
+                        🎯 Прогноз цены
+                      </Typography>
+                      <AnalysisSections
+                        analysis={{ price_prediction: analysis.price_prediction }}
+                        activeLayers={['price_prediction']}
+                      />
+                    </Box>
+                  </Grid>
+                )}
+                {analysis.recommendations && (
+                  <Grid item xs={12} md={6}>
+                    <Box sx={{
+                      p: 2,
+                      bgcolor: 'background.paper',
+                      borderRadius: 2,
+                      border: '1px solid',
+                      borderColor: 'success.light'
+                    }}>
+                      <Typography variant="h6" gutterBottom color="success.main">
+                        💡 Торговые рекомендации
+                      </Typography>
+                      <AnalysisSections
+                        analysis={{ recommendations: analysis.recommendations }}
+                        activeLayers={['recommendations']}
+                      />
+                    </Box>
+                  </Grid>
+                )}
+              </Grid>
+            </Paper>
+          </Grid>
+        </Grid>
+      )}
     </Container>
   );
 }

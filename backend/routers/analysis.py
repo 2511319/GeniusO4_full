@@ -7,10 +7,10 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from backend.services.crypto_compare_provider import fetch_ohlcv
-from backend.services.data_processor import DataProcessor
-from backend.services.chatgpt_analyzer import ChatGPTAnalyzer
-from backend.services.viz import create_chart
+from services.crypto_compare_provider import fetch_ohlcv
+from services.data_processor import DataProcessor
+from services.chatgpt_analyzer import ChatGPTAnalyzer
+from services.viz import create_chart
 
 router = APIRouter()
 

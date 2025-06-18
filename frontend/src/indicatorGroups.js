@@ -37,17 +37,20 @@ export const indicatorColumnMap = {
 export const advancedIndicators = [
   'support_resistance_levels',
   'trend_lines',
-  'unfinished_zones',
-  'imbalances',
   'fibonacci_analysis',
   'elliott_wave_analysis',
+  'unfinished_zones',
+  'imbalances',
+  'divergence_analysis',
   'structural_edge',
   'candlestick_patterns',
-  'divergence_analysis',
   'fair_value_gaps',
   'gap_analysis',
   'psychological_levels',
-  'anomalous_candles'
+  'anomalous_candles',
+  'price_prediction',
+  'pivot_points',
+  'volume_analysis'
 ];
 
 export const modelAnalysisIndicators = [

@@ -48,6 +48,16 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     Volume: '#26a69a'
   };
 
+  // Функция для получения размеров контейнера
+  const getContainerSize = () => {
+    if (!containerRef.current) return { width: 800, height: 500 };
+    const rect = containerRef.current.getBoundingClientRect();
+    return {
+      width: Math.max(400, rect.width - 20), // минимум 400px, отступ 20px
+      height: Math.max(400, Math.min(600, window.innerHeight * 0.6)) // от 400px до 600px или 60% высоты экрана
+    };
+  };
+
   useEffect(() => {
     console.log('Отрисовка графика. Длина данных:', data.length, 'слои:', layers);
     if (!data.length) return;
@@ -98,8 +108,10 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       return series;
     };
 
+    const containerSize = getContainerSize();
     const mainChart = createChart(mainRef.current, {
-      height: 500,
+      width: containerSize.width,
+      height: containerSize.height,
       layout: {
         background: { color: '#121212' },
         textColor:  '#c7c7c7',
@@ -107,6 +119,15 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       grid: {
         vertLines: { color: '#2a2a2a' },
         horzLines: { color: '#2a2a2a' },
+      },
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+      },
+      handleScale: {
+        axisPressedMouseMove: true,
+        mouseWheel: true,
+        pinch: true,
       },
     });
     chartRef.current.main = mainChart;
@@ -272,6 +293,424 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       });
     }
 
+    // Добавление отрисовки уровней Фибоначчи
+    if (layers.includes('fibonacci_analysis')) {
+      const fibonacci = analysis.fibonacci_analysis || {};
+
+      // Отрисовка уровней Фибоначчи для локального тренда
+      if (fibonacci.based_on_local_trend) {
+        const fib = fibonacci.based_on_local_trend;
+        const levels = fib.levels || {};
+        const startTime = toUnix(fib.start_point?.date);
+        const endTime = toUnix(fib.end_point?.date);
+
+        if (startTime && endTime) {
+          Object.entries(levels).forEach(([level, price]) => {
+            const series = mainChart.addLineSeries({
+              color: 'rgba(255, 215, 0, 0.7)',
+              lineStyle: 2,
+              lineWidth: 1,
+            });
+            series.setData([
+              { time: startTime, value: price },
+              { time: endTime, value: price },
+            ]);
+            chartRef.current.overlays.push(series);
+          });
+        }
+      }
+
+      // Отрисовка уровней Фибоначчи для глобального тренда
+      if (fibonacci.based_on_global_trend) {
+        const fib = fibonacci.based_on_global_trend;
+        const levels = fib.levels || {};
+        const startTime = toUnix(fib.start_point?.date);
+        const endTime = toUnix(fib.end_point?.date);
+
+        if (startTime && endTime) {
+          Object.entries(levels).forEach(([level, price]) => {
+            const series = mainChart.addLineSeries({
+              color: 'rgba(255, 165, 0, 0.7)',
+              lineStyle: 2,
+              lineWidth: 1,
+            });
+            series.setData([
+              { time: startTime, value: price },
+              { time: endTime, value: price },
+            ]);
+            chartRef.current.overlays.push(series);
+          });
+        }
+      }
+    }
+
+    // Добавление отрисовки волн Эллиота
+    if (layers.includes('elliott_wave_analysis')) {
+      const waves = analysis.elliott_wave_analysis?.waves || [];
+      waves.forEach((wave, index) => {
+        const startTime = toUnix(wave.start_point?.date);
+        const endTime = toUnix(wave.end_point?.date);
+        const startPrice = wave.start_point?.price;
+        const endPrice = wave.end_point?.price;
+
+        if (startTime && endTime && startPrice && endPrice) {
+          const series = mainChart.addLineSeries({
+            color: `hsl(${(index * 60) % 360}, 70%, 50%)`,
+            lineWidth: 2,
+          });
+          series.setData([
+            { time: startTime, value: startPrice },
+            { time: endTime, value: endPrice },
+          ]);
+          chartRef.current.overlays.push(series);
+
+          // Добавление маркера с номером волны
+          markers.push({
+            time: startTime,
+            position: 'aboveBar',
+            color: `hsl(${(index * 60) % 360}, 70%, 50%)`,
+            shape: 'circle',
+            text: `W${wave.wave_number}`,
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки линий тренда
+    if (layers.includes('trend_lines')) {
+      const trendLines = analysis.trend_lines?.lines || [];
+      trendLines.forEach((line, index) => {
+        const startTime = toUnix(line.start_point?.date);
+        const endTime = toUnix(line.end_point?.date);
+        const startPrice = line.start_point?.price;
+        const endPrice = line.end_point?.price;
+
+        if (startTime && endTime && startPrice && endPrice) {
+          const color = line.type === 'восходящая' ? 'green' : 'red';
+          const series = mainChart.addLineSeries({
+            color,
+            lineWidth: 2,
+            lineStyle: 1,
+          });
+          series.setData([
+            { time: startTime, value: startPrice },
+            { time: endTime, value: endPrice },
+          ]);
+          chartRef.current.overlays.push(series);
+        }
+      });
+    }
+
+    // Добавление отрисовки дивергенций
+    if (layers.includes('divergence_analysis')) {
+      const divergences = analysis.divergence_analysis || [];
+      divergences.forEach((div) => {
+        const time = toUnix(div.date);
+        if (time) {
+          markers.push({
+            time,
+            position: 'belowBar',
+            color: div.type === 'bullish' ? 'green' : 'red',
+            shape: 'arrowUp',
+            text: `${div.indicator} ${div.type}`,
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки свечных паттернов
+    if (layers.includes('candlestick_patterns')) {
+      const patterns = analysis.candlestick_patterns || [];
+      patterns.forEach((pattern) => {
+        const time = toUnix(pattern.date);
+        if (time) {
+          markers.push({
+            time,
+            position: 'aboveBar',
+            color: 'orange',
+            shape: 'square',
+            text: pattern.type,
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки структурных преимуществ
+    if (layers.includes('structural_edge')) {
+      const edges = analysis.structural_edge || [];
+      edges.forEach((edge) => {
+        const time = toUnix(edge.date);
+        if (time) {
+          markers.push({
+            time,
+            position: 'aboveBar',
+            color: 'cyan',
+            shape: 'diamond',
+            text: edge.type,
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки прогнозных свечей
+    if (layers.includes('price_prediction') && analysis.price_prediction?.virtual_candles) {
+      const virtualCandles = analysis.price_prediction.virtual_candles;
+      const predictionData = virtualCandles.map(candle => ({
+        time: toUnix(candle.date),
+        open: candle.open,
+        high: candle.high,
+        low: candle.low,
+        close: candle.close,
+      })).filter(candle => candle.time);
+
+      if (predictionData.length > 0) {
+        // Создаем отдельную серию для прогнозных свечей
+        const predictionSeries = mainChart.addCandlestickSeries({
+          upColor: 'rgba(0, 255, 0, 0.5)',
+          downColor: 'rgba(255, 0, 0, 0.5)',
+          borderUpColor: 'rgba(0, 255, 0, 0.8)',
+          borderDownColor: 'rgba(255, 0, 0, 0.8)',
+          wickUpColor: 'rgba(0, 255, 0, 0.8)',
+          wickDownColor: 'rgba(255, 0, 0, 0.8)',
+        });
+
+        predictionSeries.setData(predictionData);
+        chartRef.current.overlays.push(predictionSeries);
+
+        // Добавляем маркер начала прогноза
+        if (predictionData[0]) {
+          markers.push({
+            time: predictionData[0].time,
+            position: 'aboveBar',
+            color: 'purple',
+            shape: 'arrowDown',
+            text: 'Прогноз',
+          });
+        }
+      }
+    }
+
+    // Добавление отрисовки зон справедливой стоимости (Fair Value Gaps)
+    if (layers.includes('fair_value_gaps')) {
+      const fvgs = analysis.fair_value_gaps || [];
+      fvgs.forEach((fvg, index) => {
+        const startTime = toUnix(fvg.start_date);
+        const endTime = toUnix(fvg.end_date);
+        const topPrice = fvg.top_price;
+        const bottomPrice = fvg.bottom_price;
+
+        if (startTime && endTime && topPrice && bottomPrice) {
+          // Создаем прямоугольную зону
+          const topSeries = mainChart.addLineSeries({
+            color: 'rgba(255, 255, 0, 0.3)',
+            lineWidth: 1,
+            lineStyle: 2,
+          });
+          const bottomSeries = mainChart.addLineSeries({
+            color: 'rgba(255, 255, 0, 0.3)',
+            lineWidth: 1,
+            lineStyle: 2,
+          });
+
+          topSeries.setData([
+            { time: startTime, value: topPrice },
+            { time: endTime, value: topPrice },
+          ]);
+          bottomSeries.setData([
+            { time: startTime, value: bottomPrice },
+            { time: endTime, value: bottomPrice },
+          ]);
+
+          chartRef.current.overlays.push(topSeries, bottomSeries);
+
+          // Добавляем маркер
+          markers.push({
+            time: startTime,
+            position: 'inBar',
+            color: 'yellow',
+            shape: 'square',
+            text: 'FVG',
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки психологических уровней
+    if (layers.includes('psychological_levels')) {
+      const levels = analysis.psychological_levels || [];
+      levels.forEach((level) => {
+        const price = level.price;
+        if (price && data.length > 0) {
+          const series = mainChart.addLineSeries({
+            color: 'rgba(128, 0, 128, 0.7)',
+            lineWidth: 2,
+            lineStyle: 3,
+          });
+          series.setData([
+            { time: data[0].time, value: price },
+            { time: data[data.length - 1].time, value: price },
+          ]);
+          chartRef.current.overlays.push(series);
+        }
+      });
+    }
+
+    // Добавление отрисовки гэпов
+    if (layers.includes('gap_analysis')) {
+      const gaps = analysis.gap_analysis || [];
+      gaps.forEach((gap) => {
+        const time = toUnix(gap.date);
+        if (time) {
+          markers.push({
+            time,
+            position: 'inBar',
+            color: 'magenta',
+            shape: 'circle',
+            text: `Gap ${gap.type}`,
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки незавершенных зон
+    if (layers.includes('unfinished_zones')) {
+      const zones = analysis.unfinished_zones || [];
+      zones.forEach((zone) => {
+        const startTime = toUnix(zone.start_date);
+        const endTime = toUnix(zone.end_date);
+        const topPrice = zone.top_price;
+        const bottomPrice = zone.bottom_price;
+
+        if (startTime && endTime && topPrice && bottomPrice) {
+          const series = mainChart.addLineSeries({
+            color: 'rgba(255, 165, 0, 0.5)',
+            lineWidth: 2,
+            lineStyle: 1,
+          });
+          series.setData([
+            { time: startTime, value: topPrice },
+            { time: endTime, value: topPrice },
+            { time: endTime, value: bottomPrice },
+            { time: startTime, value: bottomPrice },
+            { time: startTime, value: topPrice },
+          ]);
+          chartRef.current.overlays.push(series);
+        }
+      });
+    }
+
+    // Добавление отрисовки дисбалансов
+    if (layers.includes('imbalances')) {
+      const imbalances = analysis.imbalances || [];
+      imbalances.forEach((imbalance) => {
+        const startTime = toUnix(imbalance.start_point?.date);
+        const endTime = toUnix(imbalance.end_point?.date);
+        const startPrice = imbalance.start_point?.price;
+        const endPrice = imbalance.end_point?.price;
+
+        if (startTime && endTime && startPrice && endPrice) {
+          // Создаем зону дисбаланса
+          const series = mainChart.addLineSeries({
+            color: 'rgba(255, 165, 0, 0.6)',
+            lineWidth: 2,
+            lineStyle: 2,
+          });
+          series.setData([
+            { time: startTime, value: startPrice },
+            { time: endTime, value: endPrice },
+          ]);
+          chartRef.current.overlays.push(series);
+
+          // Добавляем маркер
+          markers.push({
+            time: startTime,
+            position: 'belowBar',
+            color: 'orange',
+            shape: 'arrowUp',
+            text: imbalance.type,
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки pivot points
+    if (layers.includes('pivot_points')) {
+      const pivots = analysis.pivot_points || {};
+
+      // Основной пивот
+      if (pivots.pivot) {
+        const pivotLevel = pivots.pivot.level;
+        if (pivotLevel && data.length > 0) {
+          const series = mainChart.addLineSeries({
+            color: 'rgba(255, 255, 0, 0.8)',
+            lineWidth: 3,
+            lineStyle: 1,
+          });
+          series.setData([
+            { time: data[0].time, value: pivotLevel },
+            { time: data[data.length - 1].time, value: pivotLevel },
+          ]);
+          chartRef.current.overlays.push(series);
+        }
+      }
+
+      // Уровни сопротивления пивота
+      if (pivots.resistances) {
+        pivots.resistances.forEach((resistance, index) => {
+          const series = mainChart.addLineSeries({
+            color: `rgba(255, 0, 0, ${0.6 - index * 0.1})`,
+            lineWidth: 2,
+            lineStyle: 2,
+          });
+          series.setData([
+            { time: data[0].time, value: resistance.level },
+            { time: data[data.length - 1].time, value: resistance.level },
+          ]);
+          chartRef.current.overlays.push(series);
+        });
+      }
+
+      // Уровни поддержки пивота
+      if (pivots.supports) {
+        pivots.supports.forEach((support, index) => {
+          const series = mainChart.addLineSeries({
+            color: `rgba(0, 255, 0, ${0.6 - index * 0.1})`,
+            lineWidth: 2,
+            lineStyle: 2,
+          });
+          series.setData([
+            { time: data[0].time, value: support.level },
+            { time: data[data.length - 1].time, value: support.level },
+          ]);
+          chartRef.current.overlays.push(series);
+        });
+      }
+    }
+
+    // Добавление отрисовки значительных изменений объемов
+    if (layers.includes('volume_analysis')) {
+      const volumeAnalysis = analysis.volume_analysis || {};
+      const significantChanges = volumeAnalysis.significant_volume_changes || [];
+
+      significantChanges.forEach((change) => {
+        const time = toUnix(change.date);
+        if (time) {
+          const volumeLevel = change.volume > 3000 ? 'Высокий' :
+                             change.volume > 1500 ? 'Средний' : 'Низкий';
+          const color = change.volume > 3000 ? 'red' :
+                       change.volume > 1500 ? 'orange' : 'green';
+
+          markers.push({
+            time,
+            position: 'belowBar',
+            color,
+            shape: 'circle',
+            text: `Vol: ${volumeLevel}`,
+          });
+        }
+      });
+    }
+
     if (markers.length) {
       candleSeries.setMarkers(markers.filter((m) => m.time));
     }
@@ -393,6 +832,29 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       chartRef.current = {};
     };
   }, [data, layers, analysis]);
+
+  // Обработчик изменения размера окна
+  useEffect(() => {
+    const handleResize = () => {
+      if (chartRef.current.main) {
+        const containerSize = getContainerSize();
+        chartRef.current.main.applyOptions({
+          width: containerSize.width,
+          height: containerSize.height,
+        });
+      }
+      if (chartRef.current.panel) {
+        const containerSize = getContainerSize();
+        chartRef.current.panel.applyOptions({
+          width: containerSize.width,
+          height: Math.max(100, containerSize.height * panelRatio),
+        });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [panelRatio]);
 
   const startDrag = (e) => {
     e.preventDefault();
