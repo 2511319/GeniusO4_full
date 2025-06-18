@@ -538,7 +538,9 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     // Добавление отрисовки психологических уровней
     if (layers.includes('psychological_levels')) {
       const levels = analysis.psychological_levels || [];
-      levels.forEach((level) => {
+      // Проверяем, что levels - это массив
+      if (Array.isArray(levels)) {
+        levels.forEach((level) => {
         const price = level.price;
         if (price && data.length > 0) {
           const series = mainChart.addLineSeries({
@@ -552,13 +554,16 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
           ]);
           chartRef.current.overlays.push(series);
         }
-      });
+        });
+      }
     }
 
     // Добавление отрисовки гэпов
     if (layers.includes('gap_analysis')) {
       const gaps = analysis.gap_analysis || [];
-      gaps.forEach((gap) => {
+      // Проверяем, что gaps - это массив
+      if (Array.isArray(gaps)) {
+        gaps.forEach((gap) => {
         const time = toUnix(gap.date);
         if (time) {
           markers.push({
@@ -569,7 +574,8 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
             text: `Gap ${gap.type}`,
           });
         }
-      });
+        });
+      }
     }
 
     // Добавление отрисовки незавершенных зон

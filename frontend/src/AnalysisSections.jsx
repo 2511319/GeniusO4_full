@@ -109,12 +109,33 @@ export default function AnalysisSections({ analysis, activeLayers = [] }) {
   const formatObjectValue = (obj, key) => {
     if (!obj || typeof obj !== 'object') return String(obj);
 
+    // Приоритет для поля explanation
+    if (obj.explanation) {
+      return (
+        <Box>
+          <Typography variant="body2" sx={{ mb: 1, fontStyle: 'italic', color: 'text.primary' }}>
+            {obj.explanation}
+          </Typography>
+          {Object.entries(obj).filter(([k]) => k !== 'explanation').map(([subKey, subValue]) => (
+            <Box key={subKey} sx={{ mb: 0.3 }}>
+              <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'primary.main', fontSize: '0.75rem' }}>
+                {subKey.replace(/_/g, ' ')}:
+              </Typography>
+              <Typography variant="body2" component="span" sx={{ ml: 1, fontSize: '0.8rem' }}>
+                {typeof subValue === 'object' ? JSON.stringify(subValue, null, 2) : String(subValue)}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      );
+    }
+
     return Object.entries(obj).map(([subKey, subValue]) => (
-      <Box key={subKey} sx={{ mb: 0.5 }}>
-        <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-          {subKey}:
+      <Box key={subKey} sx={{ mb: 0.3 }}>
+        <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'primary.main', fontSize: '0.75rem' }}>
+          {subKey.replace(/_/g, ' ')}:
         </Typography>
-        <Typography variant="body2" component="span" sx={{ ml: 1 }}>
+        <Typography variant="body2" component="span" sx={{ ml: 1, fontSize: '0.8rem' }}>
           {typeof subValue === 'object' ? JSON.stringify(subValue, null, 2) : String(subValue)}
         </Typography>
       </Box>
@@ -150,28 +171,33 @@ export default function AnalysisSections({ analysis, activeLayers = [] }) {
         if (visibleSections.length === 0) return null;
 
         return (
-          <Box key={category} sx={{ mb: 2 }}>
-            <Typography variant="h6" sx={{ mb: 1, color: 'primary.main' }}>
+          <Box key={category} sx={{ mb: 1.5 }}>
+            <Typography variant="subtitle1" sx={{ mb: 0.5, color: 'primary.main', fontWeight: 'bold', fontSize: '0.95rem' }}>
               {categoryTitles[category]}
             </Typography>
-            <Divider sx={{ mb: 1 }} />
+            <Divider sx={{ mb: 0.5 }} />
 
             {visibleSections.map(({ key, title }) => {
               const value = analysis[key];
 
               return (
-                <Accordion key={key} defaultExpanded={category === 'basic'}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Accordion key={key} defaultExpanded={category === 'basic'} sx={{ mb: 0.5 }}>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    sx={{ py: 0.5, minHeight: 'auto', '& .MuiAccordionSummary-content': { my: 0.5 } }}
+                  >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="subtitle1">{title}</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 'medium', fontSize: '0.85rem' }}>
+                        {title}
+                      </Typography>
                       {activeLayers.includes(key) && (
-                        <Chip label="Активен" size="small" color="primary" />
+                        <Chip label="●" size="small" color="primary" sx={{ minWidth: 'auto', height: 16, fontSize: '0.7rem' }} />
                       )}
                     </Box>
                   </AccordionSummary>
 
-                  <AccordionDetails>
-                    <Box sx={{ whiteSpace: 'pre-wrap' }}>
+                  <AccordionDetails sx={{ py: 1, px: 2 }}>
+                    <Box sx={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem' }}>
                       {formatValue(value, key)}
                     </Box>
                   </AccordionDetails>

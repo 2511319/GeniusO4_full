@@ -61,15 +61,15 @@ export default function Home() {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 2 }}>
-      <Grid container spacing={2}>
+    <Container maxWidth={false} sx={{ mt: 1, px: 1 }}>
+      <Grid container spacing={1}>
         {/* левая панель */}
-        <Grid item xs={12} md={3}>
-          <Accordion defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="h6">Параметры запроса</Typography>
+        <Grid item xs={12} lg={2.5}>
+          <Accordion defaultExpanded sx={{ mb: 1 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ py: 0.5 }}>
+              <Typography variant="subtitle1" fontWeight="bold">Параметры запроса</Typography>
             </AccordionSummary>
-            <AccordionDetails>
+            <AccordionDetails sx={{ py: 1 }}>
 
             <TextField
               fullWidth label="Тикер"
@@ -167,15 +167,15 @@ export default function Home() {
         </Grid>
 
         {/* график */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 1, height: 'fit-content' }}>
+        <Grid item xs={12} lg={7}>
+          <Paper sx={{ p: 0.5, height: 'fit-content' }}>
             <TradingViewChart data={data} layers={layers} analysis={analysis} />
           </Paper>
         </Grid>
 
         {/* результаты */}
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 2, maxHeight: '82vh', overflow: 'auto' }}>
+        <Grid item xs={12} lg={2.5}>
+          <Paper sx={{ p: 1.5, maxHeight: '82vh', overflow: 'auto' }}>
             <AnalysisSections analysis={analysis} activeLayers={layers} />
           </Paper>
         </Grid>
