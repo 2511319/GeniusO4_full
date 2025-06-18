@@ -7,6 +7,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material';
 import App from './App';
 import { store } from './store';
 import theme from './theme';
+import './darkThemeFix.css'; // Import comprehensive dark theme fixes
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -215,8 +215,12 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       const levels = analysis.psychological_levels?.levels || [];
       const lastTime = candleData[candleData.length - 1]?.time;
       levels.forEach((l) => {
-        const color = l.type === 'Support' ? 'blue' : 'orange';
-        const series = mainChart.addLineSeries({ color, lineStyle: 2 });
+        const color = l.type === 'Support' ? 'rgba(0, 123, 255, 0.8)' : 'rgba(255, 152, 0, 0.8)';
+        const series = mainChart.addLineSeries({
+          color,
+          lineStyle: 2, // Пунктирная линия
+          lineWidth: 2  // Стандартная толщина линии
+        });
         series.setData([
           { time: toUnix(l.date), value: l.level },
           { time: lastTime, value: l.level },
@@ -307,9 +311,9 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         if (startTime && endTime) {
           Object.entries(levels).forEach(([level, price]) => {
             const series = mainChart.addLineSeries({
-              color: 'rgba(255, 215, 0, 0.7)',
-              lineStyle: 2,
-              lineWidth: 1,
+              color: 'rgba(255, 215, 0, 0.8)',
+              lineStyle: 2, // Пунктирная линия
+              lineWidth: 2, // Стандартная толщина линии
             });
             series.setData([
               { time: startTime, value: price },
@@ -330,9 +334,9 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         if (startTime && endTime) {
           Object.entries(levels).forEach(([level, price]) => {
             const series = mainChart.addLineSeries({
-              color: 'rgba(255, 165, 0, 0.7)',
-              lineStyle: 2,
-              lineWidth: 1,
+              color: 'rgba(255, 165, 0, 0.8)',
+              lineStyle: 2, // Пунктирная линия
+              lineWidth: 2, // Стандартная толщина линии
             });
             series.setData([
               { time: startTime, value: price },
@@ -502,14 +506,14 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         if (startTime && endTime && topPrice && bottomPrice) {
           // Создаем прямоугольную зону
           const topSeries = mainChart.addLineSeries({
-            color: 'rgba(255, 255, 0, 0.3)',
-            lineWidth: 1,
-            lineStyle: 2,
+            color: 'rgba(255, 255, 0, 0.6)',
+            lineWidth: 2, // Стандартная толщина линии
+            lineStyle: 2, // Пунктирная линия
           });
           const bottomSeries = mainChart.addLineSeries({
-            color: 'rgba(255, 255, 0, 0.3)',
-            lineWidth: 1,
-            lineStyle: 2,
+            color: 'rgba(255, 255, 0, 0.6)',
+            lineWidth: 2, // Стандартная толщина линии
+            lineStyle: 2, // Пунктирная линия
           });
 
           topSeries.setData([
@@ -535,28 +539,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       });
     }
 
-    // Добавление отрисовки психологических уровней
-    if (layers.includes('psychological_levels')) {
-      const levels = analysis.psychological_levels || [];
-      // Проверяем, что levels - это массив
-      if (Array.isArray(levels)) {
-        levels.forEach((level) => {
-        const price = level.price;
-        if (price && data.length > 0) {
-          const series = mainChart.addLineSeries({
-            color: 'rgba(128, 0, 128, 0.7)',
-            lineWidth: 2,
-            lineStyle: 3,
-          });
-          series.setData([
-            { time: data[0].time, value: price },
-            { time: data[data.length - 1].time, value: price },
-          ]);
-          chartRef.current.overlays.push(series);
-        }
-        });
-      }
-    }
+    // Дублирующий код для psychological_levels удален - используется основная реализация выше
 
     // Добавление отрисовки гэпов
     if (layers.includes('gap_analysis')) {
@@ -718,7 +701,15 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     }
 
     if (markers.length) {
-      candleSeries.setMarkers(markers.filter((m) => m.time));
+      // Сортируем маркеры по времени в возрастающем порядке для предотвращения ошибки
+      // "Assertion failed: data must be asc ordered by time"
+      const sortedMarkers = markers
+        .filter((m) => m.time && !isNaN(m.time)) // Фильтруем только валидные временные метки
+        .sort((a, b) => a.time - b.time); // Сортируем по времени в возрастающем порядке
+
+      if (sortedMarkers.length > 0) {
+        candleSeries.setMarkers(sortedMarkers);
+      }
     }
 
     let panelChart = null;

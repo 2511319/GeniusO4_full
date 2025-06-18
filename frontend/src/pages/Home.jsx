@@ -65,11 +65,29 @@ export default function Home() {
       <Grid container spacing={1}>
         {/* левая панель */}
         <Grid item xs={12} lg={2.5}>
-          <Accordion defaultExpanded sx={{ mb: 1 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ py: 0.5 }}>
-              <Typography variant="subtitle1" fontWeight="bold">Параметры запроса</Typography>
+          <Accordion defaultExpanded sx={{
+            mb: 0.8,
+            bgcolor: 'rgba(33, 150, 243, 0.08)',
+            border: '1px solid rgba(33, 150, 243, 0.2)',
+            '&:before': { display: 'none' }
+          }}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ color: '#90caf9' }} />}
+              sx={{
+                py: 0.3,
+                minHeight: 32,
+                bgcolor: 'rgba(33, 150, 243, 0.15)'
+              }}
+            >
+              <Typography variant="subtitle1" sx={{
+                fontWeight: 'bold',
+                color: '#e3f2fd',
+                fontSize: '0.9rem'
+              }}>
+                ⚙️ Параметры запроса
+              </Typography>
             </AccordionSummary>
-            <AccordionDetails sx={{ py: 1 }}>
+            <AccordionDetails sx={{ py: 0.8, px: 1.5 }}>
 
             <TextField
               fullWidth label="Тикер"
@@ -102,14 +120,30 @@ export default function Home() {
             </AccordionDetails>
           </Accordion>
 
-          <Accordion defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
-              <Typography variant="subtitle1">Индикаторы графика</Typography>
+          <Accordion defaultExpanded sx={{
+            mb: 0.8,
+            bgcolor: 'rgba(76, 175, 80, 0.08)',
+            border: '1px solid rgba(76, 175, 80, 0.2)',
+            '&:before': { display: 'none' }
+          }}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ color: '#a5d6a7' }} />}
+              sx={{
+                py: 0.3,
+                minHeight: 32,
+                bgcolor: 'rgba(76, 175, 80, 0.15)'
+              }}
+            >
+              <Typography variant="subtitle1" sx={{
+                fontWeight: 'bold',
+                color: '#c8e6c9',
+                fontSize: '0.9rem'
+              }}>
+                📊 Индикаторы графика
+              </Typography>
             </AccordionSummary>
-            <AccordionDetails>
-              <Divider sx={{ mb: 2 }} />
-
-              <FormGroup>
+            <AccordionDetails sx={{ py: 0.8, px: 1.5 }}>
+              <FormGroup sx={{ gap: 0.2 }}>
               {['RSI','MACD','OBV','ATR','VWAP'].map((ind) => (
                 <FormControlLabel
                   key={ind}
@@ -117,20 +151,51 @@ export default function Home() {
                     <Checkbox
                       checked={layers.includes(ind)}
                       onChange={() => toggleLayer(ind)}
+                      sx={{
+                        py: 0.2,
+                        '& .MuiSvgIcon-root': { color: '#a5d6a7' }
+                      }}
                     />
                   }
-                  label={ind}
+                  label={
+                    <Typography sx={{
+                      fontSize: '0.85rem',
+                      color: '#e8f5e8',
+                      fontWeight: layers.includes(ind) ? 600 : 400
+                    }}>
+                      {ind}
+                    </Typography>
+                  }
+                  sx={{ my: 0.1 }}
                 />
               ))}
               </FormGroup>
             </AccordionDetails>
           </Accordion>
 
-          <Accordion defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
-              <Typography variant="subtitle1">Технические</Typography>
+          <Accordion defaultExpanded sx={{
+            mb: 0.8,
+            bgcolor: 'rgba(255, 152, 0, 0.08)',
+            border: '1px solid rgba(255, 152, 0, 0.2)',
+            '&:before': { display: 'none' }
+          }}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ color: '#ffcc80' }} />}
+              sx={{
+                py: 0.3,
+                minHeight: 32,
+                bgcolor: 'rgba(255, 152, 0, 0.15)'
+              }}
+            >
+              <Typography variant="subtitle1" sx={{
+                fontWeight: 'bold',
+                color: '#ffe0b2',
+                fontSize: '0.9rem'
+              }}>
+                🔧 Технические
+              </Typography>
             </AccordionSummary>
-            <AccordionDetails>
+            <AccordionDetails sx={{ py: 0.8, px: 1.5 }}>
             <TechnicalIndicators
               available={available}
               layers={layers}
@@ -139,11 +204,29 @@ export default function Home() {
             </AccordionDetails>
           </Accordion>
 
-          <Accordion defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
-              <Typography variant="subtitle1">Продвинутые</Typography>
+          <Accordion defaultExpanded sx={{
+            mb: 0.8,
+            bgcolor: 'rgba(156, 39, 176, 0.08)',
+            border: '1px solid rgba(156, 39, 176, 0.2)',
+            '&:before': { display: 'none' }
+          }}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ color: '#ce93d8' }} />}
+              sx={{
+                py: 0.3,
+                minHeight: 32,
+                bgcolor: 'rgba(156, 39, 176, 0.15)'
+              }}
+            >
+              <Typography variant="subtitle1" sx={{
+                fontWeight: 'bold',
+                color: '#e1bee7',
+                fontSize: '0.9rem'
+              }}>
+                🚀 Продвинутые
+              </Typography>
             </AccordionSummary>
-            <AccordionDetails>
+            <AccordionDetails sx={{ py: 0.8, px: 1.5 }}>
             <AdvancedIndicators
               available={available}
               layers={layers}
@@ -152,11 +235,28 @@ export default function Home() {
             </AccordionDetails>
           </Accordion>
 
-          <Accordion defaultExpanded>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}> 
-              <Typography variant="subtitle1">Модельный анализ</Typography>
+          <Accordion defaultExpanded sx={{
+            bgcolor: 'rgba(244, 67, 54, 0.08)',
+            border: '1px solid rgba(244, 67, 54, 0.2)',
+            '&:before': { display: 'none' }
+          }}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon sx={{ color: '#ef9a9a' }} />}
+              sx={{
+                py: 0.3,
+                minHeight: 32,
+                bgcolor: 'rgba(244, 67, 54, 0.15)'
+              }}
+            >
+              <Typography variant="subtitle1" sx={{
+                fontWeight: 'bold',
+                color: '#ffcdd2',
+                fontSize: '0.9rem'
+              }}>
+                🤖 Модельный анализ
+              </Typography>
             </AccordionSummary>
-            <AccordionDetails>
+            <AccordionDetails sx={{ py: 0.8, px: 1.5 }}>
             <ModelAnalysisIndicators
               available={available}
               layers={layers}
@@ -175,7 +275,44 @@ export default function Home() {
 
         {/* результаты */}
         <Grid item xs={12} lg={2.5}>
-          <Paper sx={{ p: 1.5, maxHeight: '82vh', overflow: 'auto' }}>
+          <Paper sx={{
+            p: 1.5,
+            maxHeight: '82vh',
+            overflow: 'auto',
+            bgcolor: 'rgba(0, 0, 0, 0.4)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: 2,
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: 'rgba(33, 150, 243, 0.6)',
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              background: 'rgba(33, 150, 243, 0.8)',
+            }
+          }}>
+            <Box sx={{
+              mb: 1.5,
+              p: 1,
+              bgcolor: 'rgba(33, 150, 243, 0.15)',
+              borderRadius: 1,
+              border: '1px solid rgba(33, 150, 243, 0.3)',
+              textAlign: 'center'
+            }}>
+              <Typography variant="h6" sx={{
+                color: '#e3f2fd',
+                fontWeight: 'bold',
+                fontSize: '1rem'
+              }}>
+                📋 Результаты анализа
+              </Typography>
+            </Box>
             <AnalysisSections analysis={analysis} activeLayers={layers} />
           </Paper>
         </Grid>
@@ -185,22 +322,41 @@ export default function Home() {
       {analysis && (analysis.price_prediction || analysis.recommendations) && (
         <Grid container spacing={2} sx={{ mt: 2 }}>
           <Grid item xs={12}>
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="h5" gutterBottom color="primary">
+            <Paper sx={{
+              p: 3,
+              bgcolor: 'rgba(33, 150, 243, 0.08)',
+              border: '2px solid rgba(33, 150, 243, 0.3)',
+              borderRadius: 2
+            }}>
+              <Typography variant="h5" gutterBottom sx={{
+                color: '#e3f2fd',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                mb: 2
+              }}>
                 📈 Прогнозы и торговые рекомендации
               </Typography>
-              <Divider sx={{ mb: 2 }} />
+              <Divider sx={{
+                mb: 3,
+                borderColor: 'rgba(33, 150, 243, 0.3)',
+                borderWidth: 1
+              }} />
               <Grid container spacing={3}>
                 {analysis.price_prediction && (
                   <Grid item xs={12} md={6}>
                     <Box sx={{
-                      p: 2,
-                      bgcolor: 'background.paper',
+                      p: 2.5,
+                      bgcolor: 'rgba(76, 175, 80, 0.1)',
                       borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: 'primary.light'
+                      border: '2px solid rgba(76, 175, 80, 0.4)',
+                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)'
                     }}>
-                      <Typography variant="h6" gutterBottom color="primary">
+                      <Typography variant="h6" gutterBottom sx={{
+                        color: '#c8e6c9',
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        mb: 2
+                      }}>
                         🎯 Прогноз цены
                       </Typography>
                       <AnalysisSections
@@ -213,13 +369,18 @@ export default function Home() {
                 {analysis.recommendations && (
                   <Grid item xs={12} md={6}>
                     <Box sx={{
-                      p: 2,
-                      bgcolor: 'background.paper',
+                      p: 2.5,
+                      bgcolor: 'rgba(255, 152, 0, 0.1)',
                       borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: 'success.light'
+                      border: '2px solid rgba(255, 152, 0, 0.4)',
+                      boxShadow: '0 4px 12px rgba(255, 152, 0, 0.2)'
                     }}>
-                      <Typography variant="h6" gutterBottom color="success.main">
+                      <Typography variant="h6" gutterBottom sx={{
+                        color: '#ffe0b2',
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        mb: 2
+                      }}>
                         💡 Торговые рекомендации
                       </Typography>
                       <AnalysisSections
