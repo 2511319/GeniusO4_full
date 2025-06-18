@@ -192,14 +192,8 @@ export default function IndicatorsAnalysisDisplay({ indicators }) {
 
           {/* Комментарий */}
           {data.comment && (
-            <Box sx={{
-              p: 1,
-              bgcolor: 'background.paper',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'divider'
-            }}>
-              <Typography variant="body2" color="text.primary">
+            <Box sx={{ p: 1, bgcolor: 'grey.100', borderRadius: 1 }}>
+              <Typography variant="body2">
                 {data.comment}
               </Typography>
             </Box>
