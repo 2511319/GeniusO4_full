@@ -33,3 +33,6 @@ jobs:
       - name: Build frontend image
         run: |
           docker build -t geniuso4-ui:latest frontend
+      - name: Build bot image
+        run: |
+          docker build -t geniuso4-bot:latest bot

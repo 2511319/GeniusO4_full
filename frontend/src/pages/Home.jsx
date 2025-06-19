@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import {
   Container, Grid, Paper, Box,
   TextField, Select, MenuItem, Button, Typography,
   Divider, FormGroup, FormControlLabel, Checkbox,
-  Accordion, AccordionSummary, AccordionDetails
+  Accordion, AccordionSummary, AccordionDetails, Chip
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -16,6 +17,7 @@ import ModelAnalysisIndicators from '../ModelAnalysisIndicators';
 
 export default function Home() {
   const token = useSelector((state) => state.auth.token);
+  const [searchParams] = useSearchParams();
 
   const [symbol,  setSymbol]  = useState('BTCUSDT');
   const [interval,setInterval]= useState('4h');
@@ -24,6 +26,21 @@ export default function Home() {
   const [data,    setData]    = useState([]);
   const [analysis,setAnalysis]= useState(null);
   const [available,setAvailable]= useState([]);
+  const [analysisType, setAnalysisType] = useState('full');
+
+  // Проверяем параметры из URL
+  useEffect(() => {
+    const urlAnalysisType = searchParams.get('analysis_type');
+    const urlSymbol = searchParams.get('symbol');
+
+    if (urlAnalysisType) {
+      setAnalysisType(urlAnalysisType);
+    }
+
+    if (urlSymbol) {
+      setSymbol(urlSymbol);
+    }
+  }, [searchParams]);
 
   const toggleLayer = (name) =>
     setLayers((prev) =>
@@ -49,16 +66,45 @@ export default function Home() {
   const loadData = async () => {
     const body = { symbol, interval, limit, indicators: layers };
     const headers = { 'Content-Type': 'application/json' };
-    if (token) headers.Authorization = `Bearer ${token}`;
 
-    const res   = await fetch('/api/analyze', {
-      method:'POST', headers, body:JSON.stringify(body),
+    // Выбираем endpoint в зависимости от типа анализа
+    let endpoint = '/api/analyze';
+    if (analysisType === 'simple') {
+      endpoint = '/bot/analysis/simple';
+      headers['X-Telegram-Id'] = extractTelegramIdFromToken(token);
+    } else {
+      if (token) headers.Authorization = `Bearer ${token}`;
+    }
+
+    const res = await fetch(endpoint, {
+      method: analysisType === 'simple' ? 'POST' : 'POST',
+      headers,
+      body: analysisType === 'simple' ? undefined : JSON.stringify(body),
     });
-    const json  = await res.json();
-    setAnalysis(json.analysis);
-    setData(json.ohlc);
-    setAvailable(json.indicators || []);
+
+    const json = await res.json();
+
+    if (analysisType === 'simple') {
+      // Для простого анализа структура ответа другая
+      setAnalysis(json.analysis);
+      setData([]); // Простой анализ не возвращает OHLC данные
+      setAvailable([]);
+    } else {
+      setAnalysis(json.analysis);
+      setData(json.ohlc);
+      setAvailable(json.indicators || []);
+    }
   };
+
+  function extractTelegramIdFromToken(token) {
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.telegram_id || payload.sub;
+    } catch {
+      return null;
+    }
+  }
 
   return (
     <Container maxWidth={false} sx={{ mt: 1, px: 1 }}>
@@ -67,7 +113,14 @@ export default function Home() {
         <Grid item xs={12} lg={2.5}>
           <Accordion defaultExpanded sx={{ mb: 1 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ py: 0.5 }}>
-              <Typography variant="subtitle1" fontWeight="bold">Параметры запроса</Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography variant="subtitle1" fontWeight="bold">Параметры запроса</Typography>
+                <Chip
+                  label={analysisType === 'simple' ? 'Краткий' : 'Полный'}
+                  size="small"
+                  color={analysisType === 'simple' ? 'secondary' : 'primary'}
+                />
+              </Box>
             </AccordionSummary>
             <AccordionDetails sx={{ py: 1 }}>
 
@@ -94,11 +147,33 @@ export default function Home() {
             </Select>
 
             <Button variant="contained" fullWidth onClick={loadData}>
-              Запустить анализ
+              {analysisType === 'simple' ? 'Запустить краткий анализ' : 'Запустить полный анализ'}
             </Button>
             <Button variant="outlined" fullWidth sx={{ mt: 1 }} onClick={loadTestData}>
               Test
             </Button>
+            {analysisType === 'simple' && (
+              <Button
+                variant="outlined"
+                color="primary"
+                fullWidth
+                sx={{ mt: 1 }}
+                onClick={() => setAnalysisType('full')}
+              >
+                Переключить на полный анализ
+              </Button>
+            )}
+            {analysisType === 'full' && (
+              <Button
+                variant="outlined"
+                color="secondary"
+                fullWidth
+                sx={{ mt: 1 }}
+                onClick={() => setAnalysisType('simple')}
+              >
+                Переключить на краткий анализ
+              </Button>
+            )}
             </AccordionDetails>
           </Accordion>
 

@@ -1,0 +1,128 @@
+steps:
+  # Build Backend API
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/chartgenius-api:$COMMIT_SHA'
+      - '-f'
+      - 'backend/Dockerfile'
+      - '.'
+    id: 'build-api'
+
+  # Build Telegram Bot
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/chartgenius-bot:$COMMIT_SHA'
+      - '-f'
+      - 'bot/Dockerfile'
+      - '.'
+    id: 'build-bot'
+
+  # Build Frontend
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/chartgenius-frontend:$COMMIT_SHA'
+      - '-f'
+      - 'frontend/Dockerfile'
+      - '.'
+      - '--build-arg'
+      - 'VITE_API_URL=https://chartgenius-api-${_CLOUD_RUN_REGION}-${_CLOUD_RUN_SUFFIX}.a.run.app'
+      - '--build-arg'
+      - 'VITE_TELEGRAM_BOT_USERNAME=Chart_Genius_bot'
+    id: 'build-frontend'
+
+  # Push images
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/chartgenius-api:$COMMIT_SHA']
+    id: 'push-api'
+    waitFor: ['build-api']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/chartgenius-bot:$COMMIT_SHA']
+    id: 'push-bot'
+    waitFor: ['build-bot']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/chartgenius-frontend:$COMMIT_SHA']
+    id: 'push-frontend'
+    waitFor: ['build-frontend']
+
+  # Deploy Backend API
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'chartgenius-api'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/chartgenius-api:$COMMIT_SHA'
+      - '--region'
+      - '${_CLOUD_RUN_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-secrets'
+      - 'JWT_SECRET_KEY=JWT_SECRET_KEY:latest,TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest,CRYPTOCOMPARE_API_KEY=CRYPTOCOMPARE_API_KEY:latest'
+      - '--set-env-vars'
+      - 'LLM_PROVIDER=openai,DEFAULT_SYMBOL=BTCUSDT,LOCAL_TESTING=false'
+      - '--cpu=1'
+      - '--memory=1Gi'
+      - '--max-instances=10'
+    id: 'deploy-api'
+    waitFor: ['push-api']
+
+  # Deploy Telegram Bot
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'chartgenius-bot'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/chartgenius-bot:$COMMIT_SHA'
+      - '--region'
+      - '${_CLOUD_RUN_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-secrets'
+      - 'JWT_SECRET_KEY=JWT_SECRET_KEY:latest,TELEGRAM_BOT_TOKEN=TELEGRAM_BOT_TOKEN:latest'
+      - '--set-env-vars'
+      - 'API_URL=https://chartgenius-api-${_CLOUD_RUN_REGION}-${_CLOUD_RUN_SUFFIX}.a.run.app,WEBAPP_URL=https://chartgenius-frontend-${_CLOUD_RUN_REGION}-${_CLOUD_RUN_SUFFIX}.a.run.app'
+      - '--cpu=1'
+      - '--memory=512Mi'
+      - '--max-instances=5'
+    id: 'deploy-bot'
+    waitFor: ['push-bot', 'deploy-api']
+
+  # Deploy Frontend
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'chartgenius-frontend'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/chartgenius-frontend:$COMMIT_SHA'
+      - '--region'
+      - '${_CLOUD_RUN_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--cpu=1'
+      - '--memory=512Mi'
+      - '--max-instances=5'
+    id: 'deploy-frontend'
+    waitFor: ['push-frontend']
+
+substitutions:
+  _CLOUD_RUN_REGION: us-central1
+  _CLOUD_RUN_SUFFIX: uc.a.run.app
+
+options:
+  logging: CLOUD_LOGGING_ONLY

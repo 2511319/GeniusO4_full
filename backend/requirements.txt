@@ -12,3 +12,8 @@ scipy
 google-cloud-firestore
 pyyaml
 python-dotenv
+python-jose[cryptography]
+python-telegram-bot==21.2
+telegram-webapp-auth==3.0.5
+sqlmodel
+aiohttp
