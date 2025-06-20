@@ -13,6 +13,31 @@ from backend.middleware.telegram_webapp import get_current_user_from_webapp
 security = HTTPBearer()
 
 
+async def get_current_user(request: Request) -> Dict[str, Any]:
+    """
+    Получение текущего пользователя из JWT токена или Telegram WebApp
+    """
+    try:
+        # Сначала пробуем получить пользователя из Telegram WebApp
+        webapp_user = await get_current_user_from_webapp(request)
+        if webapp_user:
+            return webapp_user
+
+        # Если не получилось, пробуем JWT токен
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Токен авторизации не найден")
+
+        token = auth_header.split(" ")[1]
+        return await get_user_from_jwt(token)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Ошибка получения текущего пользователя: {e}")
+        raise HTTPException(status_code=401, detail="Ошибка авторизации")
+
+
 class RoleChecker:
     """Класс для проверки ролей пользователей"""
     
@@ -51,31 +76,6 @@ def require_role(role: str):
 def require_any_role(*roles: str):
     """Декоратор для проверки любой из указанных ролей"""
     return RoleChecker(list(roles))
-
-
-async def get_current_user(request: Request) -> Dict[str, Any]:
-    """
-    Получение текущего пользователя из JWT токена или Telegram WebApp
-    """
-    try:
-        # Сначала пробуем получить пользователя из Telegram WebApp
-        webapp_user = await get_current_user_from_webapp(request)
-        if webapp_user:
-            return webapp_user
-        
-        # Если не получилось, пробуем JWT токен
-        auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Токен авторизации не найден")
-        
-        token = auth_header.split(" ")[1]
-        return await get_user_from_jwt(token)
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Ошибка получения текущего пользователя: {e}")
-        raise HTTPException(status_code=401, detail="Ошибка авторизации")
 
 
 async def get_user_from_jwt(token: str) -> Dict[str, Any]:

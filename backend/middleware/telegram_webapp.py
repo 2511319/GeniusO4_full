@@ -7,7 +7,7 @@ import json
 from urllib.parse import unquote
 from typing import Optional, Dict, Any
 from fastapi import HTTPException, Request
-from telegram_webapp_auth import validate_init_data
+from telegram_webapp_auth.auth import TelegramAuthenticator
 from backend.config.config import logger, db
 from google.cloud import firestore
 
@@ -20,21 +20,22 @@ class TelegramWebAppAuth:
         if not self.bot_token:
             logger.error("TELEGRAM_BOT_TOKEN не установлен")
     
-    def validate_webapp_data(self, init_data: str) -> Optional[Dict[str, Any]]:
+    def validate_webapp_data(self, init_data: str) -> bool:
         """
         Валидация данных от Telegram WebApp
         """
         try:
             if not self.bot_token:
-                return None
-                
+                return False
+
             # Используем библиотеку telegram-webapp-auth для валидации
-            user_data = validate_init_data(init_data, self.bot_token)
-            return user_data
-            
+            authenticator = TelegramAuthenticator(self.bot_token)
+            authenticator.validate(init_data)
+            return True
+
         except Exception as e:
             logger.error(f"Ошибка валидации Telegram WebApp данных: {e}")
-            return None
+            return False
     
     def extract_user_from_init_data(self, init_data: str) -> Optional[Dict[str, Any]]:
         """

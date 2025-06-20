@@ -3,17 +3,17 @@ import os
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
-# ↓ относительный импорт
-from routers.analysis import router as analysis_router
-from routers.admin import router as admin_router
-from routers.mod import router as mod_router
-from routers.watch import router as watch_router
+# ↓ абсолютный импорт
+from backend.routers.analysis import router as analysis_router
+from backend.routers.admin import router as admin_router
+from backend.routers.mod import router as mod_router
+from backend.routers.watch import router as watch_router
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 import uvicorn
 from dotenv import load_dotenv
-from config.config import logger
+from backend.config.config import logger
 
 load_dotenv()  # подхватит .env.dev
 
@@ -45,7 +45,7 @@ async def test_api():
 async def create_webapp_token(init_data: str):
     """Создание JWT токена для WebApp (10 минут)"""
     try:
-        from middleware.telegram_webapp import TelegramWebAppAuth
+        from backend.middleware.telegram_webapp import TelegramWebAppAuth
 
         auth = TelegramWebAppAuth()
 
@@ -61,7 +61,7 @@ async def create_webapp_token(init_data: str):
         telegram_id = str(user_data.get('id'))
 
         # Создаем JWT токен на 10 минут
-        from auth.dependencies import create_jwt_token
+        from backend.auth.dependencies import create_jwt_token
         token = create_jwt_token(telegram_id, expires_minutes=10)
 
         return {

@@ -5,7 +5,8 @@ import numpy as np
 import json
 from typing import Dict, Any, List
 import math
-from config.config import logger
+from backend.config.config import logger
+from backend.utils.performance_monitor import monitor_performance, DataSizeAnalyzer
 import ta  # Технический анализ
 
 
@@ -16,6 +17,63 @@ class DataProcessor:
 
     def __init__(self, df: pd.DataFrame):
         self.df = df
+        self._validate_input_data()
+
+    def _validate_input_data(self) -> None:
+        """
+        Валидирует входные данные для обеспечения корректности обработки
+        """
+        try:
+            if self.df is None:
+                raise ValueError("DataFrame не может быть None")
+
+            if self.df.empty:
+                logger.warning("Получен пустой DataFrame")
+                return
+
+            # Проверяем наличие обязательных столбцов OHLCV
+            required_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+            missing_columns = [col for col in required_columns if col not in self.df.columns]
+
+            if missing_columns:
+                logger.warning(f"Отсутствуют обязательные столбцы: {missing_columns}")
+
+            # Проверяем типы данных
+            numeric_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+            for col in numeric_columns:
+                if col in self.df.columns and not pd.api.types.is_numeric_dtype(self.df[col]):
+                    logger.warning(f"Столбец {col} не является числовым: {self.df[col].dtype}")
+                    try:
+                        self.df[col] = pd.to_numeric(self.df[col], errors='coerce')
+                        logger.info(f"Столбец {col} преобразован в числовой тип")
+                    except Exception as e:
+                        logger.error(f"Не удалось преобразовать столбец {col} в числовой: {e}")
+
+            # Проверяем логическую корректность OHLC данных
+            if all(col in self.df.columns for col in ['Open', 'High', 'Low', 'Close']):
+                # High должен быть >= max(Open, Close)
+                invalid_high = (self.df['High'] < self.df[['Open', 'Close']].max(axis=1))
+                if invalid_high.any():
+                    invalid_count = invalid_high.sum()
+                    logger.warning(f"Найдено {invalid_count} свечей с некорректными High значениями")
+
+                # Low должен быть <= min(Open, Close)
+                invalid_low = (self.df['Low'] > self.df[['Open', 'Close']].min(axis=1))
+                if invalid_low.any():
+                    invalid_count = invalid_low.sum()
+                    logger.warning(f"Найдено {invalid_count} свечей с некорректными Low значениями")
+
+            # Проверяем размер данных
+            data_size = len(self.df)
+            if data_size > 10000:
+                logger.info(f"Большой объем данных: {data_size} записей. Рекомендуется оптимизация.")
+            elif data_size < 10:
+                logger.warning(f"Малый объем данных: {data_size} записей. Индикаторы могут быть неточными.")
+
+            logger.info(f"Валидация данных завершена. Записей: {data_size}, Столбцов: {len(self.df.columns)}")
+
+        except Exception as e:
+            logger.error(f"Ошибка при валидации входных данных: {e}")
 
     def preprocess(self) -> pd.DataFrame:
         """
@@ -34,6 +92,7 @@ class DataProcessor:
             logger.error(f"Ошибка при предобработке данных: {e}")
             return self.df
 
+    @monitor_performance("DataProcessor.calculate_indicators")
     def calculate_indicators(self) -> pd.DataFrame:
         """
         Рассчитывает технические индикаторы и добавляет их в DataFrame.
@@ -243,16 +302,42 @@ class DataProcessor:
             return self.df
 
     def sanitize(self) -> pd.DataFrame:
-        """Удаляет бесконечные значения и заполняет NaN."""
+        """
+        Оптимизированная очистка данных от бесконечных значений и NaN.
+        Использует векторизованные операции pandas для лучшей производительности.
+        """
         try:
-            if np.isinf(self.df.select_dtypes(include=[float, int])).values.any():
-                logger.warning("Найдены бесконечные значения после обработки, выполняется замена")
-                self.df.replace([np.inf, -np.inf], np.nan, inplace=True)
-            nulls = self.df.isna().sum().sum()
-            if nulls:
-                logger.warning(f"Обнаружено {nulls} NaN значений, выполняется заполнение")
-                self.df = self.df.ffill().bfill()
+            # Получаем только числовые столбцы для оптимизации
+            numeric_cols = self.df.select_dtypes(include=[np.number]).columns
+
+            if len(numeric_cols) == 0:
+                logger.info("Нет числовых столбцов для очистки")
+                return self.df
+
+            # Проверяем наличие бесконечных значений только в числовых столбцах
+            inf_mask = np.isinf(self.df[numeric_cols]).any().any()
+            if inf_mask:
+                logger.warning("Найдены бесконечные значения, выполняется замена")
+                # Заменяем только в числовых столбцах для производительности
+                self.df[numeric_cols] = self.df[numeric_cols].replace([np.inf, -np.inf], np.nan)
+
+            # Подсчитываем NaN только в числовых столбцах
+            nulls = self.df[numeric_cols].isna().sum().sum()
+            if nulls > 0:
+                logger.warning(f"Обнаружено {nulls} NaN значений в числовых столбцах, выполняется заполнение")
+
+                # Оптимизированное заполнение: сначала forward fill, затем backward fill
+                # Применяем только к числовым столбцам
+                self.df[numeric_cols] = self.df[numeric_cols].fillna(method='ffill').fillna(method='bfill')
+
+                # Если все еще остались NaN (например, весь столбец пустой), заполняем нулями
+                remaining_nulls = self.df[numeric_cols].isna().sum().sum()
+                if remaining_nulls > 0:
+                    logger.warning(f"Остались {remaining_nulls} NaN значений, заполняем нулями")
+                    self.df[numeric_cols] = self.df[numeric_cols].fillna(0)
+
             return self.df
+
         except Exception as e:
             logger.error(f"Ошибка при очистке данных: {e}")
             return self.df
@@ -275,38 +360,72 @@ class DataProcessor:
 
     def get_ohlc_data(self, num_candles: int = 144) -> List[Dict[str, Any]]:
         """
-        Получает данные OHLC с включенными индикаторами.
+        Оптимизированное получение данных OHLC с включенными индикаторами.
+        Использует векторизованные операции для лучшей производительности.
+
         Параметры:
             num_candles (int): Количество последних свечей для возврата.
         """
-        # Выбираем все столбцы, включая индикаторы
-        ohlc_data = self.df.tail(num_candles).copy()
+        try:
+            # Выбираем последние свечи более эффективно
+            if num_candles >= len(self.df):
+                ohlc_data = self.df.copy()
+            else:
+                ohlc_data = self.df.iloc[-num_candles:].copy()
 
-        # Преобразуем все столбцы с датами и временем в строки
-        datetime_cols = ohlc_data.select_dtypes(include=['datetime64[ns]', 'datetime64[ns, UTC]']).columns
-        for col in datetime_cols:
-            ohlc_data[col] = ohlc_data[col].astype(str)
+            # Оптимизированное преобразование datetime столбцов
+            datetime_cols = ohlc_data.select_dtypes(include=['datetime64[ns]', 'datetime64[ns, UTC]']).columns
+            if len(datetime_cols) > 0:
+                # Векторизованное преобразование всех datetime столбцов сразу
+                for col in datetime_cols:
+                    ohlc_data[col] = ohlc_data[col].dt.strftime('%Y-%m-%d %H:%M:%S')
 
-        # Убедимся, что столбцы с индикаторами не содержат NaN/inf
-        if np.isinf(ohlc_data.select_dtypes(include=[float, int])).values.any():
-            logger.debug(
-                "Бесконечные значения в OHLC данных, заменяем на NaN"
-            )  # конфликтных маркеров не осталось
-        ohlc_data = ohlc_data.replace([np.inf, -np.inf], np.nan)
-        ohlc_data = ohlc_data.ffill().bfill()
-        nulls = ohlc_data.isna().sum().sum()
-        if nulls:
-            logger.debug(f"После очистки осталось {nulls} NaN, заменяем на None")
-        # Заменяем NaN и NaT на None для корректной сериализации в JSON
-        ohlc_data = ohlc_data.where(pd.notnull(ohlc_data), None)
+            # Оптимизированная очистка числовых данных
+            numeric_cols = ohlc_data.select_dtypes(include=[np.number]).columns
+            if len(numeric_cols) > 0:
+                # Проверяем наличие бесконечных значений только в числовых столбцах
+                inf_check = np.isinf(ohlc_data[numeric_cols]).any().any()
+                if inf_check:
+                    logger.debug("Бесконечные значения в OHLC данных, заменяем на NaN")
+                    ohlc_data[numeric_cols] = ohlc_data[numeric_cols].replace([np.inf, -np.inf], np.nan)
 
-        ohlc_data = ohlc_data.to_dict(orient='records')
-        return ohlc_data
+                # Заполняем NaN значения
+                nan_count = ohlc_data[numeric_cols].isna().sum().sum()
+                if nan_count > 0:
+                    logger.debug(f"Заполняем {nan_count} NaN значений в OHLC данных")
+                    ohlc_data[numeric_cols] = ohlc_data[numeric_cols].fillna(method='ffill').fillna(method='bfill').fillna(0)
 
+            # Финальная очистка для JSON сериализации
+            # Заменяем оставшиеся NaN и NaT на None более эффективно
+            ohlc_data = ohlc_data.where(pd.notnull(ohlc_data), None)
+
+            # Конвертируем в список словарей
+            result = ohlc_data.to_dict(orient='records')
+
+            logger.debug(f"Подготовлено {len(result)} свечей OHLC данных")
+            return result
+
+        except Exception as e:
+            logger.error(f"Ошибка при получении OHLC данных: {e}")
+            # Fallback: возвращаем базовые данные
+            try:
+                fallback_data = self.df.tail(num_candles).to_dict(orient='records')
+                return fallback_data
+            except Exception as fallback_error:
+                logger.error(f"Критическая ошибка при fallback получении OHLC: {fallback_error}")
+                return []
+
+    @monitor_performance("DataProcessor.full_processing")
     def perform_full_processing(self, drop_na: bool = True) -> pd.DataFrame:
         """
-        Полный процесс предобработки данных.
+        Полный процесс предобработки данных с мониторингом производительности.
         """
+        data_size = len(self.df)
+
+        # Выбираем оптимальную стратегию обработки
+        strategy = DataSizeAnalyzer.recommend_algorithm(data_size, 'indicators')
+        logger.info(f"Обработка {data_size} записей с использованием стратегии: {strategy}")
+
         self.preprocess()
         self.calculate_indicators()
         self.apply_rounding()  # Применяем округление

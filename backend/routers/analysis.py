@@ -2,15 +2,24 @@
 
 import os
 import json
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 
-from services.crypto_compare_provider import fetch_ohlcv
-from services.data_processor import DataProcessor
-from services.chatgpt_analyzer import ChatGPTAnalyzer
-from services.viz import create_chart
+from backend.services.crypto_compare_provider import fetch_ohlcv
+from backend.services.data_processor import DataProcessor
+from backend.services.chatgpt_analyzer import ChatGPTAnalyzer
+from backend.services.viz import create_chart
+from backend.validators.analysis_validators import (
+    validate_analysis_request_data,
+    ValidationError,
+    SUPPORTED_INTERVALS,
+    SUPPORTED_INDICATORS,
+    MIN_LIMIT,
+    MAX_LIMIT,
+    DEFAULT_LIMIT
+)
 
 router = APIRouter()
 
@@ -18,11 +27,109 @@ router = APIRouter()
 DEFAULT_SYMBOL = os.getenv("DEFAULT_SYMBOL", "BTCUSDT")
 
 class AnalyzeRequest(BaseModel):
-    symbol: str
-    interval: str
-    limit: int
-    indicators: List[str] = []
-    drop_na: bool = True
+    """
+    Модель запроса для анализа с расширенной валидацией
+    """
+    symbol: str = Field(
+        ...,
+        min_length=2,
+        max_length=20,
+        description="Торговый символ (например: BTCUSDT, BTC-USDT, BTC/USDT)",
+        example="BTCUSDT"
+    )
+    interval: str = Field(
+        ...,
+        description=f"Временной интервал. Поддерживаемые: {', '.join(sorted(SUPPORTED_INTERVALS))}",
+        example="4h"
+    )
+    limit: int = Field(
+        DEFAULT_LIMIT,
+        ge=MIN_LIMIT,
+        le=MAX_LIMIT,
+        description=f"Количество свечей для анализа (от {MIN_LIMIT} до {MAX_LIMIT})",
+        example=144
+    )
+    indicators: List[str] = Field(
+        default_factory=list,
+        description="Список индикаторов для отображения (пустой список = все индикаторы)",
+        example=["RSI", "MACD", "Bollinger_Bands"]
+    )
+    drop_na: bool = Field(
+        True,
+        description="Удалять ли свечи с пропущенными значениями индикаторов"
+    )
+
+    @validator('symbol')
+    def validate_symbol(cls, v):
+        """Валидация торгового символа"""
+        if not v or not v.strip():
+            raise ValueError("Символ не может быть пустым")
+        return v.strip().upper()
+
+    @validator('interval')
+    def validate_interval(cls, v):
+        """Валидация временного интервала"""
+        if not v or not v.strip():
+            raise ValueError("Интервал не может быть пустым")
+
+        clean_interval = v.strip().lower()
+        if clean_interval not in SUPPORTED_INTERVALS:
+            raise ValueError(
+                f"Неподдерживаемый интервал: {v}. "
+                f"Поддерживаемые: {', '.join(sorted(SUPPORTED_INTERVALS))}"
+            )
+        return clean_interval
+
+    @validator('indicators')
+    def validate_indicators(cls, v):
+        """Валидация списка индикаторов"""
+        if not v:
+            return []
+
+        if len(v) > len(SUPPORTED_INDICATORS):
+            raise ValueError(f"Слишком много индикаторов: {len(v)}")
+
+        clean_indicators = []
+        invalid_indicators = []
+
+        for indicator in v:
+            if not isinstance(indicator, str):
+                raise ValueError(f"Индикатор должен быть строкой: {indicator}")
+
+            clean_indicator = indicator.strip()
+            if not clean_indicator:
+                continue
+
+            # Ищем индикатор без учета регистра
+            found_indicator = None
+            for supported in SUPPORTED_INDICATORS:
+                if clean_indicator.upper() == supported.upper():
+                    found_indicator = supported
+                    break
+
+            if found_indicator is None:
+                invalid_indicators.append(clean_indicator)
+            else:
+                clean_indicators.append(found_indicator)
+
+        if invalid_indicators:
+            raise ValueError(
+                f"Неподдерживаемые индикаторы: {', '.join(invalid_indicators)}"
+            )
+
+        # Удаляем дубликаты
+        return list(dict.fromkeys(clean_indicators))
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "symbol": "BTCUSDT",
+                "interval": "4h",
+                "limit": 144,
+                "indicators": ["RSI", "MACD", "Bollinger_Bands"],
+                "drop_na": True
+            }
+        }
 
 class AnalyzeResponse(BaseModel):
     figure: dict
@@ -43,20 +150,68 @@ ALL_LAYERS = [
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze(req: AnalyzeRequest):
-    # если пользователь оставил пустой символ — подставляем дефолт
-    symbol = req.symbol.strip().upper() or DEFAULT_SYMBOL
+    """
+    Анализ криптовалютных данных с расширенной валидацией
+    """
+    try:
+        # Дополнительная валидация с детальными проверками
+        validated_symbol, validated_interval, validated_limit, validated_indicators = \
+            validate_analysis_request_data(
+                req.symbol,
+                req.interval,
+                req.limit,
+                req.indicators
+            )
 
-    # 1. Получаем OHLCV с небольшим запасом, чтобы индикаторы успели "разогнаться"
-    extra_candles = 200
-    fetch_limit = req.limit + extra_candles
-    df = await fetch_ohlcv(symbol, req.interval, fetch_limit)
-    if df.empty:
-        raise HTTPException(404, f"No data for symbol {symbol}")
+        # Используем валидированные данные или дефолт
+        symbol = validated_symbol or DEFAULT_SYMBOL
+
+        # 1. Получаем OHLCV с небольшим запасом, чтобы индикаторы успели "разогнаться"
+        extra_candles = 200
+        fetch_limit = validated_limit + extra_candles
+
+        try:
+            df = await fetch_ohlcv(symbol, validated_interval, fetch_limit)
+        except KeyError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Ошибка получения данных для символа {symbol} с интервалом {validated_interval}: {e}"
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Ошибка при получении данных: {e}"
+            )
+
+        if df.empty:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Нет данных для символа {symbol} с интервалом {validated_interval}"
+            )
+
+    except ValidationError:
+        # ValidationError уже содержит правильный HTTP статус и детали
+        raise
+    except HTTPException:
+        # Пробрасываем HTTP исключения как есть
+        raise
+    except Exception as e:
+        # Обрабатываем неожиданные ошибки
+        raise HTTPException(
+            status_code=500,
+            detail=f"Внутренняя ошибка сервера: {e}"
+        )
 
     # 2. Расчёт всех индикаторов
-    processor = DataProcessor(df)
-    df_ind = processor.perform_full_processing(drop_na=req.drop_na)
-    ohlc = processor.get_ohlc_data(req.limit)
+    try:
+        processor = DataProcessor(df)
+        df_ind = processor.perform_full_processing(drop_na=req.drop_na)
+        ohlc = processor.get_ohlc_data(validated_limit)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка при обработке данных: {e}"
+        )
 
     # список вычисленных индикаторов
     base_cols = [
@@ -66,17 +221,28 @@ async def analyze(req: AnalyzeRequest):
     ]
     indicator_cols = [c for c in df_ind.columns if c not in base_cols]
 
-    # 3. Анализ ChatGPT
-    analyzer = ChatGPTAnalyzer()
-    analysis = analyzer.analyze({"ohlc": ohlc})
+    # 3. Анализ с помощью LLM
+    try:
+        analyzer = ChatGPTAnalyzer()
+        analysis = analyzer.analyze({"ohlc": ohlc})
+    except Exception as e:
+        # Если анализ не удался, возвращаем пустой анализ вместо ошибки
+        analysis = {
+            "error": f"Анализ не удался: {e}",
+            "primary_analysis": "Анализ временно недоступен"
+        }
 
     # 4. Визуализация (рисуем выбранные слои)
-    layers = req.indicators or ALL_LAYERS
-    fig = create_chart(layers, df_ind, analysis)
+    try:
+        layers = validated_indicators or ALL_LAYERS
+        fig = create_chart(layers, df_ind, analysis)
+        figure_dict = json.loads(fig.to_json())
+    except Exception as e:
+        # Если визуализация не удалась, возвращаем пустую фигуру
+        figure_dict = {"error": f"Визуализация не удалась: {e}"}
 
     return AnalyzeResponse(
-        # Преобразуем JSON-строку фигуры в dict, иначе Pydantic не сможет сериализовать
-        figure=json.loads(fig.to_json()),
+        figure=figure_dict,
         analysis=analysis,
         ohlc=ohlc,
         indicators=indicator_cols

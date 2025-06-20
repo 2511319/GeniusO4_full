@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart } from 'lightweight-charts';
+import { toUnix, buildSeriesData, buildCandleData, validateTimeRange } from './utils/timeUtils';
 import { indicatorColumnMap } from './indicatorGroups';
 
 export default function TradingViewChart({ data = [], layers = [], analysis = {} }) {
@@ -71,47 +72,8 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     });
     chartRef.current = {};
 
-    const toUnix = (d) => {
-      if (!d) return null;
-
-      try {
-        let parsed;
-        if (typeof d === 'string') {
-          // Handle various date string formats
-          parsed = new Date(d.includes('T') ? d : d.replace(' ', 'T') + 'Z');
-        } else if (typeof d === 'number') {
-          // Handle Unix timestamp (seconds or milliseconds)
-          parsed = new Date(d > 1e10 ? d : d * 1000);
-        } else {
-          parsed = new Date(d);
-        }
-
-        const t = Math.floor(parsed.getTime() / 1000);
-
-        // Validate timestamp is reasonable (between 2000 and 2100)
-        if (!t || Number.isNaN(t) || t < 946684800 || t > 4102444800) {
-          console.warn('Invalid or unreasonable timestamp:', d, 'parsed to:', t);
-          return null;
-        }
-
-        return t;
-      } catch (error) {
-        console.warn('Error parsing date:', d, error);
-        return null;
-      }
-    };
-
-    const buildSeriesData = (field) => {
-      const seen = new Set();
-      return data
-        .map((c) => {
-          const t = toUnix(c['Open Time']);
-          if (t === null || c[field] === undefined) return null;
-          return { time: t, value: c[field] };
-        })
-        .filter((c) => c && !seen.has(c.time) && seen.add(c.time))
-        .sort((a, b) => a.time - b.time);
-    };
+    // Используем оптимизированные утилиты для работы с временными метками
+    // toUnix, buildSeriesData, buildCandleData импортированы из utils/timeUtils
 
     const addLine = (chart, field, color) => {
       const series = chart.addLineSeries({
@@ -119,7 +81,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         lastValueVisible: true,   // Показываем значение цены на правой шкале
         priceLineVisible: false   // Убираем горизонтальную пунктирную линию
       });
-      series.setData(buildSeriesData(field));
+      series.setData(buildSeriesData(data, 'Open Time', field));
       return series;
     };
 
@@ -130,7 +92,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         lastValueVisible: true,   // Показываем значение на правой шкале
         priceLineVisible: false   // Убираем горизонтальную пунктирную линию
       });
-      series.setData(buildSeriesData(field));
+      series.setData(buildSeriesData(data, 'Open Time', field));
       return series;
     };
 
@@ -177,15 +139,8 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       lastValueVisible: true,   // Показываем цену последней свечи
       priceLineVisible: false   // Убираем горизонтальную пунктирную линию
     });
-    const seenCandles = new Set();
-    const candleData = data
-      .map((c) => {
-        const time = toUnix(c['Open Time']);
-        if (time === null) return null;
-        return { time, open: c.Open, high: c.High, low: c.Low, close: c.Close };
-      })
-      .filter((c) => c && !seenCandles.has(c.time) && seenCandles.add(c.time))
-      .sort((a, b) => a.time - b.time);
+    // Используем оптимизированную функцию для построения свечных данных
+    const candleData = buildCandleData(data, 'Open Time');
     candleSeries.setData(candleData);
 
 
