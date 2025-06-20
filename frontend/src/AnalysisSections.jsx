@@ -171,33 +171,33 @@ export default function AnalysisSections({ analysis, activeLayers = [] }) {
         if (visibleSections.length === 0) return null;
 
         return (
-          <Box key={category} sx={{ mb: 1.5 }}>
-            <Typography variant="subtitle1" sx={{ mb: 0.5, color: 'primary.main', fontWeight: 'bold', fontSize: '0.95rem' }}>
+          <Box key={category} sx={{ mb: 1 }}>
+            <Typography variant="subtitle1" sx={{ mb: 0.3, color: 'primary.main', fontWeight: 'bold', fontSize: '0.9rem' }}>
               {categoryTitles[category]}
             </Typography>
-            <Divider sx={{ mb: 0.5 }} />
+            <Divider sx={{ mb: 0.3 }} />
 
             {visibleSections.map(({ key, title }) => {
               const value = analysis[key];
 
               return (
-                <Accordion key={key} defaultExpanded={category === 'basic'} sx={{ mb: 0.5 }}>
+                <Accordion key={key} defaultExpanded={category === 'basic'} sx={{ mb: 0.3 }}>
                   <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
-                    sx={{ py: 0.5, minHeight: 'auto', '& .MuiAccordionSummary-content': { my: 0.5 } }}
+                    sx={{ py: 0.3, minHeight: 'auto', '& .MuiAccordionSummary-content': { my: 0.3 } }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 'medium', fontSize: '0.85rem' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 'medium', fontSize: '0.82rem', lineHeight: 1.2 }}>
                         {title}
                       </Typography>
                       {activeLayers.includes(key) && (
-                        <Chip label="●" size="small" color="primary" sx={{ minWidth: 'auto', height: 16, fontSize: '0.7rem' }} />
+                        <Chip label="●" size="small" color="primary" sx={{ minWidth: 'auto', height: 14, fontSize: '0.65rem' }} />
                       )}
                     </Box>
                   </AccordionSummary>
 
-                  <AccordionDetails sx={{ py: 1, px: 2 }}>
-                    <Box sx={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem' }}>
+                  <AccordionDetails sx={{ py: 0.8, px: 1.5 }}>
+                    <Box sx={{ whiteSpace: 'pre-wrap', fontSize: '0.78rem', lineHeight: 1.3 }}>
                       {formatValue(value, key)}
                     </Box>
                   </AccordionDetails>

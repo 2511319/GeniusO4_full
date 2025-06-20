@@ -81,3 +81,60 @@ async def analyze(req: AnalyzeRequest):
         ohlc=ohlc,
         indicators=indicator_cols
     )
+
+@router.post("/analyze-test")
+async def analyze_test(req: AnalyzeRequest):
+    """Тестовый endpoint с фиктивными данными"""
+    # Создаем тестовые OHLC данные
+    test_ohlc = [
+        {
+            "Open Time": "2024-01-01T00:00:00Z",
+            "Close Time": "2024-01-01T04:00:00Z",
+            "Open": 42000.0,
+            "High": 42500.0,
+            "Low": 41800.0,
+            "Close": 42200.0,
+            "Volume": 1000.0
+        },
+        {
+            "Open Time": "2024-01-01T04:00:00Z",
+            "Close Time": "2024-01-01T08:00:00Z",
+            "Open": 42200.0,
+            "High": 42800.0,
+            "Low": 42000.0,
+            "Close": 42600.0,
+            "Volume": 1200.0
+        }
+    ]
+
+    # Создаем тестовый анализ
+    test_analysis = {
+        "primary_analysis": "Тестовый анализ показывает восходящий тренд",
+        "confidence_in_trading_decisions": "Высокая уверенность в сигналах",
+        "support_resistance_levels": {
+            "supports": [{"level": 41800, "date": "2024-01-01T00:00:00Z"}],
+            "resistances": [{"level": 42800, "date": "2024-01-01T04:00:00Z"}]
+        },
+        "recommendations": {
+            "trading_strategies": [
+                {
+                    "strategy": "Покупка на откате к поддержке",
+                    "stop_loss": 41500,
+                    "take_profit": 43000,
+                    "risk": "Средний"
+                }
+            ]
+        },
+        "price_prediction": {
+            "direction": "Вверх",
+            "target_price": 43000,
+            "confidence": 0.75
+        }
+    }
+
+    return AnalyzeResponse(
+        figure={},
+        analysis=test_analysis,
+        ohlc=test_ohlc,
+        indicators=["RSI", "MACD"]
+    )

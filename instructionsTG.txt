@@ -1,0 +1,230 @@
+\###############################################################################
+
+# AugmentCode Instruction File
+
+# Telegram Mini‑App + Desktop JWT + 5‑уровневая RBAC + Firestore
+
+# Проект «GeniusO4» (FastAPI / React / Cloud Run)
+
+\###############################################################################
+
+## 0. Цель
+
+* Mini‑App в Telegram — основная точка входа.
+* Ссылка «Открыть в браузере» — одноразовый JWT на 10 минут.
+* **Пять уровней ролей**: `admin`, `moderator`, `vip`, `premium`, `user`.
+* Учёт и проверка ролей/сроков — Firestore.
+* **Платежей и UI‑бейджей нет** (будут позже).
+* Деплой полностью автоматизирован через Cloud Build → Cloud Run.
+
+---
+
+## 1. Подготовка окружения
+
+```bash
+poetry add python-jose[cryptography] python-telegram-bot==21.2 telegram-webapp-auth==0.4.0
+```
+
+Secret Manager: `TELEGRAM_BOT_TOKEN`, `JWT_SECRET_KEY` (HS256).
+
+---
+
+## 2. Firestore схема
+
+```
+users/{telegram_id}          { username, first_name, last_name, role: string }
+subscriptions/{telegram_id}  { level: string, expires_at: timestamp }
+analyses/{ulid}              { owner_id, json_result, created_at }
+```
+
+* `role` принимает одно из: `admin`, `moderator`, `vip`, `premium`, `user`.
+* TTL‑policy: `analyses.created_at` → 30 дн.
+
+---
+
+## 3. Middleware: Telegram Web‑App + JWT
+
+`backend/app/middleware/telegram_webapp.py`:
+
+```python
+from fastapi import Request, HTTPException, status
+from starlette.middleware.base import BaseHTTPMiddleware
+from app.auth.telegram import verify
+from jose import jwt
+import os, time
+from google.cloud import firestore
+
+JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]
+ALGORITHM = "HS256"
+
+class TelegramWebAppMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        uid = None
+        # 1) Mini‑App: X-Tg-InitData
+        init_data = request.headers.get("X-Tg-InitData")
+        if init_data:
+            from telegram_webapp_auth import TelegramAuthVerifier
+            payload = TelegramAuthVerifier().verify(init_data)
+            uid = payload["user"]["id"]
+        # 2) Desktop JWT
+        else:
+            auth = request.headers.get("Authorization", "")
+            if auth.startswith("Bearer "):
+                try:
+                    claims = jwt.decode(auth.split()[1], JWT_SECRET_KEY, algorithms=[ALGORITHM])
+                    uid = int(claims["sub"])
+                except Exception:
+                    raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Bad token")
+        if not uid:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED)
+        # Подгружаем роль + подписку (кэш Firestore держит ≤ 1 мс)
+        db = firestore.Client()
+        user_doc = db.collection("users").document(str(uid)).get().to_dict() or {}
+        sub_doc = db.collection("subscriptions").document(str(uid)).get().to_dict() or {}
+        request.state.uid = uid
+        request.state.role = user_doc.get("role", "user")
+        request.state.subscription = sub_doc
+        return await call_next(request)
+```
+
+Добавь в `main.py`:
+
+```python
+from app.middleware.telegram_webapp import TelegramWebAppMiddleware
+app.add_middleware(TelegramWebAppMiddleware)
+```
+
+---
+
+## 4. Dependency `require_role`
+
+`backend/app/deps/roles.py`:
+
+```python
+from fastapi import Depends, HTTPException, status, Request
+from datetime import datetime
+
+ROLE_ORDER = {"admin":5, "moderator":4, "vip":3, "premium":2, "user":1}
+
+def require_role(min_role: str):
+    async def checker(request: Request = Depends()):
+        role = getattr(request.state, "role", "user")
+        if ROLE_ORDER[role] < ROLE_ORDER[min_role]:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Forbidden")
+        if role in ("vip", "premium"):
+            sub = getattr(request.state, "subscription", {})
+            if sub.get("expires_at", 0) < datetime.utcnow().timestamp():
+                raise HTTPException(status.HTTP_402_PAYMENT_REQUIRED, "Subscription expired")
+        return request.state.uid
+    return checker
+```
+
+Используй в роутерах, напр.:
+
+```python
+@router.get("/analysis/{id}", dependencies=[Depends(require_role("user"))])
+```
+
+`admin` и `moderator` пропускаются на все уровни ниже себя.
+
+---
+
+## 5. API для админов
+
+`backend/app/api/routers/admin.py`:
+
+```python
+from fastapi import APIRouter, Depends
+from google.cloud import firestore
+from app.deps.roles import require_role
+from datetime import datetime, timedelta
+
+router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_role("admin"))])
+
+db = firestore.Client()
+
+@router.post("/setrole")
+async def set_role(uid: int, role: str, days: int = 0):
+    db.collection("users").document(str(uid)).set({"role": role}, merge=True)
+    if role in ("vip", "premium") and days > 0:
+        expires = datetime.utcnow() + timedelta(days=days)
+        db.collection("subscriptions").document(str(uid)).set({"level": role, "expires_at": expires.timestamp()})
+    return {"ok": True}
+```
+
+Подключи роутер в `main.py`.
+
+---
+
+## 6. Telegram‑бот (python‑telegram‑bot 21.2)
+
+Добавь команды:
+
+```python
+@admin_only
+async def setrole_cmd(update, ctx):
+    uid, role, days = parse(ctx.args)
+    await ctx.bot.request.post('/admin/setrole', json={'uid': uid, 'role': role, 'days': days})
+    await update.message.reply_text('✅ Роль назначена')
+```
+
+`admin_only` проверяет `update.effective_user.id` по списку `ADMIN_IDS` в env.
+
+Клавиатура `/start`:
+
+```python
+InlineKeyboardMarkup([[InlineKeyboardButton('Открыть терминал', web_app=WebAppInfo(url='https://app.genius-o4.com/mini'))]])
+```
+
+Добавь кнопку "Открыть в браузере" внутри Mini‑App (React) – вызывает POST `/auth/desktop_link` и копирует ссылку в буфер.
+
+---
+
+## 7. React
+
+* `MiniAppRoot.jsx` – как раньше, но добавь кнопку:
+
+```jsx
+const openDesktop = async () => {
+  const { data } = await axios.post('/auth/desktop_link');
+  window.Telegram.WebApp.openLink(data.url);
+};
+```
+
+* `DesktopRedirect.jsx` – сохранение `jwt` из query → потом основной UI.
+
+---
+
+## 8. Cloud Scheduler
+
+`expire_subs` – Cloud Function / Cloud Run Job раз в день:
+
+```python
+for doc in db.collection('subscriptions').where('expires_at', '<', time.time()):
+    doc.update({'level': 'user'})
+```
+
+---
+
+## 9. Тесты
+
+* `test_rbac.py` – каждый уровень получает/не получает доступ.
+* `test_admin_setrole.py` – admin выставляет роль, проверка проходит.
+* `e2e_miniapp.py` – Pyppeteer жмёт кнопку, получает 200.
+
+---
+
+## 10. Критерии приёмки
+
+* Mini‑App открывается и грузит данные без логина.
+* URL «Открыть в браузере» работает 20 минут.
+* Роли проверяются корректно (`403`/`402`).
+* Команда `/setrole` успешно меняет роль и срок.
+* Cron‑задача обнуляет просроченные подписки.
+* CI/CD деплоит без ошибок, тесты зелёные.
+
+\###############################################################################
+
+# Конец файла
+
+\###############################################################################

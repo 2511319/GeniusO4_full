@@ -32,11 +32,15 @@ app.add_middleware(
 async def health():
     return {"status":"ok"}
 
-# здесь подключаем анализ
+@app.get("/api/test")
+async def test_api():
+    return {"message": "API работает!", "timestamp": "2025-06-20"}
+
+# здесь подключаем анализ БЕЗ аутентификации для тестирования
 app.include_router(
     analysis_router,
-    prefix="/api",
-    dependencies=[Depends(verify_token)]
+    prefix="/api"
+    # dependencies=[Depends(verify_token)]  # Временно отключено
 )
 
 if __name__=="__main__":

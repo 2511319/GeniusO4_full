@@ -155,7 +155,7 @@ export default function RecommendationsDisplay({ recommendations }) {
             </TableContainer>
 
             {strategy.other_details && (
-              <Box sx={{ mt: 2, p: 1, bgcolor: 'grey.100', borderRadius: 1 }}>
+              <Box sx={{ mt: 2, p: 1, bgcolor: 'background.default', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="caption" color="text.secondary">
                   Дополнительные детали:
                 </Typography>
