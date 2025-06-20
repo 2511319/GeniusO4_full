@@ -22,3 +22,13 @@ services:
       - "${FRONTEND_PORT:-5173}:80"
     environment:
       - ENV_FILE=.env.docker
+
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    depends_on:
+      - api
+    environment:
+      - ENV_FILE=.env.docker
+    restart: unless-stopped

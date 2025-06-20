@@ -12,3 +12,7 @@ scipy
 google-cloud-firestore
 pyyaml
 python-dotenv
+python-jose[cryptography]
+python-telegram-bot==21.2
+telegram-webapp-auth==0.4.0
+ulid-py

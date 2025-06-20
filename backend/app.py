@@ -5,11 +5,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # ↓ относительный импорт
 from routers.analysis import router as analysis_router
+from routers.admin import router as admin_router
+from routers.mod import router as mod_router
+from routers.watch import router as watch_router
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 import uvicorn
 from dotenv import load_dotenv
+from config.config import logger
 
 load_dotenv()  # подхватит .env.dev
 
@@ -36,12 +40,53 @@ async def health():
 async def test_api():
     return {"message": "API работает!", "timestamp": "2025-06-20"}
 
+
+@app.post("/api/auth/webapp-token")
+async def create_webapp_token(init_data: str):
+    """Создание JWT токена для WebApp (10 минут)"""
+    try:
+        from middleware.telegram_webapp import TelegramWebAppAuth
+
+        auth = TelegramWebAppAuth()
+
+        # Валидируем данные от Telegram WebApp
+        if not auth.validate_webapp_data(init_data):
+            raise HTTPException(status_code=401, detail="Неверные данные WebApp")
+
+        # Извлекаем пользователя
+        user_data = auth.extract_user_from_init_data(init_data)
+        if not user_data:
+            raise HTTPException(status_code=401, detail="Не удалось извлечь данные пользователя")
+
+        telegram_id = str(user_data.get('id'))
+
+        # Создаем JWT токен на 10 минут
+        from auth.dependencies import create_jwt_token
+        token = create_jwt_token(telegram_id, expires_minutes=10)
+
+        return {
+            "access_token": token,
+            "token_type": "bearer",
+            "expires_in": 600  # 10 минут в секундах
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Ошибка создания WebApp токена: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка создания токена")
+
 # здесь подключаем анализ БЕЗ аутентификации для тестирования
 app.include_router(
     analysis_router,
     prefix="/api"
     # dependencies=[Depends(verify_token)]  # Временно отключено
 )
+
+# Подключаем новые роутеры с аутентификацией
+app.include_router(admin_router, prefix="/api")
+app.include_router(mod_router, prefix="/api")
+app.include_router(watch_router, prefix="/api")
 
 if __name__=="__main__":
     uvicorn.run(

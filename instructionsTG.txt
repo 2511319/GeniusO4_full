@@ -2,20 +2,23 @@
 
 # AugmentCode Instruction File
 
-# Telegram Mini‑App + Desktop JWT + 5‑уровневая RBAC + Firestore
+# Telegram Mini-App + Desktop JWT + 5-уровневая RBAC + Firestore
 
-# Проект «GeniusO4» (FastAPI / React / Cloud Run)
+# Проект «GeniusO4» (FastAPI / React / Cloud Run)
 
 \###############################################################################
 
-## 0. Цель
+## 0. Цель (rev‑2)
 
 * Mini‑App в Telegram — основная точка входа.
-* Ссылка «Открыть в браузере» — одноразовый JWT на 10 минут.
-* **Пять уровней ролей**: `admin`, `moderator`, `vip`, `premium`, `user`.
-* Учёт и проверка ролей/сроков — Firestore.
-* **Платежей и UI‑бейджей нет** (будут позже).
-* Деплой полностью автоматизирован через Cloud Build → Cloud Run.
+* Ссылка «Открыть в браузере» — одноразовый JWT на 10 мин.
+* **Роли**: admin, moderator, vip, premium, user.
+* Firestore хранит роли + подписки.
+* **НЕТ**: команд «Запрос анализа», «Повторить последний анализ», «История отчётов» — будут добавлены позже при расширении.
+* **Бэклог** (не реализовывать теперь):
+
+  * Natural‑language запросы.
+  * «Вопрос к модели» (LLM‑чат).
 
 ---
 
@@ -25,203 +28,152 @@
 poetry add python-jose[cryptography] python-telegram-bot==21.2 telegram-webapp-auth==0.4.0
 ```
 
-Secret Manager: `TELEGRAM_BOT_TOKEN`, `JWT_SECRET_KEY` (HS256).
+Secrets: `TELEGRAM_BOT_TOKEN`, `JWT_SECRET_KEY`.
 
 ---
 
 ## 2. Firestore схема
 
 ```
-users/{telegram_id}          { username, first_name, last_name, role: string }
-subscriptions/{telegram_id}  { level: string, expires_at: timestamp }
-analyses/{ulid}              { owner_id, json_result, created_at }
-```
-
-* `role` принимает одно из: `admin`, `moderator`, `vip`, `premium`, `user`.
-* TTL‑policy: `analyses.created_at` → 30 дн.
-
----
-
-## 3. Middleware: Telegram Web‑App + JWT
-
-`backend/app/middleware/telegram_webapp.py`:
-
-```python
-from fastapi import Request, HTTPException, status
-from starlette.middleware.base import BaseHTTPMiddleware
-from app.auth.telegram import verify
-from jose import jwt
-import os, time
-from google.cloud import firestore
-
-JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]
-ALGORITHM = "HS256"
-
-class TelegramWebAppMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        uid = None
-        # 1) Mini‑App: X-Tg-InitData
-        init_data = request.headers.get("X-Tg-InitData")
-        if init_data:
-            from telegram_webapp_auth import TelegramAuthVerifier
-            payload = TelegramAuthVerifier().verify(init_data)
-            uid = payload["user"]["id"]
-        # 2) Desktop JWT
-        else:
-            auth = request.headers.get("Authorization", "")
-            if auth.startswith("Bearer "):
-                try:
-                    claims = jwt.decode(auth.split()[1], JWT_SECRET_KEY, algorithms=[ALGORITHM])
-                    uid = int(claims["sub"])
-                except Exception:
-                    raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Bad token")
-        if not uid:
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED)
-        # Подгружаем роль + подписку (кэш Firestore держит ≤ 1 мс)
-        db = firestore.Client()
-        user_doc = db.collection("users").document(str(uid)).get().to_dict() or {}
-        sub_doc = db.collection("subscriptions").document(str(uid)).get().to_dict() or {}
-        request.state.uid = uid
-        request.state.role = user_doc.get("role", "user")
-        request.state.subscription = sub_doc
-        return await call_next(request)
-```
-
-Добавь в `main.py`:
-
-```python
-from app.middleware.telegram_webapp import TelegramWebAppMiddleware
-app.add_middleware(TelegramWebAppMiddleware)
+users/{telegram_id}          { username, first_name, last_name, role }
+subscriptions/{telegram_id}  { level, expires_at }
+watchlists/{telegram_id}     { symbols: [str] }
+flags/{analysis_ulid}        { reason, flagged_by, ts }
+analyses/{ulid}              { owner_id, json_result, created_at }  #TTL 30d
 ```
 
 ---
 
-## 4. Dependency `require_role`
+## 3. Middleware, RBAC и dependencies
 
-`backend/app/deps/roles.py`:
-
-```python
-from fastapi import Depends, HTTPException, status, Request
-from datetime import datetime
-
-ROLE_ORDER = {"admin":5, "moderator":4, "vip":3, "premium":2, "user":1}
-
-def require_role(min_role: str):
-    async def checker(request: Request = Depends()):
-        role = getattr(request.state, "role", "user")
-        if ROLE_ORDER[role] < ROLE_ORDER[min_role]:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Forbidden")
-        if role in ("vip", "premium"):
-            sub = getattr(request.state, "subscription", {})
-            if sub.get("expires_at", 0) < datetime.utcnow().timestamp():
-                raise HTTPException(status.HTTP_402_PAYMENT_REQUIRED, "Subscription expired")
-        return request.state.uid
-    return checker
-```
-
-Используй в роутерах, напр.:
-
-```python
-@router.get("/analysis/{id}", dependencies=[Depends(require_role("user"))])
-```
-
-`admin` и `moderator` пропускаются на все уровни ниже себя.
+(без изменений относительно rev‑1 — файл `middleware/telegram_webapp.py` и `require_role()` уже включены)
 
 ---
 
-## 5. API для админов
+## 4. Новые API‑эндпоинты (admin / moderator / watchlist)
 
-`backend/app/api/routers/admin.py`:
+*Файлы*:
 
-```python
-from fastapi import APIRouter, Depends
-from google.cloud import firestore
-from app.deps.roles import require_role
-from datetime import datetime, timedelta
-
-router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_role("admin"))])
-
-db = firestore.Client()
-
-@router.post("/setrole")
-async def set_role(uid: int, role: str, days: int = 0):
-    db.collection("users").document(str(uid)).set({"role": role}, merge=True)
-    if role in ("vip", "premium") and days > 0:
-        expires = datetime.utcnow() + timedelta(days=days)
-        db.collection("subscriptions").document(str(uid)).set({"level": role, "expires_at": expires.timestamp()})
-    return {"ok": True}
+```
+backend/app/api/routers/
+  ├─ admin.py       # уже есть set_role
+  ├─ mod.py         # moderator actions
+  └─ watch.py       # watchlist CRUD
 ```
 
-Подключи роутер в `main.py`.
-
----
-
-## 6. Telegram‑бот (python‑telegram‑bot 21.2)
-
-Добавь команды:
+### 4.1 admin.py (добавить)
 
 ```python
-@admin_only
-async def setrole_cmd(update, ctx):
-    uid, role, days = parse(ctx.args)
-    await ctx.bot.request.post('/admin/setrole', json={'uid': uid, 'role': role, 'days': days})
-    await update.message.reply_text('✅ Роль назначена')
+@router.get('/stats')
+async def stats():
+    # верни count пользователей по ролям + активных vip/premium
 ```
-
-`admin_only` проверяет `update.effective_user.id` по списку `ADMIN_IDS` в env.
-
-Клавиатура `/start`:
 
 ```python
-InlineKeyboardMarkup([[InlineKeyboardButton('Открыть терминал', web_app=WebAppInfo(url='https://app.genius-o4.com/mini'))]])
+@router.post('/broadcast', summary='Разослать сообщение всем')
+async def broadcast(text: str):
+    # итерация по user ids, PTB send_message
 ```
-
-Добавь кнопку "Открыть в браузере" внутри Mini‑App (React) – вызывает POST `/auth/desktop_link` и копирует ссылку в буфер.
-
----
-
-## 7. React
-
-* `MiniAppRoot.jsx` – как раньше, но добавь кнопку:
-
-```jsx
-const openDesktop = async () => {
-  const { data } = await axios.post('/auth/desktop_link');
-  window.Telegram.WebApp.openLink(data.url);
-};
-```
-
-* `DesktopRedirect.jsx` – сохранение `jwt` из query → потом основной UI.
-
----
-
-## 8. Cloud Scheduler
-
-`expire_subs` – Cloud Function / Cloud Run Job раз в день:
 
 ```python
-for doc in db.collection('subscriptions').where('expires_at', '<', time.time()):
-    doc.update({'level': 'user'})
+@router.post('/gc', summary='Ручная очистка устар.')
+async def gc():
+    # удалить analyses > 30d
+```
+
+### 4.2 mod.py
+
+```python
+router = APIRouter(prefix='/moderator', tags=['moderator'], dependencies=[Depends(require_role('moderator'))])
+
+@router.post('/ban')
+async def ban(uid: int, days: int = 30):
+    ...
+@router.post('/unban')
+async def unban(uid: int):
+    ...
+@router.post('/review_flag')
+async def review_flag(ulid: str, reason: str):
+    ...
+```
+
+### 4.3 watch.py
+
+```python
+router = APIRouter(prefix='/watch', tags=['watch'], dependencies=[Depends(require_role('premium'))])
+@router.post('/set')
+async def set_watch(symbols: list[str], uid=Depends(get_uid)):
+    db.collection('watchlists').document(str(uid)).set({'symbols': symbols})
+@router.get('/get')
+async def get_watch(uid=Depends(get_uid)):
+    return db.collection('watchlists').document(str(uid)).get().to_dict()
 ```
 
 ---
 
-## 9. Тесты
+## 5. Telegram‑бот: команды и UI
 
-* `test_rbac.py` – каждый уровень получает/не получает доступ.
-* `test_admin_setrole.py` – admin выставляет роль, проверка проходит.
-* `e2e_miniapp.py` – Pyppeteer жмёт кнопку, получает 200.
+### 5.1 Основное меню `/start`
+
+```
+[  Открыть терминал  ]
+[  Мой watch‑лист    ] [  Настройки  ]
+```
+
+### 5.2 Команды
+
+| Роль      | Команды                                  | Ответ                    |
+| --------- | ---------------------------------------- | ------------------------ |
+| user      | `/watch BTC,ETH` — перезаписывает список | «✅ Watch‑лист обновлён»  |
+| user      | `/settings lang=ru tz=UTC+3`             | «🛠 Настройки сохранены» |
+| moderator | `/ban <@id> 15` / `/unban <@id>`         | статус изменён           |
+| moderator | `/review <ulid> <reason>`                | помечает отчёт флагом    |
+| admin     | `/setrole <@id> vip 60`                  | роль+подписка выданы     |
+| admin     | `/stats` / `/broadcast <текст>` / `/gc`  | админ‑функции            |
+
+*Хелп‑команда* `/help` перечисляет доступные пользователю команды в зависимости от `role`.
+
+---
+
+## 6. Cron / Cloud Scheduler Jobs
+
+* `expire_subs` — перевести просроченные `vip/premium` в `user`.
+* `daily_digest` — для каждого vip/premium собрать watch‑лист, сгенерировать сводку (цена, изменение, MA‑пересечение) и отправить одним сообщением.
+* `prune_flags` — удалять `flags` старше 14 дн.
+
+---
+
+## 7. React Mini‑App
+
+* Добавить раздел «Watch‑лист» (CRUD symbols).
+* Кнопка «Настройки» (язык, часовой пояс).
+* Реализовать кнопку «Открыть в браузере» (как rev‑1).
+
+---
+
+## 8. тесты
+
+* `test_watchlist.py` — CRUD ok / доступ только premium+.
+* `test_mod_ban.py` — moderator банит, доступ запрещён.
+* `test_admin_stats.py` — admin stats 200.
+
+---
+
+## 9. Бэклог (не реализовывать)
+
+* Natural‑language запросы (NLP→params).
+* Q\&A к модели (LLM chat‑assistant).
 
 ---
 
 ## 10. Критерии приёмки
 
-* Mini‑App открывается и грузит данные без логина.
-* URL «Открыть в браузере» работает 20 минут.
-* Роли проверяются корректно (`403`/`402`).
-* Команда `/setrole` успешно меняет роль и срок.
-* Cron‑задача обнуляет просроченные подписки.
-* CI/CD деплоит без ошибок, тесты зелёные.
+* Mini‑App стартует без логина.
+* CRUD watch‑лист работает для premium+.
+* /ban закрывает доступ (403).
+* /stats выводит агрегаты.
+* Cron‑jobs выполняются (Cloud Logging).
+* Все тесты зелёные, CI/CD деплой без ошибок.
 
 \###############################################################################
 
