@@ -195,8 +195,12 @@ class ChatGPTAnalyzer:
             # Отправка запроса через LLMService
             response = self.llm_service.generate(messages)
 
+            # Генерируем timestamp для логирования
+            import time
+            timestamp = int(time.time())
+
             # Логируем сырой ответ
-            timestamp = self.logger.log_raw_response(response)
+            self.logger.log_raw_response(response, timestamp)
 
             # Извлекаем контент из ответа
             answer = response.content.strip() if response.content else ""

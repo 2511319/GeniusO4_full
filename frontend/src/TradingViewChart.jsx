@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart } from 'lightweight-charts';
+import * as LightweightCharts from 'lightweight-charts';
+import { createSeriesMarkers } from 'lightweight-charts';
 import { toUnix, buildSeriesData, buildCandleData, validateTimeRange } from './utils/timeUtils';
 import { indicatorColumnMap } from './indicatorGroups';
 
@@ -76,7 +77,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     // toUnix, buildSeriesData, buildCandleData импортированы из utils/timeUtils
 
     const addLine = (chart, field, color) => {
-      const series = chart.addLineSeries({
+      const series = chart.addSeries(LightweightCharts.LineSeries, {
         color,
         lastValueVisible: true,   // Показываем значение цены на правой шкале
         priceLineVisible: false   // Убираем горизонтальную пунктирную линию
@@ -86,7 +87,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     };
 
     const addHistogram = (chart, field, color) => {
-      const series = chart.addHistogramSeries({
+      const series = chart.addSeries(LightweightCharts.HistogramSeries, {
         color,
         priceFormat: { type: 'volume' },
         lastValueVisible: true,   // Показываем значение на правой шкале
@@ -97,7 +98,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     };
 
     const containerSize = getContainerSize();
-    const mainChart = createChart(mainRef.current, {
+    const mainChart = LightweightCharts.createChart(mainRef.current, {
       width: containerSize.width,
       height: containerSize.height,
       layout: {
@@ -135,7 +136,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     });
     chartRef.current.main = mainChart;
     mainChart.applyOptions({ rightPriceScale: { visible: true }, leftPriceScale: { visible: true } });
-    const candleSeries = mainChart.addCandlestickSeries({
+    const candleSeries = mainChart.addSeries(LightweightCharts.CandlestickSeries, {
       lastValueVisible: true,   // Показываем цену последней свечи
       priceLineVisible: false   // Убираем горизонтальную пунктирную линию
     });
@@ -174,16 +175,18 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       const lastTime = candleData[candleData.length - 1]?.time;
       const addSR = (items, color) => {
         items?.forEach((l) => {
-          const series = mainChart.addLineSeries({
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
             color,
             lineStyle: 2,
             lastValueVisible: true,  // Показываем значения уровней поддержки/сопротивления на правой шкале
             priceLineVisible: false
           });
-          series.setData([
+          // Сортируем данные по времени для избежания ошибки
+          const sortedData = [
             { time: toUnix(l.date), value: l.level },
             { time: lastTime, value: l.level },
-          ]);
+          ].sort((a, b) => a.time - b.time);
+          series.setData(sortedData);
           chartRef.current.overlays.push(series);
         });
       };
@@ -194,7 +197,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     if (layers.includes('price_prediction')) {
       const candles = analysis.price_prediction?.virtual_candles || [];
       if (candles.length) {
-        const series = mainChart.addCandlestickSeries({
+        const series = mainChart.addSeries(LightweightCharts.CandlestickSeries, {
           upColor: 'purple',
           downColor: 'purple',
           borderVisible: false,
@@ -222,17 +225,19 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       const lastTime = candleData[candleData.length - 1]?.time;
       levels.forEach((l) => {
         const color = l.type === 'Support' ? '#4CAF50' : '#FF9800'; // Better contrast colors
-        const series = mainChart.addLineSeries({
+        const series = mainChart.addSeries(LightweightCharts.LineSeries, {
           color,
           lineWidth: 2, // Improved line thickness
           lineStyle: 1, // Solid line instead of dotted for better visibility
           lastValueVisible: false,
           priceLineVisible: false
         });
-        series.setData([
+        // Сортируем данные по времени для избежания ошибки
+        const sortedData = [
           { time: toUnix(l.date), value: l.level },
           { time: lastTime, value: l.level },
-        ]);
+        ].sort((a, b) => a.time - b.time);
+        series.setData(sortedData);
         chartRef.current.overlays.push(series);
       });
     }
@@ -269,7 +274,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         const from = toUnix(im.start_point?.date);
         const to = toUnix(im.end_point?.date);
         if (from && to) {
-          const series = mainChart.addAreaSeries({
+          const series = mainChart.addSeries(LightweightCharts.AreaSeries, {
             lineColor: 'rgba(255,0,0,0.3)',
             topColor: 'rgba(255,0,0,0.1)',
             bottomColor: 'rgba(255,0,0,0.1)',
@@ -280,7 +285,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
             { time: from, value: im.price_range?.[0] || im.start_point.price },
             { time: to, value: im.price_range?.[0] || im.start_point.price },
           ]);
-          const series2 = mainChart.addAreaSeries({
+          const series2 = mainChart.addSeries(LightweightCharts.AreaSeries, {
             lineColor: 'rgba(255,0,0,0.3)',
             topColor: 'rgba(255,0,0,0.1)',
             bottomColor: 'rgba(255,0,0,0.1)',
@@ -322,7 +327,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
         if (startTime && endTime) {
           Object.entries(levels).forEach(([level, price]) => {
-            const series = mainChart.addLineSeries({
+            const series = mainChart.addSeries(LightweightCharts.LineSeries, {
               color: 'rgba(0, 255, 255, 0.8)', // Голубой для локального тренда
               lineStyle: 2, // Пунктирная линия
               lineWidth: 1,
@@ -349,7 +354,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
         if (startTime && endTime) {
           Object.entries(levels).forEach(([level, price]) => {
-            const series = mainChart.addLineSeries({
+            const series = mainChart.addSeries(LightweightCharts.LineSeries, {
               color: 'rgba(255, 215, 0, 0.9)', // Золотой для глобального тренда
               lineStyle: 1, // Сплошная линия
               lineWidth: 2, // Толще для глобального
@@ -382,7 +387,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
             // Используем RGB цвета вместо HSL для совместимости
             const waveColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
             const waveColor = waveColors[index % waveColors.length];
-            const series = mainChart.addLineSeries({
+            const series = mainChart.addSeries(LightweightCharts.LineSeries, {
               color: waveColor,
               lineWidth: 2, // Уменьшаем толщину линии
               lineStyle: 1, // Solid line
@@ -423,17 +428,19 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
         if (startTime && endTime && startPrice && endPrice) {
           const color = line.type === 'восходящая' ? 'green' : 'red';
-          const series = mainChart.addLineSeries({
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
             color,
             lineWidth: 2,
             lineStyle: 1,
             lastValueVisible: true,  // Показываем значения линий тренда
             priceLineVisible: false
           });
-          series.setData([
+          // Сортируем данные по времени для избежания ошибки
+          const sortedData = [
             { time: startTime, value: startPrice },
             { time: endTime, value: endPrice },
-          ]);
+          ].sort((a, b) => a.time - b.time);
+          series.setData(sortedData);
           chartRef.current.overlays.push(series);
         }
       });
@@ -503,7 +510,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
       if (predictionData.length > 0) {
         // Создаем отдельную серию для прогнозных свечей
-        const predictionSeries = mainChart.addCandlestickSeries({
+        const predictionSeries = mainChart.addSeries(LightweightCharts.CandlestickSeries, {
           upColor: 'rgba(0, 255, 0, 0.5)',
           downColor: 'rgba(255, 0, 0, 0.5)',
           borderUpColor: 'rgba(0, 255, 0, 0.8)',
@@ -541,14 +548,14 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
         if (startTime && endTime && topPrice && bottomPrice) {
           // Создаем прямоугольную зону с улучшенной визуализацией
-          const topSeries = mainChart.addLineSeries({
+          const topSeries = mainChart.addSeries(LightweightCharts.LineSeries, {
             color: 'rgba(255, 255, 0, 0.6)', // Better opacity
             lineWidth: 2, // Improved thickness
             lineStyle: 1, // Solid line for better visibility
             lastValueVisible: true,  // Показываем верхнее значение FVG
             priceLineVisible: false
           });
-          const bottomSeries = mainChart.addLineSeries({
+          const bottomSeries = mainChart.addSeries(LightweightCharts.LineSeries, {
             color: 'rgba(255, 255, 0, 0.6)', // Better opacity
             lineWidth: 2, // Improved thickness
             lineStyle: 1, // Solid line for better visibility
@@ -556,14 +563,18 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
             priceLineVisible: false
           });
 
-          topSeries.setData([
+          // Сортируем данные по времени для избежания ошибки
+          const sortedTopData = [
             { time: startTime, value: topPrice },
             { time: endTime, value: topPrice },
-          ]);
-          bottomSeries.setData([
+          ].sort((a, b) => a.time - b.time);
+          const sortedBottomData = [
             { time: startTime, value: bottomPrice },
             { time: endTime, value: bottomPrice },
-          ]);
+          ].sort((a, b) => a.time - b.time);
+
+          topSeries.setData(sortedTopData);
+          bottomSeries.setData(sortedBottomData);
 
           chartRef.current.overlays.push(topSeries, bottomSeries);
 
@@ -632,7 +643,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         const bottomPrice = zone.bottom_price;
 
         if (startTime && endTime && topPrice && bottomPrice) {
-          const series = mainChart.addLineSeries({
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
             color: 'rgba(255, 165, 0, 0.5)',
             lineWidth: 2,
             lineStyle: 1,
@@ -662,7 +673,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
         if (startTime && endTime && startPrice && endPrice) {
           // Создаем зону дисбаланса
-          const series = mainChart.addLineSeries({
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
             color: 'rgba(255, 165, 0, 0.6)',
             lineWidth: 2,
             lineStyle: 2,
@@ -695,7 +706,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       if (pivots.pivot) {
         const pivotLevel = pivots.pivot.level;
         if (pivotLevel && candleData.length > 0) {
-          const series = mainChart.addLineSeries({
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
             color: '#FFD700', // Better gold color
             lineWidth: 3,
             lineStyle: 1, // Solid line for main pivot
@@ -713,7 +724,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       // Уровни сопротивления пивота
       if (pivots.resistances) {
         pivots.resistances.forEach((resistance, index) => {
-          const series = mainChart.addLineSeries({
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
             color: `rgba(255, 0, 0, ${0.6 - index * 0.1})`,
             lineWidth: 2,
             lineStyle: 2,
@@ -731,7 +742,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
       // Уровни поддержки пивота
       if (pivots.supports) {
         pivots.supports.forEach((support, index) => {
-          const series = mainChart.addLineSeries({
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
             color: `rgba(0, 255, 0, ${0.6 - index * 0.1})`,
             lineWidth: 2,
             lineStyle: 2,
@@ -780,7 +791,9 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
       if (validMarkers.length > 0) {
         try {
-          candleSeries.setMarkers(validMarkers);
+          // Используем новый API для маркеров в lightweight-charts 5.0
+          const seriesMarkers = createSeriesMarkers(candleSeries, validMarkers);
+          chartRef.current.markers = seriesMarkers; // Сохраняем ссылку для очистки
         } catch (error) {
           console.error('Error setting markers:', error);
           console.log('Markers data:', validMarkers.slice(0, 5)); // Log first 5 markers for debugging
@@ -791,7 +804,7 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
     let panelChart = null;
     let firstPanelSeries = null;
     if (panelLayers.length) {
-      panelChart = createChart(panelRef.current, {
+      panelChart = LightweightCharts.createChart(panelRef.current, {
         width: containerSize.width, // Coordinate width with main chart
         height: Math.max(150, containerSize.height * panelRatio), // Better height calculation
         layout: {
@@ -841,14 +854,14 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         const s1 = addLine(panelChart, 'RSI', colors.RSI);
         if (!firstPanelSeries) firstPanelSeries = s1;
         // Возвращаем уровни перекупленности и перепроданности для RSI
-        const over = panelChart.addLineSeries({
+        const over = panelChart.addSeries(LightweightCharts.LineSeries, {
           color: 'rgba(255,0,0,0.5)',
           lineStyle: 2,
           lastValueVisible: true,   // Показываем значение 70 на шкале
           priceLineVisible: false
         });
         over.setData(buildConstData(70));
-        const under = panelChart.addLineSeries({
+        const under = panelChart.addSeries(LightweightCharts.LineSeries, {
           color: 'rgba(0,128,0,0.5)',
           lineStyle: 2,
           lastValueVisible: true,   // Показываем значение 30 на шкале
@@ -856,18 +869,37 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         });
         under.setData(buildConstData(30));
       } else if (layer === 'Stochastic_Oscillator') {
-        const s1 = addLine(panelChart, 'Stochastic_%K', colors.Stochastic_K);
-        if (!firstPanelSeries) firstPanelSeries = s1;
-        addLine(panelChart, 'Stochastic_%D', colors.Stochastic_D);
+        // Проверяем, есть ли колонки данных для Stochastic
+        const hasStochasticK = data.some(row => row['Stochastic_%K'] !== undefined);
+        const hasStochasticD = data.some(row => row['Stochastic_%D'] !== undefined);
+
+        if (hasStochasticK && hasStochasticD) {
+          // Если есть исторические данные, отрисовываем их
+          const s1 = addLine(panelChart, 'Stochastic_%K', colors.Stochastic_K);
+          if (!firstPanelSeries) firstPanelSeries = s1;
+          addLine(panelChart, 'Stochastic_%D', colors.Stochastic_D);
+        } else if (analysis?.indicators_analysis?.Stochastic_Oscillator?.current_value) {
+          // Если есть только текущее значение из анализа, создаем горизонтальную линию
+          const currentValue = analysis.indicators_analysis.Stochastic_Oscillator.current_value;
+          const s1 = panelChart.addSeries(LightweightCharts.LineSeries, {
+            color: colors.Stochastic_Oscillator || '#FF6B35',
+            lineWidth: 2,
+            lastValueVisible: true,
+            priceLineVisible: false
+          });
+          s1.setData(buildConstData(currentValue));
+          if (!firstPanelSeries) firstPanelSeries = s1;
+        }
+
         // Добавляем уровни перекупленности и перепроданности для Stochastic
-        const over = panelChart.addLineSeries({
+        const over = panelChart.addSeries(LightweightCharts.LineSeries, {
           color: 'rgba(255,0,0,0.3)',
           lineStyle: 2,
           lastValueVisible: true,   // Показываем значение 80 на шкале
           priceLineVisible: false
         });
         over.setData(buildConstData(80));
-        const under = panelChart.addLineSeries({
+        const under = panelChart.addSeries(LightweightCharts.LineSeries, {
           color: 'rgba(0,128,0,0.3)',
           lineStyle: 2,
           lastValueVisible: true,   // Показываем значение 20 на шкале
@@ -878,14 +910,14 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
         const s1 = addLine(panelChart, 'Williams_%R', colors.Williams_R);
         if (!firstPanelSeries) firstPanelSeries = s1;
         // Добавляем уровни для Williams %R
-        const over = panelChart.addLineSeries({
+        const over = panelChart.addSeries(LightweightCharts.LineSeries, {
           color: 'rgba(255,0,0,0.3)',
           lineStyle: 2,
           lastValueVisible: true,   // Показываем значение -20 на шкале
           priceLineVisible: false
         });
         over.setData(buildConstData(-20));
-        const under = panelChart.addLineSeries({
+        const under = panelChart.addSeries(LightweightCharts.LineSeries, {
           color: 'rgba(0,128,0,0.3)',
           lineStyle: 2,
           lastValueVisible: true,   // Показываем значение -80 на шкале
@@ -948,6 +980,14 @@ export default function TradingViewChart({ data = [], layers = [], analysis = {}
 
     return () => {
       cleanup();
+      // Очистка маркеров
+      if (chartRef.current.markers) {
+        try {
+          chartRef.current.markers.setMarkers([]);
+        } catch (err) {
+          console.warn('Ошибка очистки маркеров', err);
+        }
+      }
       if (chartRef.current.overlays) {
         chartRef.current.overlays.forEach((s) => {
           try {
