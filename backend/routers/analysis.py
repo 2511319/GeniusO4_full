@@ -1,4 +1,4 @@
-# api/routers/analysis.py
+# backend/routers/analysis.py
 
 import os
 import json
@@ -225,12 +225,26 @@ async def analyze(req: AnalyzeRequest):
     try:
         analyzer = ChatGPTAnalyzer()
         analysis = analyzer.analyze({"ohlc": ohlc})
+
+        # Проверяем, что анализ содержит необходимые данные
+        if not analysis or not isinstance(analysis, dict):
+            raise ValueError("Получен пустой или некорректный анализ")
+
     except Exception as e:
-        # Если анализ не удался, возвращаем пустой анализ вместо ошибки
-        analysis = {
-            "error": f"Анализ не удался: {e}",
-            "primary_analysis": "Анализ временно недоступен"
-        }
+        # Логируем ошибку для мониторинга
+        from backend.config.config import logger
+        logger.error(f"Ошибка анализа для {validated_symbol}: {e}")
+
+        # Возвращаем ошибку клиенту вместо пустого анализа
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "Сервис анализа временно недоступен",
+                "message": "Попробуйте повторить запрос через несколько минут",
+                "symbol": validated_symbol,
+                "retry_after": 60
+            }
+        )
 
     # 4. Визуализация (рисуем выбранные слои)
     try:

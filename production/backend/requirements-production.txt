@@ -1,0 +1,17 @@
+# Дополнительные зависимости для продакшн
+
+# Google Cloud
+google-cloud-secret-manager==2.18.1
+
+# Мониторинг и логирование
+google-cloud-logging==3.8.0
+google-cloud-monitoring==2.16.0
+
+# Безопасность
+cryptography>=41.0.0
+
+# Производительность
+gunicorn==21.2.0
+
+# Валидация
+email-validator==2.1.0

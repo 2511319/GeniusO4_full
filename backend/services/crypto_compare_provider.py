@@ -1,4 +1,4 @@
-# api/services/crypto_compare_provider.py
+# backend/services/crypto_compare_provider.py
 
 import os
 import re
@@ -17,7 +17,7 @@ DEFAULT_SYMBOL = os.getenv("DEFAULT_SYMBOL", "BTCUSDT")
 DEFAULT_QUOTE = os.getenv("DEFAULT_QUOTE", "USD")
 # Флаг логирования
 DEBUG = os.getenv("DEBUG_LOGGING", "false").lower() == "true"
-DEV_LOG_DIR = os.path.join(os.getcwd(), "api", "dev_logs")
+DEV_LOG_DIR = os.path.join(os.getcwd(), "backend", "dev_logs")
 
 
 async def fetch_ohlcv(symbol: str, interval: str, limit: int) -> pd.DataFrame:

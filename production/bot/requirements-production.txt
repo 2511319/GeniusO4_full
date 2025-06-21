@@ -1,0 +1,8 @@
+# Дополнительные зависимости для продакшн бота
+
+# Google Cloud
+google-cloud-secret-manager==2.18.1
+google-cloud-logging==3.8.0
+
+# Мониторинг
+google-cloud-monitoring==2.16.0

@@ -1,8 +1,122 @@
-__pycache__/
-*.pyc
+# ChartGenius .gitignore
 
+# ===== СЕКРЕТЫ И КОНФИДЕНЦИАЛЬНАЯ ИНФОРМАЦИЯ =====
+# НИКОГДА НЕ КОММИТИТЬ!
+*.key
+*.pem
+*.p12
+.env.local
+.env.production.local
+secrets/
+.secrets/
+
+# ===== ВРЕМЕННЫЕ И ОТЛАДОЧНЫЕ ФАЙЛЫ =====
+# Логи разработки
+dev_logs/
+logs/
+*.log
+invalid_*.txt
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Базы данных разработки
+*.db
+*.sqlite
+*.sqlite3
+users.db
+
+# ===== PYTHON =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
 venv/
-frontend/node_modules/
+env/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# ===== NODE.JS =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm
+.yarn-integrity
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+
+# Build outputs
 frontend/dist/
-api/dev_logs/
-frontend/dev_logs/
+frontend/node_modules/
+build/
+.next/
+out/
+.nuxt/
+.cache/
+.parcel-cache/
+
+# ===== DOCKER =====
+.dockerignore
+
+# ===== IDE И РЕДАКТОРЫ =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== OS =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===== GOOGLE CLOUD =====
+.gcloud/
+service-account-key.json
+
+# ===== СПЕЦИФИЧНЫЕ ДЛЯ ПРОЕКТА =====
+# Удаленная директория api (дубликат backend)
+api/
+
+# Конфигурации разработки с реальными ключами
+.env.dev.real
+.env.real
