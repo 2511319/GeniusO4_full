@@ -10,7 +10,6 @@ import {
   CircularProgress 
 } from '@mui/material';
 import { setToken } from '../store';
-import { API_URL } from '../config';
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -43,7 +42,7 @@ export default function Login() {
     try {
       console.log('📡 Отправляем запрос на авторизацию...');
       
-      const response = await fetch(`${API_URL}/api/auth/webapp-token`, {
+      const response = await fetch('/api/auth/webapp-token', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -89,8 +88,23 @@ export default function Login() {
   };
 
   const handleOpenInTelegram = () => {
-    // Показываем инструкцию пользователю
-    setError('Для авторизации откройте приложение через Telegram бота @Chart_Genius_bot');
+    // Пытаемся открыть Telegram бота для бесшовной авторизации
+    const telegramBotUrl = "https://t.me/Chart_Genius_bot";
+
+    try {
+      // Открываем Telegram в новой вкладке/приложении
+      const opened = window.open(telegramBotUrl, '_blank');
+
+      if (opened) {
+        setError('✅ Telegram открыт! Используйте команду /start в боте @Chart_Genius_bot для получения ссылки на приложение.');
+      } else {
+        // Если popup заблокирован, показываем инструкцию
+        setError('🔗 Перейдите к боту @Chart_Genius_bot в Telegram и используйте команду /start');
+      }
+    } catch (e) {
+      // Fallback если не удалось открыть
+      setError('📱 Откройте Telegram и найдите бота @Chart_Genius_bot, затем используйте команду /start');
+    }
   };
 
   return (
@@ -141,12 +155,18 @@ export default function Login() {
               </Typography>
               
               <Button
-                variant="outlined"
+                variant="contained"
                 size="large"
                 onClick={handleOpenInTelegram}
-                sx={{ minWidth: 200 }}
+                sx={{
+                  minWidth: 200,
+                  background: 'linear-gradient(45deg, #0088cc 30%, #229ED9 90%)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #006699 30%, #1a7db8 90%)',
+                  }
+                }}
               >
-                📱 Открыть в Telegram
+                🚀 Запустить в Telegram
               </Button>
             </Box>
           )}

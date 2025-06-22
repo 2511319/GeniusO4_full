@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="ChartGenius API",
     description="Продакшн API для анализа криптовалютных данных",
-    version="1.0.2",
+    version="1.0.13",
     docs_url=None,  # Отключаем Swagger в продакшн
     redoc_url=None,  # Отключаем ReDoc в продакшн
     lifespan=lifespan
@@ -115,6 +115,20 @@ async def root():
         "version": app.version,
         "status": "running",
         "environment": config.ENVIRONMENT
+    }
+
+
+@app.get("/testdata")
+async def testdata():
+    """Тестовые данные для проверки интеграции"""
+    return {
+        "status": "ok",
+        "message": "Test data endpoint",
+        "data": {
+            "symbol": "BTCUSDT",
+            "price": 42000.0,
+            "timestamp": "2025-06-22T18:00:00Z"
+        }
     }
 
 

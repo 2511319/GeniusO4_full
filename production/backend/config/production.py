@@ -14,7 +14,8 @@ class ProductionConfig:
     DEBUG_LOGGING = False
     
     # Google Cloud настройки
-    GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID")
+    # Cloud Run автоматически устанавливает GOOGLE_CLOUD_PROJECT
+    GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID") or os.getenv("GOOGLE_CLOUD_PROJECT")
     GCP_REGION = os.getenv("GCP_REGION", "europe-west1")
     
     # Сервисные настройки
@@ -24,9 +25,11 @@ class ProductionConfig:
     
     # CORS настройки для продакшн
     CORS_ORIGINS = [
+        f"https://chartgenius-frontend-169129692197.{GCP_REGION}.run.app",
         f"https://chartgenius-frontend-{GCP_REGION}-a.run.app",
         f"https://chartgenius-frontend-{GCP_REGION}.run.app",
         "https://t.me",  # Для Telegram WebApp
+        "*"  # Временно для отладки
     ]
     
     # Настройки логирования
@@ -118,11 +121,9 @@ class ProductionConfig:
     @classmethod
     def validate_config(cls):
         """Валидация конфигурации при запуске"""
-        required_env_vars = ["GCP_PROJECT_ID"]
-        missing_vars = [var for var in required_env_vars if not os.getenv(var)]
-        
-        if missing_vars:
-            raise ValueError(f"Отсутствуют обязательные переменные окружения: {missing_vars}")
+        # Проверяем наличие GCP_PROJECT_ID или GOOGLE_CLOUD_PROJECT
+        if not cls.GCP_PROJECT_ID:
+            raise ValueError("Отсутствует переменная окружения GCP_PROJECT_ID или GOOGLE_CLOUD_PROJECT")
         
         # Проверяем доступность секретов
         try:

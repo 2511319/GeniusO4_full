@@ -20,7 +20,8 @@ class ProductionBotConfig:
     """Продакшн конфигурация для бота"""
 
     def __init__(self):
-        self.gcp_project_id = os.getenv("GCP_PROJECT_ID")
+        # Cloud Run автоматически устанавливает GOOGLE_CLOUD_PROJECT
+        self.gcp_project_id = os.getenv("GCP_PROJECT_ID") or os.getenv("GOOGLE_CLOUD_PROJECT") or "chartgenius-444017"
         self.environment = "production"
         self.admin_id = int(os.getenv("ADMIN_TELEGRAM_ID", "299820674"))
         self.webapp_url = self._get_webapp_url()
@@ -29,8 +30,8 @@ class ProductionBotConfig:
         # Cloud Run резервирует PORT, используем SERVER_PORT или fallback на PORT
         self.port = int(os.getenv("SERVER_PORT", os.getenv("PORT", "8080")))
 
-        # Инициализация Firestore
-        self.db = self._init_firestore()
+        # Отключаем Firestore для упрощения
+        self.db = None
 
         # Настройка логирования
         self._setup_logging()
@@ -45,36 +46,39 @@ class ProductionBotConfig:
     def _get_webapp_url(self) -> str:
         """Получение URL веб-приложения"""
         region = os.getenv("GCP_REGION", "europe-west1")
-        url = f"https://chartgenius-frontend-{region}-a.run.app"
+        url = f"https://chartgenius-frontend-169129692197.{region}.run.app"
         # Очищаем URL от невидимых символов \r и \n
         return self._clean_url(url)
 
     def _get_webhook_url(self) -> str:
         """Получение URL для webhook"""
-        # Используем фиксированный URL для избежания проблем с переменными окружения
-        url = "https://chartgenius-bot-169129692197.europe-west1.run.app/webhook"
+        # Используем новый URL бота
+        url = "https://chartgenius-bot-new-169129692197.europe-west1.run.app/webhook"
         return self._clean_url(url)
 
     def _clean_url(self, url: str) -> str:
-        """Очистка URL от невидимых символов"""
+        """Очистка URL от невидимых символов включая \r"""
         if not url:
             return ""
         # Удаляем все невидимые символы и пробелы
         cleaned = url.replace('\r', '').replace('\n', '').replace('\t', '').strip()
-        # Дополнительная очистка от всех управляющих символов
+        # Дополнительная очистка от всех управляющих символов (ASCII < 32)
         cleaned = ''.join(char for char in cleaned if ord(char) >= 32)
+        # Убираем лишние пробелы внутри URL
+        cleaned = ' '.join(cleaned.split())
         return cleaned
 
     def _init_firestore(self):
         """Инициализация Firestore клиента"""
         try:
             if self.gcp_project_id:
-                return firestore.Client(project=self.gcp_project_id)
+                # Используем default credentials для Cloud Run
+                return firestore.Client()
             else:
                 logging.warning("GCP_PROJECT_ID не установлен, Firestore недоступен")
                 return None
         except Exception as e:
-            logging.error(f"Ошибка инициализации Firestore: {e}")
+            logging.warning(f"Firestore недоступен: {e}")
             return None
     
     def _setup_logging(self):
@@ -104,7 +108,17 @@ class ProductionBotConfig:
     
     def get_telegram_bot_token(self) -> str:
         """Получение токена Telegram бота"""
-        return self.get_secret("telegram-bot-token")
+        # Сначала пытаемся получить из переменной окружения
+        token = os.getenv("TELEGRAM_BOT_TOKEN")
+        if token:
+            return token.replace('\r', '').replace('\n', '').strip()
+
+        # Если нет в переменной окружения, пытаемся получить из Secret Manager
+        try:
+            return self.get_secret("telegram-bot-token")
+        except Exception as e:
+            logging.error(f"Не удалось получить токен бота: {e}")
+            raise
 
 
 class ChartGeniusProductionBot:
@@ -139,8 +153,8 @@ class ChartGeniusProductionBot:
             user = update.effective_user
             self.logger.info(f"Пользователь {user.id} ({user.username}) запустил бота")
             
-            # Регистрируем или обновляем пользователя в Firestore
-            await self.register_user(user)
+            # Логируем пользователя (Firestore отключен)
+            self.logger.info(f"Пользователь {user.id} ({user.username}) использует бота")
             
             # Создаем клавиатуру с WebApp
             keyboard = [
@@ -216,7 +230,7 @@ class ChartGeniusProductionBot:
                 f"🗄️ База данных: {db_status}\n"
                 f"🌐 Веб-приложение: ✅ Доступно\n"
                 f"🕐 Время: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC\n"
-                f"🏷️ Версия: 1.0.0\n"
+                f"🏷️ Версия: 1.0.15\n"
                 f"🌍 Регион: {os.getenv('GCP_REGION', 'europe-west1')}"
             )
             
@@ -330,7 +344,7 @@ class ChartGeniusProductionBot:
 app = FastAPI(
     title="ChartGenius Telegram Bot",
     description="Продакшн Telegram бот для ChartGenius",
-    version="1.0.2"
+    version="1.0.15"
 )
 
 # Глобальная переменная для бота
@@ -398,7 +412,7 @@ async def health_check():
     return {
         "status": "healthy",
         "mode": "webhook" if bot_instance and bot_instance.config.use_webhook else "polling",
-        "version": "1.0.2"
+        "version": "1.0.15"
     }
 
 @app.get("/")
@@ -406,7 +420,7 @@ async def root():
     """Корневой endpoint"""
     return {
         "service": "ChartGenius Telegram Bot",
-        "version": "1.0.2",
+        "version": "1.0.15",
         "mode": "webhook" if bot_instance and bot_instance.config.use_webhook else "polling"
     }
 

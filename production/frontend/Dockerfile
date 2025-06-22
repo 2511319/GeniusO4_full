@@ -19,9 +19,14 @@ COPY frontend/package*.json ./
 # Установка зависимостей
 RUN npm install --silent
 
-# Копирование исходного кода
-COPY frontend/ ./
+# Копирование базовых файлов frontend
+COPY frontend/package*.json ./
+COPY frontend/index.html ./
+COPY frontend/public/ ./public/
+
+# Копирование production конфигурации и исходного кода
 COPY production/frontend/vite.config.js ./vite.config.js
+COPY production/frontend/src/ ./src/
 
 # Установка переменных окружения для сборки
 ENV NODE_ENV=production
@@ -42,7 +47,8 @@ LABEL description="ChartGenius Frontend Production"
 RUN apk add --no-cache curl
 
 # Удаление дефолтной конфигурации nginx
-RUN rm /etc/nginx/conf.d/default.conf
+RUN rm /etc/nginx/conf.d/default.conf && \
+    rm /etc/nginx/nginx.conf
 
 # Копирование собранного приложения
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -50,7 +56,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Копирование VERSION файла
 COPY production/VERSION /app/VERSION
 
-# Копирование продакшн конфигурации nginx как шаблон
+# Копирование продакшн конфигурации nginx
+COPY production/frontend/nginx-main.conf /etc/nginx/nginx.conf
 COPY production/frontend/nginx.conf /etc/nginx/conf.d/default.conf.template
 
 # Копирование entrypoint скрипта
@@ -67,9 +74,10 @@ RUN chown -R nginx-user:nginx-user /usr/share/nginx/html && \
     chown -R nginx-user:nginx-user /etc/nginx/conf.d && \
     chmod +x /entrypoint.sh
 
-# Создание директории для PID файла
-RUN touch /var/run/nginx.pid && \
-    chown -R nginx-user:nginx-user /var/run/nginx.pid
+# Создание директории для PID файла и настройка прав
+RUN mkdir -p /var/run/nginx && \
+    touch /var/run/nginx/nginx.pid && \
+    chown -R nginx-user:nginx-user /var/run/nginx
 
 # Переменные окружения
 ENV BACKEND_URL=""

@@ -22,7 +22,6 @@ import {
   Analytics as AnalyticsIcon
 } from '@mui/icons-material';
 import { clearAuth } from '../store';
-import { APP_VERSION } from '../config';
 
 export default function UserDashboard() {
   const { token } = useSelector((state) => state.auth);
@@ -314,7 +313,7 @@ export default function UserDashboard() {
         
         <Box sx={{ textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
-            ChartGenius v{APP_VERSION} • Профессиональный анализ криптовалютных рынков
+            ChartGenius v1.0.2 • Профессиональный анализ криптовалютных рынков
           </Typography>
         </Box>
       </Paper>

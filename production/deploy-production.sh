@@ -184,7 +184,7 @@ deploy_services() {
         --min-instances 0 \
         --concurrency 80 \
         --timeout 300 \
-        --set-env-vars="GCP_PROJECT_ID=$GCP_PROJECT_ID,GCP_REGION=$GCP_REGION,ENVIRONMENT=production,ADMIN_TELEGRAM_ID=299820674,SERVER_PORT=8080" \
+        --set-env-vars="GCP_REGION=$GCP_REGION,ENVIRONMENT=production,ADMIN_TELEGRAM_ID=299820674,SERVER_PORT=8080" \
         --set-secrets="OPENAI_API_KEY=openai-api-key:latest,JWT_SECRET_KEY=jwt-secret-key:latest,CRYPTOCOMPARE_API_KEY=cryptocompare-api-key:latest" \
         --quiet
     
@@ -225,7 +225,7 @@ deploy_services() {
         --max-instances 1 \
         --concurrency 1 \
         --timeout 3600 \
-        --set-env-vars="GCP_PROJECT_ID=$GCP_PROJECT_ID,GCP_REGION=$GCP_REGION,ENVIRONMENT=production,ADMIN_TELEGRAM_ID=299820674,SERVER_PORT=8080,USE_WEBHOOK=true" \
+        --set-env-vars="GCP_REGION=$GCP_REGION,ENVIRONMENT=production,ADMIN_TELEGRAM_ID=299820674,SERVER_PORT=8080,USE_WEBHOOK=true" \
         --set-secrets="TELEGRAM_BOT_TOKEN=telegram-bot-token:latest" \
         --quiet
     
