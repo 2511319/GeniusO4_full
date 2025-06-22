@@ -4,10 +4,10 @@ import os
 import hashlib
 import hmac
 import json
-from urllib.parse import unquote
+import time
+from urllib.parse import unquote, parse_qsl
 from typing import Optional, Dict, Any
 from fastapi import HTTPException, Request
-from telegram_webapp_auth.auth import TelegramAuthenticator
 from backend.config.config import logger, db
 from google.cloud import firestore
 
@@ -23,14 +23,61 @@ class TelegramWebAppAuth:
     def validate_webapp_data(self, init_data: str) -> bool:
         """
         Валидация данных от Telegram WebApp
+        Реализация согласно официальной документации Telegram
         """
         try:
             if not self.bot_token:
+                logger.error("Bot token не установлен")
                 return False
 
-            # Используем библиотеку telegram-webapp-auth для валидации
-            authenticator = TelegramAuthenticator(self.bot_token)
-            authenticator.validate(init_data)
+            if not init_data:
+                logger.error("init_data пустой")
+                return False
+
+            # Парсим параметры
+            parsed_data = dict(parse_qsl(init_data))
+
+            if 'hash' not in parsed_data:
+                logger.error("Отсутствует hash в init_data")
+                return False
+
+            received_hash = parsed_data.pop('hash')
+
+            # Создаем строку для проверки
+            data_check_string = '\n'.join([f"{k}={v}" for k, v in sorted(parsed_data.items())])
+
+            # Создаем секретный ключ
+            secret_key = hmac.new(
+                "WebAppData".encode(),
+                self.bot_token.encode(),
+                hashlib.sha256
+            ).digest()
+
+            # Вычисляем hash
+            calculated_hash = hmac.new(
+                secret_key,
+                data_check_string.encode(),
+                hashlib.sha256
+            ).hexdigest()
+
+            # Сравниваем хеши
+            is_valid = hmac.compare_digest(received_hash, calculated_hash)
+
+            if not is_valid:
+                logger.error("Неверный hash в init_data")
+                return False
+
+            # Проверяем время (опционально)
+            if 'auth_date' in parsed_data:
+                auth_date = int(parsed_data['auth_date'])
+                current_time = int(time.time())
+
+                # Проверяем, что данные не старше 24 часов
+                if current_time - auth_date > 86400:
+                    logger.warning("init_data устарел (старше 24 часов)")
+                    # Не блокируем, просто предупреждаем
+
+            logger.info("Валидация Telegram WebApp данных успешна")
             return True
 
         except Exception as e:
@@ -148,3 +195,67 @@ async def get_or_create_user(telegram_id: str, user_data: Dict[str, Any]) -> Dic
     except Exception as e:
         logger.error(f"Ошибка работы с пользователем в Firestore: {e}")
         return {}
+
+
+def check_webapp_signature(token: str, init_data: str) -> bool:
+    """
+    Валидация подписи WebApp данных от Telegram
+    Реализация согласно официальной документации Telegram
+
+    Эта функция заменяет удаленную telegram.helpers.check_webapp_signature
+    в python-telegram-bot версии 22.1+
+    """
+    try:
+        if not token or not init_data:
+            logger.error("Token или init_data пустые")
+            return False
+
+        # Парсим параметры
+        parsed_data = dict(parse_qsl(init_data))
+
+        if 'hash' not in parsed_data:
+            logger.error("Отсутствует hash в init_data")
+            return False
+
+        received_hash = parsed_data.pop('hash')
+
+        # Создаем строку для проверки
+        data_check_string = '\n'.join([f"{k}={v}" for k, v in sorted(parsed_data.items())])
+
+        # Создаем секретный ключ
+        secret_key = hmac.new(
+            "WebAppData".encode(),
+            token.encode(),
+            hashlib.sha256
+        ).digest()
+
+        # Вычисляем hash
+        calculated_hash = hmac.new(
+            secret_key,
+            data_check_string.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        # Сравниваем хеши
+        is_valid = hmac.compare_digest(received_hash, calculated_hash)
+
+        if not is_valid:
+            logger.error("Неверный hash в init_data")
+            return False
+
+        # Проверяем время (опционально)
+        if 'auth_date' in parsed_data:
+            auth_date = int(parsed_data['auth_date'])
+            current_time = int(time.time())
+
+            # Проверяем, что данные не старше 24 часов
+            if current_time - auth_date > 86400:
+                logger.warning("init_data устарел (старше 24 часов)")
+                # Не блокируем, просто предупреждаем
+
+        logger.info("Валидация WebApp подписи успешна")
+        return True
+
+    except Exception as e:
+        logger.error(f"Ошибка валидации WebApp подписи: {e}")
+        return False

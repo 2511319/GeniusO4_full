@@ -6,3 +6,7 @@ google-cloud-logging==3.8.0
 
 # Мониторинг
 google-cloud-monitoring==2.16.0
+
+# FastAPI для webhook режима
+fastapi==0.104.1
+uvicorn==0.24.0

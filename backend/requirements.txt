@@ -14,5 +14,6 @@ pyyaml
 python-dotenv
 python-jose[cryptography]
 python-telegram-bot==21.2
-telegram-webapp-auth==0.4.0
+telegram-webapp-auth==3.0.5
 ulid-py
+plotly

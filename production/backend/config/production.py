@@ -18,7 +18,8 @@ class ProductionConfig:
     GCP_REGION = os.getenv("GCP_REGION", "europe-west1")
     
     # Сервисные настройки
-    API_PORT = int(os.getenv("PORT", 8080))  # Cloud Run использует PORT
+    # Cloud Run резервирует PORT, используем SERVER_PORT или fallback на PORT
+    API_PORT = int(os.getenv("SERVER_PORT", os.getenv("PORT", 8080)))
     API_HOST = "0.0.0.0"
     
     # CORS настройки для продакшн
@@ -53,7 +54,7 @@ class ProductionConfig:
     
     # Настройки безопасности
     JWT_ALGORITHM = "HS256"
-    JWT_EXPIRE_MINUTES = 10  # Короткое время жизни для WebApp токенов
+    JWT_EXPIRE_MINUTES = 1440  # 24 часа для лучшего пользовательского опыта
     
     # Настройки кэширования
     CACHE_TTL_SECONDS = 300  # 5 минут
@@ -64,11 +65,13 @@ class ProductionConfig:
         try:
             if not cls.GCP_PROJECT_ID:
                 raise ValueError("GCP_PROJECT_ID не установлен")
-            
+
             client = secretmanager.SecretManagerServiceClient()
             name = f"projects/{cls.GCP_PROJECT_ID}/secrets/{secret_name}/versions/latest"
             response = client.access_secret_version(request={"name": name})
-            return response.payload.data.decode("UTF-8")
+            # Очищаем секрет от лишних символов (включая \r, \n)
+            secret_value = response.payload.data.decode("UTF-8")
+            return secret_value.replace('\r', '').replace('\n', '').strip()
         except Exception as e:
             logging.error(f"Ошибка получения секрета {secret_name}: {e}")
             raise

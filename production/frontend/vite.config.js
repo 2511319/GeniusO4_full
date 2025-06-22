@@ -30,7 +30,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_URL || 'http://localhost:8080',
+        target: process.env.VITE_API_URL || 'https://chartgenius-backend-169129692197.europe-west1.run.app',
         changeOrigin: true,
         secure: true
       }

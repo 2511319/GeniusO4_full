@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Копирование и установка зависимостей
-COPY bot/requirements.txt /tmp/bot-requirements.txt
+COPY production/bot/requirements.txt /tmp/bot-requirements.txt
 COPY production/bot/requirements-production.txt /tmp/requirements-production.txt
 
 RUN pip install --no-cache-dir --upgrade pip && \
@@ -44,10 +44,15 @@ USER botuser
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 ENV ENVIRONMENT=production
+ENV USE_WEBHOOK=true
+ENV SERVER_PORT=8080
 
 # Health check (для Cloud Run)
 HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=3 \
-    CMD python -c "import sys; sys.exit(0)" || exit 1
+    CMD curl -f http://127.0.0.1:${SERVER_PORT:-8080}/health || exit 1
+
+# Экспорт порта
+EXPOSE 8080
 
 # Команда запуска
 CMD ["python", "production/bot/app.py"]

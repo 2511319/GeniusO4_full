@@ -1,0 +1,17 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-f', 'production/bot/Dockerfile',
+      '-t', 'gcr.io/$PROJECT_ID/chartgenius-bot:${_VERSION}',
+      '.'
+    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/chartgenius-bot:${_VERSION}']
+
+substitutions:
+  _VERSION: '1.0.4'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'

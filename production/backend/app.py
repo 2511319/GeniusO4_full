@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="ChartGenius API",
     description="Продакшн API для анализа криптовалютных данных",
-    version="1.0.0",
+    version="1.0.2",
     docs_url=None,  # Отключаем Swagger в продакшн
     redoc_url=None,  # Отключаем ReDoc в продакшн
     lifespan=lifespan
@@ -51,9 +51,10 @@ app = FastAPI(
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=[
+        f"chartgenius-backend-169129692197.{config.GCP_REGION}.run.app",  # Правильный URL backend
         f"chartgenius-api-{config.GCP_REGION}-a.run.app",
         f"chartgenius-api-{config.GCP_REGION}.run.app",
-        "localhost",  # Для локального тестирования
+        f"chartgenius-api-169129692197.{config.GCP_REGION}.run.app",
     ]
 )
 
@@ -124,38 +125,96 @@ async def create_webapp_token(request: Request):
         # Получаем init_data из тела запроса
         body = await request.body()
         init_data = body.decode('utf-8')
-        
+
         if not init_data:
             raise HTTPException(status_code=400, detail="init_data отсутствует")
-        
+
         auth = TelegramWebAppAuth()
-        
+
         # Валидируем данные от Telegram WebApp
         if not auth.validate_webapp_data(init_data):
             raise HTTPException(status_code=401, detail="Неверные данные WebApp")
-        
+
         # Извлекаем пользователя
         user_data = auth.extract_user_from_init_data(init_data)
         if not user_data:
             raise HTTPException(status_code=401, detail="Не удалось извлечь данные пользователя")
-        
+
         telegram_id = str(user_data.get('id'))
-        
+
         # Создаем JWT токен
         token = create_jwt_token(telegram_id, expires_minutes=config.JWT_EXPIRE_MINUTES)
-        
+
         return {
             "access_token": token,
             "token_type": "bearer",
-            "expires_in": config.JWT_EXPIRE_MINUTES * 60
+            "expires_in": config.JWT_EXPIRE_MINUTES * 60,
+            "expires_minutes": config.JWT_EXPIRE_MINUTES
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger = config.setup_logging()
         logger.error(f"Ошибка создания WebApp токена: {e}")
         raise HTTPException(status_code=500, detail="Ошибка создания токена")
+
+
+@app.post("/api/auth/refresh-token")
+async def refresh_token(request: Request):
+    """Обновление JWT токена"""
+    try:
+        # Получаем текущий токен из заголовка Authorization
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Токен авторизации не найден")
+
+        current_token = auth_header.split(" ")[1]
+
+        # Декодируем токен (даже если он истек)
+        import jwt
+        try:
+            payload = jwt.decode(
+                current_token,
+                config.get_jwt_secret_key(),
+                algorithms=[config.JWT_ALGORITHM],
+                options={"verify_exp": False}  # Не проверяем истечение для refresh
+            )
+        except jwt.InvalidTokenError:
+            raise HTTPException(status_code=401, detail="Неверный токен")
+
+        telegram_id = payload.get("telegram_id")
+        if not telegram_id:
+            raise HTTPException(status_code=401, detail="Неверный токен")
+
+        # Проверяем, что токен не слишком старый (максимум 7 дней)
+        import time
+        token_issued_at = payload.get("iat", 0)
+        current_time = int(time.time())
+        max_refresh_age = 7 * 24 * 60 * 60  # 7 дней в секундах
+
+        if current_time - token_issued_at > max_refresh_age:
+            raise HTTPException(status_code=401, detail="Токен слишком старый для обновления")
+
+        # Создаем новый токен
+        new_token = create_jwt_token(telegram_id, expires_minutes=config.JWT_EXPIRE_MINUTES)
+
+        logger = config.setup_logging()
+        logger.info(f"Токен обновлен для пользователя {telegram_id}")
+
+        return {
+            "access_token": new_token,
+            "token_type": "bearer",
+            "expires_in": config.JWT_EXPIRE_MINUTES * 60,
+            "expires_minutes": config.JWT_EXPIRE_MINUTES
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger = config.setup_logging()
+        logger.error(f"Ошибка обновления токена: {e}")
+        raise HTTPException(status_code=500, detail="Ошибка обновления токена")
 
 
 # Подключение роутеров

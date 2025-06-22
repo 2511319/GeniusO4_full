@@ -15,7 +15,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Копирование и установка зависимостей
-COPY backend/requirements.txt /tmp/requirements.txt
+COPY production/backend/requirements.txt /tmp/requirements.txt
 COPY production/backend/requirements-production.txt /tmp/requirements-production.txt
 
 # Установка зависимостей
@@ -52,8 +52,7 @@ COPY production/backend/ /app/production/backend/
 COPY configs/ /app/configs/
 
 # Создание директорий для логов
-RUN mkdir -p /app/logs && \
-    chown -R chartgenius:chartgenius /app
+RUN mkdir -p /app/logs
 
 # Переключение на непривилегированного пользователя
 USER chartgenius
@@ -62,11 +61,11 @@ USER chartgenius
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
 ENV ENVIRONMENT=production
-ENV PORT=8080
+ENV SERVER_PORT=8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://127.0.0.1:${SERVER_PORT:-8080}/health || exit 1
 
 # Экспорт порта
 EXPOSE 8080

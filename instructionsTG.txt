@@ -25,7 +25,7 @@
 ## 1. Подготовка окружения
 
 ```bash
-poetry add python-jose[cryptography] python-telegram-bot==21.2 telegram-webapp-auth==0.4.0
+poetry add python-jose[cryptography] python-telegram-bot==22.1 telegram-webapp-auth==0.4.0
 ```
 
 Secrets: `TELEGRAM_BOT_TOKEN`, `JWT_SECRET_KEY`.

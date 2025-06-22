@@ -29,7 +29,14 @@ def verify_token(creds: HTTPAuthorizationCredentials = Depends(security)):
 app = FastAPI(title="GeniusO4 API")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
+    allow_origins=[
+        "http://localhost:5173",  # Development frontend
+        "http://localhost:3000",  # Alternative dev port
+        "https://t.me",           # Telegram WebApp
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
 )
 
 @app.get("/health")
