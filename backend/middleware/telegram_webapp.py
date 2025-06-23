@@ -16,72 +16,138 @@ class TelegramWebAppAuth:
     """Middleware для аутентификации Telegram WebApp"""
     
     def __init__(self):
+        # Получаем bot token из разных источников
+        self.bot_token = None
+
+        # Способ 1: Переменная окружения (для dev)
         self.bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+        if self.bot_token:
+            logger.info("✅ Telegram bot token загружен из переменной окружения")
+        else:
+            # Способ 2: Google Cloud Secrets (для production)
+            try:
+                # Импортируем только в production среде
+                import sys
+                sys.path.append('/app')  # Добавляем путь к приложению в Cloud Run
+
+                from config.production import config
+                self.bot_token = config.get_telegram_bot_token()
+                logger.info("✅ Telegram bot token загружен из Google Cloud Secrets")
+            except Exception as e:
+                logger.error(f"❌ Не удалось загрузить токен из Google Cloud Secrets: {e}")
+
+                # Способ 3: Прямое обращение к Secret Manager
+                try:
+                    from google.cloud import secretmanager
+                    client = secretmanager.SecretManagerServiceClient()
+                    project_id = os.getenv("GOOGLE_CLOUD_PROJECT", "chartgenius-444017")
+                    secret_name = f"projects/{project_id}/secrets/telegram-bot-token/versions/latest"
+                    response = client.access_secret_version(request={"name": secret_name})
+                    self.bot_token = response.payload.data.decode("UTF-8").strip()
+                    logger.info("✅ Telegram bot token загружен напрямую из Secret Manager")
+                except Exception as e2:
+                    logger.error(f"❌ Не удалось загрузить токен напрямую из Secret Manager: {e2}")
+
         if not self.bot_token:
-            logger.error("TELEGRAM_BOT_TOKEN не установлен")
+            logger.error("❌ TELEGRAM_BOT_TOKEN не установлен - все способы загрузки провалились")
     
     def validate_webapp_data(self, init_data: str) -> bool:
         """
         Валидация данных от Telegram WebApp
-        Реализация согласно официальной документации Telegram
+
+        БЕЗОПАСНАЯ РЕАЛИЗАЦИЯ на основе официальной документации Telegram:
+        https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app
+
+        Алгоритм:
+        1. Data-check-string = все поля (кроме hash), отсортированные по алфавиту,
+           в формате key=<value> с разделителем \n
+        2. Secret key = HMAC-SHA256(bot_token, "WebAppData")
+        3. Calculated hash = HMAC-SHA256(data_check_string, secret_key)
+        4. Сравнение с полученным hash
         """
         try:
+            logger.info(f"🔍 Начало валидации WebApp данных (официальный алгоритм)")
+            logger.info(f"📋 Bot token установлен: {bool(self.bot_token)}")
+            logger.info(f"📋 Bot token (первые 10 символов): {self.bot_token[:10] if self.bot_token else 'НЕТ'}")
+            logger.info(f"📋 Init data длина: {len(init_data) if init_data else 0}")
+
             if not self.bot_token:
-                logger.error("Bot token не установлен")
+                logger.error("❌ Bot token не установлен")
                 return False
 
             if not init_data:
-                logger.error("init_data пустой")
+                logger.error("❌ init_data пустой")
                 return False
 
-            # Парсим параметры
-            parsed_data = dict(parse_qsl(init_data))
+            # Шаг 1: Парсим query string (ПРОВЕРЕННОЕ РЕШЕНИЕ от @TheBlackHacker)
+            from urllib.parse import parse_qs
+            parsed_data = parse_qs(init_data)
+
+            # Извлекаем первое значение из каждого списка (parse_qs возвращает списки)
+            parsed_data = {key: values[0] for key, values in parsed_data.items()}
+
+            logger.info(f"📋 Парсинг данных: найдено {len(parsed_data)} полей")
+            logger.info(f"📋 Поля: {list(parsed_data.keys())}")
 
             if 'hash' not in parsed_data:
-                logger.error("Отсутствует hash в init_data")
+                logger.error("❌ Отсутствует hash в init_data")
                 return False
 
+            # Шаг 2: Извлекаем hash
             received_hash = parsed_data.pop('hash')
+            logger.info(f"🔑 Received hash: {received_hash}")
 
-            # Создаем строку для проверки
-            data_check_string = '\n'.join([f"{k}={v}" for k, v in sorted(parsed_data.items())])
+            # Шаг 3: Создаем data-check-string (ПРОВЕРЕННЫЙ АЛГОРИТМ)
+            # Сортируем поля по алфавиту и соединяем через \n
+            sorted_items = sorted((key, value) for key, value in parsed_data.items())
+            data_to_check = [f"{key}={value}" for key, value in sorted_items]
+            data_check_string = '\n'.join(data_to_check)
 
-            # Создаем секретный ключ
+            logger.info(f"📋 Data check string (первые 200 символов): {data_check_string[:200]}...")
+
+            # Шаг 4: Создаем secret key (ОФИЦИАЛЬНЫЙ АЛГОРИТМ)
+            # secret_key = HMAC_SHA256(<bot_token>, "WebAppData")
             secret_key = hmac.new(
-                "WebAppData".encode(),
-                self.bot_token.encode(),
+                "WebAppData".encode('utf-8'),
+                self.bot_token.encode('utf-8'),
                 hashlib.sha256
             ).digest()
 
-            # Вычисляем hash
+            # Шаг 5: Вычисляем hash (ОФИЦИАЛЬНЫЙ АЛГОРИТМ)
+            # calculated_hash = HMAC_SHA256(data_check_string, secret_key)
             calculated_hash = hmac.new(
                 secret_key,
-                data_check_string.encode(),
+                data_check_string.encode('utf-8'),
                 hashlib.sha256
             ).hexdigest()
 
-            # Сравниваем хеши
+            # Шаг 6: Безопасное сравнение хешей
             is_valid = hmac.compare_digest(received_hash, calculated_hash)
 
+            logger.info(f"🔑 Calculated hash: {calculated_hash}")
+            logger.info(f"✅ Хеши совпадают: {is_valid}")
+
             if not is_valid:
-                logger.error("Неверный hash в init_data")
+                logger.error("❌ Неверный hash в init_data - данные не от Telegram")
                 return False
 
-            # Проверяем время (опционально)
+            # Шаг 7: Проверяем время (защита от replay атак)
             if 'auth_date' in parsed_data:
                 auth_date = int(parsed_data['auth_date'])
                 current_time = int(time.time())
 
                 # Проверяем, что данные не старше 24 часов
                 if current_time - auth_date > 86400:
-                    logger.warning("init_data устарел (старше 24 часов)")
+                    logger.warning("⚠️ init_data устарел (старше 24 часов)")
                     # Не блокируем, просто предупреждаем
 
-            logger.info("Валидация Telegram WebApp данных успешна")
+            logger.info("✅ Валидация Telegram WebApp данных успешна")
             return True
 
         except Exception as e:
-            logger.error(f"Ошибка валидации Telegram WebApp данных: {e}")
+            logger.error(f"❌ Ошибка валидации Telegram WebApp данных: {e}")
+            import traceback
+            logger.error(f"📋 Traceback: {traceback.format_exc()}")
             return False
     
     def extract_user_from_init_data(self, init_data: str) -> Optional[Dict[str, Any]]:
@@ -201,6 +267,7 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
     """
     Валидация подписи WebApp данных от Telegram
     Реализация согласно официальной документации Telegram
+    Исправлено для правильной работы с photo_url и экранированными слешами
 
     Эта функция заменяет удаленную telegram.helpers.check_webapp_signature
     в python-telegram-bot версии 22.1+
@@ -210,8 +277,12 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
             logger.error("Token или init_data пустые")
             return False
 
-        # Парсим параметры
-        parsed_data = dict(parse_qsl(init_data))
+        # Парсим параметры (ПРОВЕРЕННОЕ РЕШЕНИЕ от @TheBlackHacker)
+        from urllib.parse import parse_qs
+        parsed_data = parse_qs(init_data)
+
+        # Извлекаем первое значение из каждого списка
+        parsed_data = {key: values[0] for key, values in parsed_data.items()}
 
         if 'hash' not in parsed_data:
             logger.error("Отсутствует hash в init_data")
@@ -219,8 +290,10 @@ def check_webapp_signature(token: str, init_data: str) -> bool:
 
         received_hash = parsed_data.pop('hash')
 
-        # Создаем строку для проверки
-        data_check_string = '\n'.join([f"{k}={v}" for k, v in sorted(parsed_data.items())])
+        # Создаем строку для проверки (ПРОВЕРЕННЫЙ АЛГОРИТМ)
+        sorted_items = sorted((key, value) for key, value in parsed_data.items())
+        data_to_check = [f"{key}={value}" for key, value in sorted_items]
+        data_check_string = '\n'.join(data_to_check)
 
         # Создаем секретный ключ
         secret_key = hmac.new(

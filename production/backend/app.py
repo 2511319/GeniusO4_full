@@ -13,12 +13,12 @@ import uvicorn
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from production.backend.config.production import config
-from backend.routers.analysis import router as analysis_router
-from backend.routers.admin import router as admin_router
-from backend.routers.mod import router as mod_router
-from backend.routers.watch import router as watch_router
-from backend.auth.dependencies import create_jwt_token
-from backend.middleware.telegram_webapp import TelegramWebAppAuth
+from production.backend.routers.analysis import router as analysis_router
+from production.backend.routers.admin import router as admin_router
+from production.backend.routers.mod import router as mod_router
+from production.backend.routers.watch import router as watch_router
+from production.backend.auth.dependencies import create_jwt_token
+from production.backend.middleware.telegram_webapp import TelegramWebAppAuth
 
 
 @asynccontextmanager
@@ -40,8 +40,8 @@ async def lifespan(app: FastAPI):
 # Создание приложения FastAPI
 app = FastAPI(
     title="ChartGenius API",
-    description="Продакшн API для анализа криптовалютных данных",
-    version="1.0.13",
+    description="Продакшн API для анализа криптовалютных данных - ФИНАЛЬНОЕ РЕШЕНИЕ OPENAI",
+    version="1.0.32-final-openai-fix",
     docs_url=None,  # Отключаем Swagger в продакшн
     redoc_url=None,  # Отключаем ReDoc в продакшн
     lifespan=lifespan
@@ -55,6 +55,8 @@ app.add_middleware(
         f"chartgenius-api-{config.GCP_REGION}-a.run.app",
         f"chartgenius-api-{config.GCP_REGION}.run.app",
         f"chartgenius-api-169129692197.{config.GCP_REGION}.run.app",
+        f"chartgenius-api-working-169129692197.{config.GCP_REGION}.run.app",  # Новый рабочий API
+        f"chartgenius-api-v2-169129692197.{config.GCP_REGION}.run.app",  # Резервный API
     ]
 )
 

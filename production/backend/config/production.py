@@ -15,7 +15,7 @@ class ProductionConfig:
     
     # Google Cloud настройки
     # Cloud Run автоматически устанавливает GOOGLE_CLOUD_PROJECT
-    GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID") or os.getenv("GOOGLE_CLOUD_PROJECT")
+    GCP_PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT") or os.getenv("GCP_PROJECT_ID") or "chartgenius-444017"
     GCP_REGION = os.getenv("GCP_REGION", "europe-west1")
     
     # Сервисные настройки

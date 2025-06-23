@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { 
-  Container, 
-  Paper, 
-  Typography, 
-  Box, 
-  Button, 
+import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Paper,
+  Typography,
+  Box,
+  Button,
   Alert,
-  CircularProgress 
+  CircularProgress
 } from '@mui/material';
 import { setToken } from '../store';
+import { API_URL } from '../config';
 
 export default function Login() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [telegramWebApp, setTelegramWebApp] = useState(null);
@@ -22,15 +25,27 @@ export default function Login() {
     if (window.Telegram?.WebApp) {
       const tg = window.Telegram.WebApp;
       setTelegramWebApp(tg);
-      
+
       // Настраиваем WebApp
       tg.ready();
       tg.expand();
-      
-      // Автоматически пытаемся авторизоваться если есть initData
-      if (tg.initData) {
+
+      // Проверяем, не был ли пользователь только что разлогинен
+      const wasLoggedOut = sessionStorage.getItem('wasLoggedOut');
+
+      // Автоматически пытаемся авторизоваться если есть initData и пользователь не выходил
+      if (tg.initData && !wasLoggedOut) {
         console.log('🔑 Обнаружены данные Telegram WebApp, выполняем автоматическую авторизацию...');
+        console.log('📋 initData:', tg.initData);
+        console.log('📋 initDataUnsafe:', tg.initDataUnsafe);
         handleTelegramAuth(tg.initData);
+      } else {
+        if (wasLoggedOut) {
+          console.log('⚠️ Пользователь вышел из системы, автоматическая авторизация отключена');
+          sessionStorage.removeItem('wasLoggedOut'); // Очищаем флаг
+        } else {
+          console.log('⚠️ initData отсутствует в Telegram WebApp');
+        }
       }
     }
   }, []);
@@ -41,8 +56,11 @@ export default function Login() {
 
     try {
       console.log('📡 Отправляем запрос на авторизацию...');
-      
-      const response = await fetch('/api/auth/webapp-token', {
+      console.log('📋 initData длина:', initData.length);
+      console.log('📋 initData содержимое:', initData);
+      console.log('📋 API URL:', `${API_URL}/api/auth/webapp-token`);
+
+      const response = await fetch(`${API_URL}/api/auth/webapp-token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -50,21 +68,28 @@ export default function Login() {
         body: initData
       });
 
+      console.log('📊 Ответ API статус:', response.status);
+
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ detail: 'Неизвестная ошибка' }));
+        console.log('❌ Ошибка API:', errorData);
         throw new Error(errorData.detail || 'Ошибка авторизации');
       }
 
       const data = await response.json();
       console.log('✅ Авторизация успешна, получен токен');
-      
+
       // Сохраняем токен
       dispatch(setToken(data.access_token));
-      
+
       // Уведомляем Telegram WebApp об успехе
       if (telegramWebApp) {
         telegramWebApp.showAlert('✅ Авторизация успешна!');
       }
+
+      // КРИТИЧНО: Перенаправляем в dashboard после успешной авторизации
+      console.log('🔄 Перенаправление в dashboard...');
+      navigate('/dashboard', { replace: true });
 
     } catch (err) {
       console.error('❌ Ошибка авторизации:', err);

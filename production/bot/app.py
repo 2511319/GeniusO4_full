@@ -52,8 +52,8 @@ class ProductionBotConfig:
 
     def _get_webhook_url(self) -> str:
         """Получение URL для webhook"""
-        # Используем новый URL бота
-        url = "https://chartgenius-bot-new-169129692197.europe-west1.run.app/webhook"
+        # Используем рабочий URL бота
+        url = "https://chartgenius-bot-working-169129692197.europe-west1.run.app/webhook"
         return self._clean_url(url)
 
     def _clean_url(self, url: str) -> str:
@@ -230,7 +230,7 @@ class ChartGeniusProductionBot:
                 f"🗄️ База данных: {db_status}\n"
                 f"🌐 Веб-приложение: ✅ Доступно\n"
                 f"🕐 Время: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC\n"
-                f"🏷️ Версия: 1.0.15\n"
+                f"🏷️ Версия: 1.0.16-working\n"
                 f"🌍 Регион: {os.getenv('GCP_REGION', 'europe-west1')}"
             )
             
@@ -343,8 +343,8 @@ class ChartGeniusProductionBot:
 # FastAPI приложение для webhook режима
 app = FastAPI(
     title="ChartGenius Telegram Bot",
-    description="Продакшн Telegram бот для ChartGenius",
-    version="1.0.15"
+    description="Продакшн Telegram бот для ChartGenius - ИСПРАВЛЕН USER-AGENT",
+    version="1.0.17-fixed-user-agent"
 )
 
 # Глобальная переменная для бота
@@ -384,14 +384,36 @@ async def shutdown_event():
 
 @app.post("/webhook")
 async def webhook_handler(request: Request):
-    """Обработчик webhook от Telegram"""
+    """Обработчик webhook от Telegram с проверкой безопасности"""
     try:
         if not bot_instance:
             raise HTTPException(status_code=500, detail="Бот не инициализирован")
 
+        # Логируем User-Agent для отладки (но не блокируем)
+        user_agent = request.headers.get("user-agent", "")
+        logging.info(f"Webhook User-Agent: {user_agent}")
+
+        # Telegram не устанавливает специальный User-Agent, поэтому не проверяем его
+
+        # Проверка Content-Type
+        content_type = request.headers.get("content-type", "")
+        if content_type != "application/json":
+            logging.warning(f"Неверный Content-Type: {content_type}")
+            raise HTTPException(status_code=400, detail="Invalid Content-Type")
+
         # Получаем данные от Telegram
         body = await request.body()
-        update_data = json.loads(body.decode('utf-8'))
+
+        # Проверка размера данных (защита от DoS)
+        if len(body) > 10 * 1024:  # 10KB максимум
+            logging.warning(f"Слишком большой payload: {len(body)} bytes")
+            raise HTTPException(status_code=413, detail="Payload too large")
+
+        try:
+            update_data = json.loads(body.decode('utf-8'))
+        except json.JSONDecodeError as e:
+            logging.warning(f"Неверный JSON: {e}")
+            raise HTTPException(status_code=400, detail="Invalid JSON")
 
         # Создаем объект Update
         update = Update.de_json(update_data, bot_instance.application.bot)
@@ -399,12 +421,17 @@ async def webhook_handler(request: Request):
         if update:
             # Обрабатываем обновление
             await bot_instance.application.process_update(update)
+        else:
+            logging.warning("Получен пустой update от Telegram")
 
         return JSONResponse(content={"status": "ok"})
 
+    except HTTPException:
+        # Пробрасываем HTTP исключения как есть
+        raise
     except Exception as e:
         logging.error(f"Ошибка обработки webhook: {e}")
-        raise HTTPException(status_code=500, detail="Ошибка обработки webhook")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/health")
 async def health_check():
@@ -412,7 +439,7 @@ async def health_check():
     return {
         "status": "healthy",
         "mode": "webhook" if bot_instance and bot_instance.config.use_webhook else "polling",
-        "version": "1.0.15"
+        "version": "1.0.17-fixed-user-agent"
     }
 
 @app.get("/")
@@ -420,7 +447,7 @@ async def root():
     """Корневой endpoint"""
     return {
         "service": "ChartGenius Telegram Bot",
-        "version": "1.0.15",
+        "version": "1.0.17-fixed-user-agent",
         "mode": "webhook" if bot_instance and bot_instance.config.use_webhook else "polling"
     }
 

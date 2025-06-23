@@ -73,12 +73,14 @@ export default function UserDashboard() {
   };
 
   const handleLogout = () => {
+    // Устанавливаем флаг, что пользователь вышел из системы
+    sessionStorage.setItem('wasLoggedOut', 'true');
     dispatch(clearAuth());
     navigate('/');
   };
 
   const handleBackToAnalysis = () => {
-    navigate('/');
+    navigate('/analysis');
   };
 
   const getRoleColor = (role) => {
