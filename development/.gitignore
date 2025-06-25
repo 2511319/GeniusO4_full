@@ -1,0 +1,51 @@
+# 🔒 ЗАЩИТА ПРОДАКШЕНА - НЕ ИЗМЕНЯТЬ!
+# Исключить случайные изменения продакшена
+/production/
+*.prod.env
+*.production.*
+production-*
+
+# Логи разработки
+logs/
+*.log
+dev_database.db
+
+# Временные файлы разработки
+.tmp/
+temp/
+*.temp
+*.tmp
+
+# IDE файлы
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS файлы
+.DS_Store
+Thumbs.db
+
+# Node modules (будут переустановлены)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.env.local
+.env.production
+
+# Docker
+.dockerignore
+
+# Backup files
+*.bak
+*.backup
