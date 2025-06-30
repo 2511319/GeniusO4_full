@@ -10,6 +10,7 @@ pydantic
 statsmodels
 scipy
 google-cloud-firestore
+google-cloud-storage
 pyyaml
 python-dotenv
 python-jose[cryptography]
@@ -17,3 +18,11 @@ python-telegram-bot==21.2
 telegram-webapp-auth==3.0.5
 ulid-py
 plotly
+# Новые зависимости для архитектурных улучшений
+celery[redis]
+redis
+prometheus-client
+psutil
+aiogram>=3.0.0
+ccxt
+websockets

@@ -1,160 +1,140 @@
-# ChartGenius 🚀
+# 🚀 ChartGenius - AI-Powered Cryptocurrency Analysis Platform
 
-Профессиональная система анализа криптовалютных рынков с использованием ИИ и технических индикаторов.
+**Version:** v1.0.51-stable  
+**Status:** ✅ Production Ready  
+**Cost:** $1.50/month (98.6% optimized)  
+**Last Updated:** 2025-06-25  
 
-## 📋 Обзор
+---
 
-ChartGenius - это комплексная система для анализа криптовалютных данных, включающая:
-- **Backend API** на FastAPI с интеграцией OpenAI
-- **Frontend** на React с интерактивными графиками
-- **Telegram Bot** для удобного доступа
-- **Продакшн-готовое развертывание** на Google Cloud Platform
+## 🎯 Quick Start
 
-## 🏗️ Архитектура
-
-```
-ChartGenius/
-├── backend/          # FastAPI сервер
-├── frontend/         # React приложение
-├── bot/             # Telegram бот
-├── production/      # Продакшн конфигурация
-├── configs/         # Конфигурационные файлы
-├── tests/          # Тесты
-└── docs/           # Документация
-```
-
-## 🚀 Быстрый старт
-
-### Разработка
-
-1. **Клонирование репозитория:**
+### 🚀 Production Deployment:
 ```bash
-git clone <repository-url>
-cd chartgenius
-```
-
-2. **Настройка переменных окружения:**
-```bash
-cp .env.example .env.dev
-# Отредактируйте .env.dev с вашими API ключами
-```
-
-3. **Запуск backend:**
-```bash
-pip install -r backend/requirements.txt
-uvicorn backend.app:app --reload
-```
-
-4. **Запуск frontend:**
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### Продакшн развертывание
-
-Для развертывания в Google Cloud Platform:
-
-```bash
-cd production
-export GCP_PROJECT_ID="your-project-id"
-export GCP_REGION="europe-west1"
-
-# Настройка секретов
-./setup-secrets.sh
-
-# Развертывание
+cd production/
 ./deploy-production.sh
 ```
 
-Подробная инструкция: [production/DEPLOYMENT_GUIDE.md](production/DEPLOYMENT_GUIDE.md)
-
-## 🔧 Разработка
-
-### Структура backend
-- `routers/` - API endpoints
-- `services/` - Бизнес-логика
-- `auth/` - Аутентификация и авторизация
-- `validators/` - Валидация данных
-- `config/` - Конфигурация
-
-### Структура frontend
-- `src/components/` - React компоненты
-- `src/store/` - Redux store
-- `src/services/` - API клиенты
-
-### Тестирование
-
+### 🔧 Development:
 ```bash
-# Backend тесты
-pytest
-
-# Frontend тесты
-cd frontend && npm test
-
-# Все тесты
-npm run test:all
+cd development/
+./start-dev.sh
 ```
 
-## 📚 Документация
+### 🚨 Emergency Rollback:
+```bash
+cd stable/v1.0.51-stable/scripts/
+./emergency_rollback.sh
+```
 
-- [Руководство по развертыванию](production/DEPLOYMENT_GUIDE.md)
-- [Настройка секретов](production/SECRETS_SETUP.md)
-- [Интеграция с Telegram](docs/telegram_integration.md)
-- [Разделение Frontend/Backend](docs/frontend_backend_split.md)
+---
 
-## 🔐 Безопасность
+## 📁 Project Structure
 
-- Все секреты хранятся в Google Cloud Secret Manager
-- JWT аутентификация с коротким временем жизни
-- CORS настроен для продакшн доменов
-- Валидация всех входных данных
+```
+chartgenius/
+├── production/          # 🏭 Stable production version (v1.0.51)
+├── development/         # 🔬 Development environment (v1.1.0-dev)
+├── stable/             # 🔒 Rollback versions and recovery tools
+├── backend/            # ⚙️ Backend API service
+├── frontend/           # 🌐 Frontend web application
+├── bot/               # 🤖 Telegram bot service
+├── docs/              # 📚 Documentation and reports
+├── archive/           # 📦 Archived files and old versions
+├── scripts/           # 🔧 Utility scripts
+├── tests/             # 🧪 Test suites
+└── configs/           # ⚙️ Configuration files
+```
 
-## 🛠️ Технологии
+---
 
-**Backend:**
-- FastAPI + Python 3.10
-- Google Cloud Firestore
-- OpenAI API
-- CryptoCompare API
+## 📚 Documentation
 
-**Frontend:**
-- React 18 + Vite
-- Material-UI v5
-- Redux Toolkit
-- TradingView Lightweight Charts
+### 🔗 Quick Links:
+- **[📋 Project Index](PROJECT_INDEX.md)** - Complete navigation
+- **[🏭 Production Guide](production/README.md)** - Production deployment
+- **[🔬 Development Guide](development/README.md)** - Development setup
+- **[🔒 Rollback Procedures](stable/v1.0.51-stable/README.md)** - Emergency recovery
 
-**Infrastructure:**
-- Google Cloud Run
-- Docker
-- Google Cloud Secret Manager
-- Cloud Logging & Monitoring
+### 📊 Reports & Documentation:
+- **[📁 All Reports](docs/reports/)** - Deployment, fixes, audits
+- **[🗂️ Organization Docs](docs/organization/)** - Project organization
+- **[📖 Technical Docs](docs/)** - Technical documentation
 
-## 📊 Возможности
+---
 
-- 📈 Технический анализ с 15+ индикаторами
-- 🤖 ИИ-анализ рыночных трендов
-- 📱 Telegram интеграция
-- 🔄 Реальное время данных
-- 👥 Система ролей пользователей
-- 📊 Интерактивные графики
+## 🔧 Quick Commands
 
-## 🤝 Вклад в проект
+### 📊 System Status:
+```bash
+# Check Cloud Run services
+gcloud run services list --region=europe-west1
 
-1. Fork репозитория
-2. Создайте feature branch
-3. Внесите изменения
-4. Добавьте тесты
-5. Создайте Pull Request
+# Check Telegram bot
+curl https://api.telegram.org/bot7279183061:AAERodVAje0VnifJmUJWeq0EM4FxMueXrB0/getWebhookInfo
+```
 
-## 📄 Лицензия
+### 💰 Cost Monitoring:
+```bash
+# Monitor GCP costs
+python archive/optimization_scripts/gcp_cost_monitor.py
 
-Этот проект лицензирован под MIT License.
+# Check budget alerts
+gcloud billing budgets list --billing-account=01FF05-287B67-1F223D
+```
 
-## 📞 Поддержка
+---
 
-При возникновении вопросов:
-- Создайте Issue в GitHub
-- Проверьте документацию в папке `docs/`
-- Обратитесь к администратору
+## 🏗️ Current Architecture
+
+### ☁️ Cloud Run Services:
+| Service | CPU | Memory | Status | Cost/Month |
+|---------|-----|--------|--------|------------|
+| chartgenius-api-working | 0.25 | 256Mi | ✅ Active | ~$0.50 |
+| chartgenius-bot-working | 0.125 | 128Mi | ✅ Active | ~$0.50 |
+| chartgenius-frontend | 0.125 | 128Mi | ✅ Active | ~$0.50 |
+
+### 💰 Cost Optimization:
+- **Monthly Cost:** $1.50 (was $104.25)
+- **Savings:** 98.6% ($102.75/month)
+- **Free Tier Status:** ✅ Within limits
+- **Budget Alerts:** $5/month threshold
+
+---
+
+## 🔄 Emergency Procedures
+
+### 🚨 Critical Issues:
+```bash
+# Immediate rollback (< 2 minutes)
+cd stable/v1.0.51-stable/scripts/
+./emergency_rollback.sh
+```
+
+### 🔧 Performance Issues:
+```bash
+# Full restoration with backup (5-10 minutes)
+cd stable/v1.0.51-stable/scripts/
+./restore_stable_version.sh
+```
+
+---
+
+## 📞 Support & Contacts
+
+### 🆘 Emergency Support:
+- **Critical Issues:** Use rollback scripts in `stable/v1.0.51-stable/scripts/`
+- **Documentation:** Check `docs/` directory
+- **Historical Issues:** Review reports in `docs/reports/`
+
+### 📚 Resources:
+- **Technical Documentation:** `docs/`
+- **Development Plans:** `development/Chartgenius_r_tr.md`
+- **Deployment Guides:** `production/`
+- **Archived Materials:** `archive/`
+
+---
+
+**🎉 ChartGenius is production-ready with 98.6% cost optimization!**
+
+*For detailed navigation, see [PROJECT_INDEX.md](PROJECT_INDEX.md)*

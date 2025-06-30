@@ -1,0 +1,86 @@
+# ChartGenius Stable Configuration v1.0.51-stable
+# Дата: 25.06.2025
+# Статус: Проверенная рабочая конфигурация после оптимизации
+
+services:
+  chartgenius-api-working:
+    region: europe-west1
+    resources:
+      cpu: "0.25"
+      memory: "256Mi"
+    scaling:
+      min_instances: 0
+      max_instances: 1
+    settings:
+      concurrency: 1
+      timeout: 60
+      cpu_throttling: true
+      startup_cpu_boost: true
+    annotations:
+      autoscaling.knative.dev/maxScale: "1"
+      run.googleapis.com/cpu-throttling: "true"
+      run.googleapis.com/startup-cpu-boost: "true"
+    
+  chartgenius-bot-working:
+    region: europe-west1
+    resources:
+      cpu: "0.125"
+      memory: "128Mi"
+    scaling:
+      min_instances: 0
+      max_instances: 1
+    settings:
+      concurrency: 1
+      timeout: 60
+      cpu_throttling: true
+      startup_cpu_boost: true
+    annotations:
+      autoscaling.knative.dev/maxScale: "1"
+      run.googleapis.com/cpu-throttling: "true"
+      run.googleapis.com/startup-cpu-boost: "true"
+    
+  chartgenius-frontend:
+    region: europe-west1
+    resources:
+      cpu: "0.125"
+      memory: "128Mi"
+    scaling:
+      min_instances: 0
+      max_instances: 1
+    settings:
+      concurrency: 1
+      timeout: 60
+      cpu_throttling: true
+      startup_cpu_boost: true
+    annotations:
+      autoscaling.knative.dev/maxScale: "1"
+      run.googleapis.com/cpu-throttling: "true"
+      run.googleapis.com/startup-cpu-boost: "true"
+
+# Удаленные сервисы (для справки):
+deleted_services:
+  - chartgenius-bot-new  # Удален 25.06.2025 для экономии $18/месяц
+
+# Экономические показатели:
+cost_optimization:
+  monthly_cost: "$1.50"
+  savings: "98.6%"
+  free_tier_status: "within_limits"
+  
+# Мониторинг:
+monitoring:
+  budget_alert: "$5/month"
+  thresholds: [20%, 50%, 80%, 100%]
+  
+# Производительность:
+performance:
+  expected_latency: "2-5 seconds (cold start)"
+  warm_latency: "<500ms"
+  max_concurrent_requests: 1
+  
+# Примечания:
+notes:
+  - "Конфигурация оптимизирована для минимального использования"
+  - "Scale-to-zero может вызывать задержки при холодном старте"
+  - "При высокой нагрузке рекомендуется увеличение ресурсов"
+  - "Все сервисы в пределах Google Cloud Free Tier"

@@ -29,7 +29,7 @@ services:
       - "version=1.1.0-dev"
 
   backend-dev:
-    build: 
+    build:
       context: ./backend-dev
       dockerfile: Dockerfile
     container_name: chartgenius-backend-dev
@@ -41,6 +41,8 @@ services:
       - VERSION=1.1.0-dev
       - CORS_ORIGINS=http://localhost:3001,http://127.0.0.1:3001
       - LOG_LEVEL=DEBUG
+      - REDIS_URL=redis://redis-dev:6379/0
+      - GOOGLE_CLOUD_STORAGE_BUCKET=chartgenius-prompts-dev
     env_file:
       - .env.development
     volumes:
@@ -48,6 +50,51 @@ services:
       - ./logs:/app/logs  # Логи
     networks:
       - dev-network
+    depends_on:
+      - redis-dev
+    restart: unless-stopped
+    labels:
+      - "environment=development"
+      - "version=1.1.0-dev"
+
+  # Redis для кэширования и очередей
+  redis-dev:
+    image: redis:7-alpine
+    container_name: chartgenius-redis-dev
+    ports:
+      - "6380:6379"  # Отличный от продакшена порт
+    volumes:
+      - redis-dev-data:/data
+    networks:
+      - dev-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    labels:
+      - "environment=development"
+      - "version=1.1.0-dev"
+
+  # Celery Worker для фоновых задач
+  celery-worker-dev:
+    build:
+      context: ./backend-dev
+      dockerfile: Dockerfile
+    container_name: chartgenius-celery-dev
+    command: celery -A backend.services.task_service worker --loglevel=info --concurrency=2
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - VERSION=1.1.0-dev
+      - REDIS_URL=redis://redis-dev:6379/0
+      - GOOGLE_CLOUD_STORAGE_BUCKET=chartgenius-prompts-dev
+    env_file:
+      - .env.development
+    volumes:
+      - ./backend-dev:/app:ro
+      - ./logs:/app/logs
+    networks:
+      - dev-network
+    depends_on:
+      - redis-dev
     restart: unless-stopped
     labels:
       - "environment=development"
@@ -87,3 +134,5 @@ networks:
 volumes:
   dev-logs:
     name: chartgenius-dev-logs
+  redis-dev-data:
+    name: chartgenius-redis-dev-data

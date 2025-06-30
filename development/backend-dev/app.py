@@ -1,11 +1,12 @@
 # backend/app.py
 import os
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 # ↓ абсолютный импорт
 from backend.routers.analysis import router as analysis_router
 from backend.routers.admin import router as admin_router
+from backend.routers.admin_enhanced import router as admin_enhanced_router
 from backend.routers.mod import router as mod_router
 from backend.routers.watch import router as watch_router
 
@@ -14,6 +15,8 @@ import jwt
 import uvicorn
 from dotenv import load_dotenv
 from backend.config.config import logger
+from backend.services.websocket_service import websocket_endpoint_handler
+from backend.services.metrics_service import metrics
 
 load_dotenv()  # подхватит .env.dev
 
@@ -26,12 +29,18 @@ def verify_token(creds: HTTPAuthorizationCredentials = Depends(security)):
     except:
         raise HTTPException(401, "Invalid token")
 
-app = FastAPI(title="GeniusO4 API")
+app = FastAPI(
+    title="ChartGenius API Development",
+    description="Development API для анализа криптовалютных данных",
+    version="1.1.0-dev"
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",  # Development frontend
         "http://localhost:3000",  # Alternative dev port
+        "http://localhost:3001",  # Dev frontend port
         "https://t.me",           # Telegram WebApp
     ],
     allow_credentials=True,
@@ -90,10 +99,26 @@ app.include_router(
     # dependencies=[Depends(verify_token)]  # Временно отключено
 )
 
-# Подключаем новые роутеры с аутентификацией
-app.include_router(admin_router, prefix="/api")
-app.include_router(mod_router, prefix="/api")
-app.include_router(watch_router, prefix="/api")
+# === WEBSOCKET ENDPOINT ===
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    """WebSocket endpoint для real-time уведомлений"""
+    await websocket_endpoint_handler(websocket, user_id)
+
+# === METRICS ENDPOINT ===
+@app.get("/metrics")
+async def get_metrics():
+    """Prometheus метрики"""
+    from fastapi.responses import Response
+    metrics_data = metrics.get_metrics()
+    return Response(content=metrics_data, media_type="text/plain")
+
+# Подключаем роутеры
+app.include_router(analysis_router, prefix="/api", tags=["analysis"])
+app.include_router(admin_router, prefix="/api", tags=["admin"])
+app.include_router(admin_enhanced_router, prefix="/api", tags=["admin-enhanced"])
+app.include_router(mod_router, prefix="/api", tags=["moderator"])
+app.include_router(watch_router, prefix="/api", tags=["watchlist"])
 
 if __name__=="__main__":
     uvicorn.run(

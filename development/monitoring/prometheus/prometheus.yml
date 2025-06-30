@@ -1,0 +1,60 @@
+# 🔍 Prometheus Configuration for ChartGenius
+# Версия: 1.1.0-dev
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'development'
+    project: 'chartgenius'
+
+rule_files:
+  - "rules/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+scrape_configs:
+  # ChartGenius Backend API
+  - job_name: 'chartgenius-backend'
+    static_configs:
+      - targets: ['host.docker.internal:8001']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # ChartGenius Bot
+  - job_name: 'chartgenius-bot'
+    static_configs:
+      - targets: ['host.docker.internal:8002']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # Node Exporter (System metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # Redis metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Google Cloud Monitoring (if needed)
+  - job_name: 'gcp-monitoring'
+    gce_sd_configs:
+      - project: 'chartgenius-444017'
+        zone: 'europe-west1-b'
+        port: 9090
+    relabel_configs:
+      - source_labels: [__meta_gce_label_environment]
+        target_label: environment
+      - source_labels: [__meta_gce_label_service]
+        target_label: service

@@ -2,7 +2,8 @@
 
 import os
 import json
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, validator
@@ -11,6 +12,8 @@ from backend.services.crypto_compare_provider import fetch_ohlcv
 from backend.services.data_processor import DataProcessor
 from backend.services.chatgpt_analyzer import ChatGPTAnalyzer
 from backend.services.viz import create_chart
+from backend.services.task_service import task_manager
+from backend.services.metrics_service import metrics
 from backend.validators.analysis_validators import (
     validate_analysis_request_data,
     ValidationError,
@@ -318,3 +321,119 @@ async def analyze_test(req: AnalyzeRequest):
         ohlc=test_ohlc,
         indicators=["RSI", "MACD"]
     )
+
+# === ASYNC ANALYSIS ENDPOINTS ===
+
+class AsyncAnalysisRequest(BaseModel):
+    symbol: str = Field(..., description="Символ криптовалюты")
+    interval: str = Field(..., description="Временной интервал")
+    indicators: List[str] = Field(default_factory=list, description="Список индикаторов")
+    user_id: str = Field(..., description="ID пользователя")
+
+class TaskStatusResponse(BaseModel):
+    task_id: str
+    status: str
+    progress: Optional[int] = None
+    message: Optional[str] = None
+    result: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+
+@router.post("/analyze/async", response_model=Dict[str, str])
+async def start_async_analysis(req: AsyncAnalysisRequest):
+    """Запуск асинхронного анализа"""
+    try:
+        # Валидация данных
+        if req.symbol not in ["BTCUSDT", "ETHUSDT", "ADAUSDT", "DOTUSDT", "LINKUSDT"]:
+            raise HTTPException(status_code=400, detail="Неподдерживаемый символ")
+
+        if req.interval not in ["1h", "4h", "1d", "1w"]:
+            raise HTTPException(status_code=400, detail="Неподдерживаемый интервал")
+
+        # Запускаем асинхронную задачу
+        task_id = await task_manager.start_analysis_task(
+            symbol=req.symbol,
+            interval=req.interval,
+            layers=req.indicators or ["RSI", "MACD", "MA_20"],
+            user_id=req.user_id
+        )
+
+        # Отслеживаем метрики
+        metrics.track_user_action('async_analysis_started', 'user')
+
+        return {
+            "task_id": task_id,
+            "status": "started",
+            "message": f"Асинхронный анализ {req.symbol} запущен"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Ошибка запуска асинхронного анализа: {e}")
+        raise HTTPException(status_code=500, detail="Не удалось запустить анализ")
+
+@router.get("/analyze/status/{task_id}", response_model=TaskStatusResponse)
+async def get_analysis_status(task_id: str):
+    """Получение статуса асинхронного анализа"""
+    try:
+        task_info = await task_manager.get_task_status(task_id)
+
+        return TaskStatusResponse(
+            task_id=task_id,
+            status=task_info.get('status', 'UNKNOWN'),
+            progress=task_info.get('info', {}).get('progress') if task_info.get('info') else None,
+            message=task_info.get('info', {}).get('status') if task_info.get('info') else None,
+            result=task_info.get('result') if task_info.get('status') == 'SUCCESS' else None,
+            error=task_info.get('error')
+        )
+
+    except Exception as e:
+        logger.error(f"Ошибка получения статуса задачи {task_id}: {e}")
+        raise HTTPException(status_code=500, detail="Не удалось получить статус задачи")
+
+@router.delete("/analyze/cancel/{task_id}")
+async def cancel_analysis(task_id: str):
+    """Отмена асинхронного анализа"""
+    try:
+        success = await task_manager.cancel_task(task_id)
+
+        if success:
+            metrics.track_user_action('async_analysis_cancelled', 'user')
+            return {"message": f"Задача {task_id} отменена", "success": True}
+        else:
+            raise HTTPException(status_code=400, detail="Не удалось отменить задачу")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Ошибка отмены задачи {task_id}: {e}")
+        raise HTTPException(status_code=500, detail="Не удалось отменить задачу")
+
+@router.get("/analyze/result/{task_id}")
+async def get_analysis_result(task_id: str):
+    """Получение результата асинхронного анализа"""
+    try:
+        import redis
+        r = redis.Redis(host='localhost', port=6379, decode_responses=True)
+
+        # Получаем результат из Redis
+        result_data = r.get(f"analysis_result:{task_id}")
+
+        if not result_data:
+            raise HTTPException(status_code=404, detail="Результат анализа не найден")
+
+        result = json.loads(result_data)
+
+        metrics.track_user_action('async_analysis_result_viewed', 'user')
+
+        return {
+            "task_id": task_id,
+            "result": result,
+            "retrieved_at": datetime.utcnow().isoformat()
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Ошибка получения результата задачи {task_id}: {e}")
+        raise HTTPException(status_code=500, detail="Не удалось получить результат анализа")
