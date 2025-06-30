@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      - ENV_FILE=.env.docker
+    volumes:
+      - ./backend/dev_logs:/app/backend/dev_logs
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    depends_on:
+      - api
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    environment:
+      - ENV_FILE=.env.docker
+
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    depends_on:
+      - api
+    environment:
+      - ENV_FILE=.env.docker
+    restart: unless-stopped

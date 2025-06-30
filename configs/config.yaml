@@ -1,0 +1,9 @@
+logging:
+  level: INFO
+  format: "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+openai:
+  model: gpt-4o-mini
+default:
+  symbol: BTCUSDT
+  interval: 4h
+  limit: 144

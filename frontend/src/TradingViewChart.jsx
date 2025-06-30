@@ -1,0 +1,1079 @@
+import React, { useEffect, useRef, useState } from 'react';
+import * as LightweightCharts from 'lightweight-charts';
+import { createSeriesMarkers } from 'lightweight-charts';
+import { toUnix, buildSeriesData, buildCandleData, validateTimeRange } from './utils/timeUtils';
+import { indicatorColumnMap } from './indicatorGroups';
+
+export default function TradingViewChart({ data = [], layers = [], analysis = {} }) {
+  const mainRef = useRef(null);
+  const panelRef = useRef(null);
+  const containerRef = useRef(null);
+  const chartRef = useRef({});
+  const [panelRatio, setPanelRatio] = useState(0.3);
+
+  const panelIndicators = new Set([
+    'RSI',
+    'MACD',
+    'OBV',
+    'ATR',
+    'ADX',
+    'Stochastic_Oscillator',
+    "Williams_%R",
+    'Volume'
+  ]);
+
+  const colors = {
+    MA_20: 'blue',
+    MA_50: 'orange',
+    MA_100: 'teal',
+    MA_200: 'purple',
+    RSI: '#ff9800',
+    MACD: '#03a9f4',
+    MACD_signal: '#e91e63',
+    MACD_hist: '#9e9e9e',
+    OBV: '#009688',
+    ATR: '#795548',
+    Stochastic_Oscillator: '#4caf50',
+    Bollinger_Middle: '#795548',
+    Bollinger_Upper: '#2196f3',
+    Bollinger_Lower: '#f44336',
+    ADX: '#9c27b0',
+    "Williams_%R": '#673ab7',
+    Parabolic_SAR: '#3f51b5',
+    Ichimoku_A: '#00bcd4',
+    Ichimoku_B: '#009688',
+    Ichimoku_Base_Line: '#ff5722',
+    Ichimoku_Conversion_Line: '#e91e63',
+    VWAP: '#607d8b',
+    Moving_Average_Envelope_Upper: '#8bc34a',
+    Moving_Average_Envelope_Lower: '#8bc34a',
+    Volume: '#26a69a'
+  };
+
+  // Функция для получения размеров контейнера
+  const getContainerSize = () => {
+    if (!containerRef.current) return { width: 800, height: 500 };
+    const rect = containerRef.current.getBoundingClientRect();
+    return {
+      width: Math.max(400, rect.width - 20), // минимум 400px, отступ 20px
+      height: Math.max(400, Math.min(600, window.innerHeight * 0.6)) // от 400px до 600px или 60% высоты экрана
+    };
+  };
+
+  useEffect(() => {
+    console.log('Отрисовка графика. Длина данных:', data.length, 'слои:', layers);
+    if (!data.length) return;
+    // очистка старых графиков
+    Object.values(chartRef.current).forEach((ch) => {
+      try {
+        ch.remove();
+      } catch (err) {
+        console.warn('Ошибка удаления графика', err);
+      }
+    });
+    chartRef.current = {};
+
+    // Используем оптимизированные утилиты для работы с временными метками
+    // toUnix, buildSeriesData, buildCandleData импортированы из utils/timeUtils
+
+    const addLine = (chart, field, color) => {
+      const series = chart.addSeries(LightweightCharts.LineSeries, {
+        color,
+        lastValueVisible: true,   // Показываем значение цены на правой шкале
+        priceLineVisible: false   // Убираем горизонтальную пунктирную линию
+      });
+      series.setData(buildSeriesData(data, 'Open Time', field));
+      return series;
+    };
+
+    const addHistogram = (chart, field, color) => {
+      const series = chart.addSeries(LightweightCharts.HistogramSeries, {
+        color,
+        priceFormat: { type: 'volume' },
+        lastValueVisible: true,   // Показываем значение на правой шкале
+        priceLineVisible: false   // Убираем горизонтальную пунктирную линию
+      });
+      series.setData(buildSeriesData(data, 'Open Time', field));
+      return series;
+    };
+
+    const containerSize = getContainerSize();
+    const mainChart = LightweightCharts.createChart(mainRef.current, {
+      width: containerSize.width,
+      height: containerSize.height,
+      layout: {
+        background: { color: '#121212' },
+        textColor: '#e0e0e0', // Better contrast for text
+        fontSize: 12, // Normalized font size
+      },
+      grid: {
+        vertLines: { color: '#2a2a2a' },
+        horzLines: { color: '#2a2a2a' },
+      },
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+      },
+      handleScale: {
+        axisPressedMouseMove: true,
+        mouseWheel: true,
+        pinch: true,
+      },
+      // Improved time scale options
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+        borderColor: '#485158',
+      },
+      // Better price scale formatting
+      rightPriceScale: {
+        borderColor: '#485158',
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.1,
+        },
+      },
+    });
+    chartRef.current.main = mainChart;
+    mainChart.applyOptions({ rightPriceScale: { visible: true }, leftPriceScale: { visible: true } });
+    const candleSeries = mainChart.addSeries(LightweightCharts.CandlestickSeries, {
+      lastValueVisible: true,   // Показываем цену последней свечи
+      priceLineVisible: false   // Убираем горизонтальную пунктирную линию
+    });
+    // Используем оптимизированную функцию для построения свечных данных
+    const candleData = buildCandleData(data, 'Open Time');
+    candleSeries.setData(candleData);
+
+
+    const overlayLayers = layers.filter((l) => !panelIndicators.has(l));
+    const panelLayers = layers.filter((l) => panelIndicators.has(l));
+
+    overlayLayers.forEach((layer) => {
+      const cols = indicatorColumnMap[layer] || [layer];
+      if (!cols.some((c) => data[0][c] !== undefined)) return;
+      if (layer === 'Bollinger_Bands') {
+        addLine(mainChart, 'Bollinger_Middle', colors.Bollinger_Middle);
+        addLine(mainChart, 'Bollinger_Upper', colors.Bollinger_Upper);
+        addLine(mainChart, 'Bollinger_Lower', colors.Bollinger_Lower);
+      } else if (layer === 'Ichimoku_Cloud') {
+        addLine(mainChart, 'Ichimoku_A', colors.Ichimoku_A);
+        addLine(mainChart, 'Ichimoku_B', colors.Ichimoku_B);
+        addLine(mainChart, 'Ichimoku_Base_Line', colors.Ichimoku_Base_Line);
+        addLine(mainChart, 'Ichimoku_Conversion_Line', colors.Ichimoku_Conversion_Line);
+      } else if (layer === 'Moving_Average_Envelopes') {
+        addLine(mainChart, 'Moving_Average_Envelope_Upper', colors.Moving_Average_Envelope_Upper);
+        addLine(mainChart, 'Moving_Average_Envelope_Lower', colors.Moving_Average_Envelope_Lower);
+      } else {
+        addLine(mainChart, layer, colors[layer] || 'black');
+      }
+    });
+
+    chartRef.current.overlays = [];
+
+    if (layers.includes('support_resistance_levels')) {
+      const levels = analysis.support_resistance_levels || {};
+      const lastTime = candleData[candleData.length - 1]?.time;
+      const addSR = (items, color) => {
+        items?.forEach((l) => {
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+            color,
+            lineStyle: 2,
+            lastValueVisible: true,  // Показываем значения уровней поддержки/сопротивления на правой шкале
+            priceLineVisible: false
+          });
+          // Сортируем данные по времени для избежания ошибки
+          const sortedData = [
+            { time: toUnix(l.date), value: l.level },
+            { time: lastTime, value: l.level },
+          ].sort((a, b) => a.time - b.time);
+          series.setData(sortedData);
+          chartRef.current.overlays.push(series);
+        });
+      };
+      addSR(levels.supports, 'green');
+      addSR(levels.resistances, 'red');
+    }
+
+    if (layers.includes('price_prediction')) {
+      const candles = analysis.price_prediction?.virtual_candles || [];
+      if (candles.length) {
+        const series = mainChart.addSeries(LightweightCharts.CandlestickSeries, {
+          upColor: 'purple',
+          downColor: 'purple',
+          borderVisible: false,
+          lastValueVisible: false,
+          priceLineVisible: false
+        });
+        const predData = candles
+          .map((c) => ({
+            time: toUnix(c.date),
+            open: c.open,
+            high: c.high,
+            low: c.low,
+            close: c.close,
+          }))
+          .filter((c) => c.time);
+        series.setData(predData);
+        chartRef.current.overlays.push(series);
+      }
+    }
+
+    const markers = [];
+
+    if (layers.includes('psychological_levels')) {
+      const levels = analysis.psychological_levels?.levels || [];
+      const lastTime = candleData[candleData.length - 1]?.time;
+      levels.forEach((l) => {
+        const color = l.type === 'Support' ? '#4CAF50' : '#FF9800'; // Better contrast colors
+        const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+          color,
+          lineWidth: 2, // Improved line thickness
+          lineStyle: 1, // Solid line instead of dotted for better visibility
+          lastValueVisible: false,
+          priceLineVisible: false
+        });
+        // Сортируем данные по времени для избежания ошибки
+        const sortedData = [
+          { time: toUnix(l.date), value: l.level },
+          { time: lastTime, value: l.level },
+        ].sort((a, b) => a.time - b.time);
+        series.setData(sortedData);
+        chartRef.current.overlays.push(series);
+      });
+    }
+
+    if (layers.includes('unfinished_zones')) {
+      const zones = analysis.unfinished_zones || [];
+      zones.forEach((z) => {
+        markers.push({
+          time: toUnix(z.date),
+          position: 'aboveBar',
+          color: z.line_color || 'purple',
+          shape: 'circle',
+          text: z.type,
+        });
+      });
+    }
+
+    if (layers.includes('gap_analysis')) {
+      const gaps = analysis.gap_analysis?.gaps || [];
+      gaps.forEach((g) => {
+        markers.push({
+          time: toUnix(g.date),
+          position: 'aboveBar',
+          color: 'red',
+          shape: 'arrowDown',
+          text: g.gap_type,
+        });
+      });
+    }
+
+    if (layers.includes('imbalances')) {
+      const imbs = analysis.imbalances || [];
+      imbs.forEach((im) => {
+        const from = toUnix(im.start_point?.date);
+        const to = toUnix(im.end_point?.date);
+        if (from && to) {
+          const series = mainChart.addSeries(LightweightCharts.AreaSeries, {
+            lineColor: 'rgba(255,0,0,0.3)',
+            topColor: 'rgba(255,0,0,0.1)',
+            bottomColor: 'rgba(255,0,0,0.1)',
+            lastValueVisible: false,
+            priceLineVisible: false
+          });
+          series.setData([
+            { time: from, value: im.price_range?.[0] || im.start_point.price },
+            { time: to, value: im.price_range?.[0] || im.start_point.price },
+          ]);
+          const series2 = mainChart.addSeries(LightweightCharts.AreaSeries, {
+            lineColor: 'rgba(255,0,0,0.3)',
+            topColor: 'rgba(255,0,0,0.1)',
+            bottomColor: 'rgba(255,0,0,0.1)',
+            lastValueVisible: false,
+            priceLineVisible: false
+          });
+          series2.setData([
+            { time: from, value: im.price_range?.[1] || im.end_point.price },
+            { time: to, value: im.price_range?.[1] || im.end_point.price },
+          ]);
+          chartRef.current.overlays.push(series, series2);
+        }
+      });
+    }
+
+    if (layers.includes('anomalous_candles')) {
+      const candles = analysis.anomalous_candles || [];
+      candles.forEach((c) => {
+        markers.push({
+          time: toUnix(c.date),
+          position: 'aboveBar',
+          color: 'yellow',
+          shape: 'square',
+          text: c.type,
+        });
+      });
+    }
+
+    // Добавление отрисовки уровней Фибоначчи
+    if (layers.includes('fibonacci_analysis')) {
+      const fibonacci = analysis.fibonacci_analysis || {};
+
+      // Отрисовка уровней Фибоначчи для локального тренда
+      if (fibonacci.based_on_local_trend) {
+        const fib = fibonacci.based_on_local_trend;
+        const levels = fib.levels || {};
+        const startTime = toUnix(fib.start_point?.date);
+        const endTime = toUnix(fib.end_point?.date);
+
+        if (startTime && endTime) {
+          Object.entries(levels).forEach(([level, price]) => {
+            const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+              color: 'rgba(0, 255, 255, 0.8)', // Голубой для локального тренда
+              lineStyle: 2, // Пунктирная линия
+              lineWidth: 1,
+              lastValueVisible: true,  // Показываем значения локальных уровней Фибоначчи
+              priceLineVisible: false
+            });
+            // Сортируем данные по времени для избежания ошибки
+            const sortedData = [
+              { time: startTime, value: price },
+              { time: endTime, value: price },
+            ].sort((a, b) => a.time - b.time);
+            series.setData(sortedData);
+            chartRef.current.overlays.push(series);
+          });
+        }
+      }
+
+      // Отрисовка уровней Фибоначчи для глобального тренда
+      if (fibonacci.based_on_global_trend) {
+        const fib = fibonacci.based_on_global_trend;
+        const levels = fib.levels || {};
+        const startTime = toUnix(fib.start_point?.date);
+        const endTime = toUnix(fib.end_point?.date);
+
+        if (startTime && endTime) {
+          Object.entries(levels).forEach(([level, price]) => {
+            const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+              color: 'rgba(255, 215, 0, 0.9)', // Золотой для глобального тренда
+              lineStyle: 1, // Сплошная линия
+              lineWidth: 2, // Толще для глобального
+              lastValueVisible: true,  // Показываем значения глобальных уровней Фибоначчи
+              priceLineVisible: false
+            });
+            // Сортируем данные по времени для избежания ошибки
+            const sortedData = [
+              { time: startTime, value: price },
+              { time: endTime, value: price },
+            ].sort((a, b) => a.time - b.time);
+            series.setData(sortedData);
+            chartRef.current.overlays.push(series);
+          });
+        }
+      }
+    }
+
+    // Добавление отрисовки волн Эллиота
+    if (layers.includes('elliott_wave_analysis')) {
+      try {
+        const waves = analysis.elliott_wave_analysis?.waves || [];
+        waves.forEach((wave, index) => {
+          const startTime = toUnix(wave.start_point?.date);
+          const endTime = toUnix(wave.end_point?.date);
+          const startPrice = wave.start_point?.price;
+          const endPrice = wave.end_point?.price;
+
+          if (startTime && endTime && startPrice && endPrice && startTime !== endTime) {
+            // Используем RGB цвета вместо HSL для совместимости
+            const waveColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+            const waveColor = waveColors[index % waveColors.length];
+            const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+              color: waveColor,
+              lineWidth: 2, // Уменьшаем толщину линии
+              lineStyle: 1, // Solid line
+              lastValueVisible: false,
+              priceLineVisible: false
+            });
+            // Сортируем данные по времени
+            const sortedData = [
+              { time: startTime, value: startPrice },
+              { time: endTime, value: endPrice },
+            ].sort((a, b) => a.time - b.time);
+            series.setData(sortedData);
+            chartRef.current.overlays.push(series);
+
+            // Добавление маркера с номером волны с улучшенной видимостью
+            markers.push({
+              time: startTime,
+              position: 'aboveBar',
+              color: waveColor,
+              shape: 'circle',
+              text: `W${wave.wave_number || index + 1}`,
+            });
+          }
+        });
+      } catch (error) {
+        console.error('Ошибка отрисовки волн Эллиота:', error);
+      }
+    }
+
+    // Добавление отрисовки линий тренда
+    if (layers.includes('trend_lines')) {
+      const trendLines = analysis.trend_lines?.lines || [];
+      trendLines.forEach((line, index) => {
+        const startTime = toUnix(line.start_point?.date);
+        const endTime = toUnix(line.end_point?.date);
+        const startPrice = line.start_point?.price;
+        const endPrice = line.end_point?.price;
+
+        if (startTime && endTime && startPrice && endPrice) {
+          const color = line.type === 'восходящая' ? 'green' : 'red';
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+            color,
+            lineWidth: 2,
+            lineStyle: 1,
+            lastValueVisible: true,  // Показываем значения линий тренда
+            priceLineVisible: false
+          });
+          // Сортируем данные по времени для избежания ошибки
+          const sortedData = [
+            { time: startTime, value: startPrice },
+            { time: endTime, value: endPrice },
+          ].sort((a, b) => a.time - b.time);
+          series.setData(sortedData);
+          chartRef.current.overlays.push(series);
+        }
+      });
+    }
+
+    // Добавление отрисовки дивергенций
+    if (layers.includes('divergence_analysis')) {
+      const divergences = analysis.divergence_analysis || [];
+      divergences.forEach((div) => {
+        const time = toUnix(div.date);
+        if (time) {
+          markers.push({
+            time,
+            position: 'belowBar',
+            color: div.type === 'bullish' ? 'green' : 'red',
+            shape: 'arrowUp',
+            text: `${div.indicator} ${div.type}`,
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки свечных паттернов
+    if (layers.includes('candlestick_patterns')) {
+      const patterns = analysis.candlestick_patterns || [];
+      patterns.forEach((pattern) => {
+        const time = toUnix(pattern.date);
+        if (time) {
+          markers.push({
+            time,
+            position: 'aboveBar',
+            color: 'orange',
+            shape: 'square',
+            text: pattern.type,
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки структурных преимуществ
+    if (layers.includes('structural_edge')) {
+      const edges = analysis.structural_edge || [];
+      edges.forEach((edge) => {
+        const time = toUnix(edge.date);
+        if (time) {
+          markers.push({
+            time,
+            position: 'aboveBar',
+            color: 'cyan',
+            shape: 'diamond',
+            text: edge.type,
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки прогнозных свечей
+    if (layers.includes('price_prediction') && analysis.price_prediction?.virtual_candles) {
+      const virtualCandles = analysis.price_prediction.virtual_candles;
+      const predictionData = virtualCandles.map(candle => ({
+        time: toUnix(candle.date),
+        open: candle.open,
+        high: candle.high,
+        low: candle.low,
+        close: candle.close,
+      })).filter(candle => candle.time);
+
+      if (predictionData.length > 0) {
+        // Создаем отдельную серию для прогнозных свечей
+        const predictionSeries = mainChart.addSeries(LightweightCharts.CandlestickSeries, {
+          upColor: 'rgba(0, 255, 0, 0.5)',
+          downColor: 'rgba(255, 0, 0, 0.5)',
+          borderUpColor: 'rgba(0, 255, 0, 0.8)',
+          borderDownColor: 'rgba(255, 0, 0, 0.8)',
+          wickUpColor: 'rgba(0, 255, 0, 0.8)',
+          wickDownColor: 'rgba(255, 0, 0, 0.8)',
+          lastValueVisible: false,
+          priceLineVisible: false
+        });
+
+        predictionSeries.setData(predictionData);
+        chartRef.current.overlays.push(predictionSeries);
+
+        // Добавляем маркер начала прогноза
+        if (predictionData[0]) {
+          markers.push({
+            time: predictionData[0].time,
+            position: 'aboveBar',
+            color: 'purple',
+            shape: 'arrowDown',
+            text: 'Прогноз',
+          });
+        }
+      }
+    }
+
+    // Добавление отрисовки зон справедливой стоимости (Fair Value Gaps)
+    if (layers.includes('fair_value_gaps')) {
+      const fvgs = analysis.fair_value_gaps || [];
+      fvgs.forEach((fvg, index) => {
+        const startTime = toUnix(fvg.start_date);
+        const endTime = toUnix(fvg.end_date);
+        const topPrice = fvg.top_price;
+        const bottomPrice = fvg.bottom_price;
+
+        if (startTime && endTime && topPrice && bottomPrice) {
+          // Создаем прямоугольную зону с улучшенной визуализацией
+          const topSeries = mainChart.addSeries(LightweightCharts.LineSeries, {
+            color: 'rgba(255, 255, 0, 0.6)', // Better opacity
+            lineWidth: 2, // Improved thickness
+            lineStyle: 1, // Solid line for better visibility
+            lastValueVisible: true,  // Показываем верхнее значение FVG
+            priceLineVisible: false
+          });
+          const bottomSeries = mainChart.addSeries(LightweightCharts.LineSeries, {
+            color: 'rgba(255, 255, 0, 0.6)', // Better opacity
+            lineWidth: 2, // Improved thickness
+            lineStyle: 1, // Solid line for better visibility
+            lastValueVisible: true,  // Показываем нижнее значение FVG
+            priceLineVisible: false
+          });
+
+          // Сортируем данные по времени для избежания ошибки
+          const sortedTopData = [
+            { time: startTime, value: topPrice },
+            { time: endTime, value: topPrice },
+          ].sort((a, b) => a.time - b.time);
+          const sortedBottomData = [
+            { time: startTime, value: bottomPrice },
+            { time: endTime, value: bottomPrice },
+          ].sort((a, b) => a.time - b.time);
+
+          topSeries.setData(sortedTopData);
+          bottomSeries.setData(sortedBottomData);
+
+          chartRef.current.overlays.push(topSeries, bottomSeries);
+
+          // Добавляем маркер с улучшенной видимостью
+          markers.push({
+            time: startTime,
+            position: 'inBar',
+            color: '#FFD700', // Better gold color
+            shape: 'square',
+            text: 'FVG',
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки психологических уровней
+    if (layers.includes('psychological_levels')) {
+      const levels = analysis.psychological_levels || [];
+      // Проверяем, что levels - это массив
+      if (Array.isArray(levels)) {
+        levels.forEach((level) => {
+        const price = level.price;
+        if (price && candleData.length > 0) {
+          // Используем createPriceLine для создания настоящих горизонтальных линий
+          const priceLine = candleSeries.createPriceLine({
+            price: price,
+            color: 'rgba(128, 0, 128, 0.7)',
+            lineWidth: 2,
+            lineStyle: 2, // Пунктирная линия
+            axisLabelVisible: true,
+            title: `Психологический уровень: ${price}`
+          });
+          chartRef.current.overlays.push(priceLine);
+        }
+        });
+      }
+    }
+
+    // Добавление отрисовки гэпов
+    if (layers.includes('gap_analysis')) {
+      const gaps = analysis.gap_analysis || [];
+      // Проверяем, что gaps - это массив
+      if (Array.isArray(gaps)) {
+        gaps.forEach((gap) => {
+        const time = toUnix(gap.date);
+        if (time) {
+          markers.push({
+            time,
+            position: 'inBar',
+            color: 'magenta',
+            shape: 'circle',
+            text: `Gap ${gap.type}`,
+          });
+        }
+        });
+      }
+    }
+
+    // Добавление отрисовки незавершенных зон
+    if (layers.includes('unfinished_zones')) {
+      const zones = analysis.unfinished_zones || [];
+      zones.forEach((zone) => {
+        const startTime = toUnix(zone.start_date);
+        const endTime = toUnix(zone.end_date);
+        const topPrice = zone.top_price;
+        const bottomPrice = zone.bottom_price;
+
+        if (startTime && endTime && topPrice && bottomPrice) {
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+            color: 'rgba(255, 165, 0, 0.5)',
+            lineWidth: 2,
+            lineStyle: 1,
+            lastValueVisible: false,
+            priceLineVisible: false
+          });
+          series.setData([
+            { time: startTime, value: topPrice },
+            { time: endTime, value: topPrice },
+            { time: endTime, value: bottomPrice },
+            { time: startTime, value: bottomPrice },
+            { time: startTime, value: topPrice },
+          ]);
+          chartRef.current.overlays.push(series);
+        }
+      });
+    }
+
+    // Добавление отрисовки дисбалансов
+    if (layers.includes('imbalances')) {
+      const imbalances = analysis.imbalances || [];
+      imbalances.forEach((imbalance) => {
+        const startTime = toUnix(imbalance.start_point?.date);
+        const endTime = toUnix(imbalance.end_point?.date);
+        const startPrice = imbalance.start_point?.price;
+        const endPrice = imbalance.end_point?.price;
+
+        if (startTime && endTime && startPrice && endPrice) {
+          // Создаем зону дисбаланса
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+            color: 'rgba(255, 165, 0, 0.6)',
+            lineWidth: 2,
+            lineStyle: 2,
+            lastValueVisible: false,
+            priceLineVisible: false
+          });
+          series.setData([
+            { time: startTime, value: startPrice },
+            { time: endTime, value: endPrice },
+          ]);
+          chartRef.current.overlays.push(series);
+
+          // Добавляем маркер
+          markers.push({
+            time: startTime,
+            position: 'belowBar',
+            color: 'orange',
+            shape: 'arrowUp',
+            text: imbalance.type,
+          });
+        }
+      });
+    }
+
+    // Добавление отрисовки pivot points
+    if (layers.includes('pivot_points')) {
+      const pivots = analysis.pivot_points || {};
+
+      // Основной пивот с улучшенной визуализацией
+      if (pivots.pivot) {
+        const pivotLevel = pivots.pivot.level;
+        if (pivotLevel && candleData.length > 0) {
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+            color: '#FFD700', // Better gold color
+            lineWidth: 3,
+            lineStyle: 1, // Solid line for main pivot
+            lastValueVisible: true,  // Показываем значение пивота на правой шкале
+            priceLineVisible: false
+          });
+          series.setData([
+            { time: candleData[0].time, value: pivotLevel },
+            { time: candleData[candleData.length - 1].time, value: pivotLevel },
+          ]);
+          chartRef.current.overlays.push(series);
+        }
+      }
+
+      // Уровни сопротивления пивота
+      if (pivots.resistances) {
+        pivots.resistances.forEach((resistance, index) => {
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+            color: `rgba(255, 0, 0, ${0.6 - index * 0.1})`,
+            lineWidth: 2,
+            lineStyle: 2,
+            lastValueVisible: true,  // Показываем значения сопротивлений на правой шкале
+            priceLineVisible: false
+          });
+          series.setData([
+            { time: data[0].time, value: resistance.level },
+            { time: data[data.length - 1].time, value: resistance.level },
+          ]);
+          chartRef.current.overlays.push(series);
+        });
+      }
+
+      // Уровни поддержки пивота
+      if (pivots.supports) {
+        pivots.supports.forEach((support, index) => {
+          const series = mainChart.addSeries(LightweightCharts.LineSeries, {
+            color: `rgba(0, 255, 0, ${0.6 - index * 0.1})`,
+            lineWidth: 2,
+            lineStyle: 2,
+            lastValueVisible: true,  // Показываем значения поддержек на правой шкале
+            priceLineVisible: false
+          });
+          series.setData([
+            { time: data[0].time, value: support.level },
+            { time: data[data.length - 1].time, value: support.level },
+          ]);
+          chartRef.current.overlays.push(series);
+        });
+      }
+    }
+
+    // Добавление отрисовки значительных изменений объемов
+    if (layers.includes('volume_analysis')) {
+      const volumeAnalysis = analysis.volume_analysis || {};
+      const significantChanges = volumeAnalysis.significant_volume_changes || [];
+
+      significantChanges.forEach((change) => {
+        const time = toUnix(change.date);
+        if (time) {
+          const volumeLevel = change.volume > 3000 ? 'Высокий' :
+                             change.volume > 1500 ? 'Средний' : 'Низкий';
+          const color = change.volume > 3000 ? 'red' :
+                       change.volume > 1500 ? 'orange' : 'green';
+
+          markers.push({
+            time,
+            position: 'belowBar',
+            color,
+            shape: 'circle',
+            text: `Vol: ${volumeLevel}`,
+          });
+        }
+      });
+    }
+
+    // CRITICAL BUG FIX: Sort markers by time in ascending order before setting them
+    // The lightweight-charts library requires markers to be sorted chronologically
+    if (markers.length) {
+      const validMarkers = markers
+        .filter((m) => m.time && typeof m.time === 'number' && !isNaN(m.time))
+        .sort((a, b) => a.time - b.time); // Sort in ascending chronological order
+
+      if (validMarkers.length > 0) {
+        try {
+          // Используем новый API для маркеров в lightweight-charts 5.0
+          const seriesMarkers = createSeriesMarkers(candleSeries, validMarkers);
+          chartRef.current.markers = seriesMarkers; // Сохраняем ссылку для очистки
+        } catch (error) {
+          console.error('Error setting markers:', error);
+          console.log('Markers data:', validMarkers.slice(0, 5)); // Log first 5 markers for debugging
+        }
+      }
+    }
+
+    let panelChart = null;
+    let firstPanelSeries = null;
+    if (panelLayers.length) {
+      panelChart = LightweightCharts.createChart(panelRef.current, {
+        width: containerSize.width, // Coordinate width with main chart
+        height: Math.max(150, containerSize.height * panelRatio), // Better height calculation
+        layout: {
+          background: { color: '#121212' },
+          textColor: '#e0e0e0', // Match main chart text color
+          fontSize: 12, // Normalized font size
+        },
+        grid: {
+          vertLines: { color: '#2a2a2a' },
+          horzLines: { color: '#2a2a2a' },
+        },
+        // Coordinate time scale with main chart
+        timeScale: {
+          timeVisible: true,
+          secondsVisible: false,
+          borderColor: '#485158',
+        },
+        // Better price scale formatting
+        rightPriceScale: {
+          borderColor: '#485158',
+          scaleMargins: {
+            top: 0.05,
+            bottom: 0.05,
+          },
+        },
+      });
+      chartRef.current.panel = panelChart;
+      panelChart.applyOptions({ rightPriceScale: { visible: true }, leftPriceScale: { visible: true } });
+    }
+
+    const times = data
+      .map((c) => toUnix(c['Open Time']))
+      .filter((t) => t !== null);
+    const buildConstData = (val) => times.map((time) => ({ time, value: val }));
+
+    panelLayers.forEach((layer) => {
+      if (!panelChart) return;
+      if (layer === 'Volume') {
+        const s = addHistogram(panelChart, 'Volume', colors.Volume);
+        if (!firstPanelSeries) firstPanelSeries = s;
+      } else if (layer === 'MACD') {
+        const s1 = addLine(panelChart, 'MACD', colors.MACD);
+        if (!firstPanelSeries) firstPanelSeries = s1;
+        addLine(panelChart, 'MACD_signal', colors.MACD_signal);
+        addHistogram(panelChart, 'MACD_hist', colors.MACD_hist);
+      } else if (layer === 'RSI') {
+        const s1 = addLine(panelChart, 'RSI', colors.RSI);
+        if (!firstPanelSeries) firstPanelSeries = s1;
+        // Возвращаем уровни перекупленности и перепроданности для RSI
+        const over = panelChart.addSeries(LightweightCharts.LineSeries, {
+          color: 'rgba(255,0,0,0.5)',
+          lineStyle: 2,
+          lastValueVisible: true,   // Показываем значение 70 на шкале
+          priceLineVisible: false
+        });
+        over.setData(buildConstData(70));
+        const under = panelChart.addSeries(LightweightCharts.LineSeries, {
+          color: 'rgba(0,128,0,0.5)',
+          lineStyle: 2,
+          lastValueVisible: true,   // Показываем значение 30 на шкале
+          priceLineVisible: false
+        });
+        under.setData(buildConstData(30));
+      } else if (layer === 'Stochastic_Oscillator') {
+        // Проверяем, есть ли колонки данных для Stochastic
+        const hasStochasticK = data.some(row => row['Stochastic_%K'] !== undefined);
+        const hasStochasticD = data.some(row => row['Stochastic_%D'] !== undefined);
+
+        if (hasStochasticK && hasStochasticD) {
+          // Если есть исторические данные, отрисовываем их
+          const s1 = addLine(panelChart, 'Stochastic_%K', colors.Stochastic_K);
+          if (!firstPanelSeries) firstPanelSeries = s1;
+          addLine(panelChart, 'Stochastic_%D', colors.Stochastic_D);
+        } else if (analysis?.indicators_analysis?.Stochastic_Oscillator?.current_value) {
+          // Если есть только текущее значение из анализа, создаем горизонтальную линию
+          const currentValue = analysis.indicators_analysis.Stochastic_Oscillator.current_value;
+          const s1 = panelChart.addSeries(LightweightCharts.LineSeries, {
+            color: colors.Stochastic_Oscillator || '#FF6B35',
+            lineWidth: 2,
+            lastValueVisible: true,
+            priceLineVisible: false
+          });
+          s1.setData(buildConstData(currentValue));
+          if (!firstPanelSeries) firstPanelSeries = s1;
+        }
+
+        // Добавляем уровни перекупленности и перепроданности для Stochastic
+        const over = panelChart.addSeries(LightweightCharts.LineSeries, {
+          color: 'rgba(255,0,0,0.3)',
+          lineStyle: 2,
+          lastValueVisible: true,   // Показываем значение 80 на шкале
+          priceLineVisible: false
+        });
+        over.setData(buildConstData(80));
+        const under = panelChart.addSeries(LightweightCharts.LineSeries, {
+          color: 'rgba(0,128,0,0.3)',
+          lineStyle: 2,
+          lastValueVisible: true,   // Показываем значение 20 на шкале
+          priceLineVisible: false
+        });
+        under.setData(buildConstData(20));
+      } else if (layer === 'Williams_%R') {
+        const s1 = addLine(panelChart, 'Williams_%R', colors.Williams_R);
+        if (!firstPanelSeries) firstPanelSeries = s1;
+        // Добавляем уровни для Williams %R
+        const over = panelChart.addSeries(LightweightCharts.LineSeries, {
+          color: 'rgba(255,0,0,0.3)',
+          lineStyle: 2,
+          lastValueVisible: true,   // Показываем значение -20 на шкале
+          priceLineVisible: false
+        });
+        over.setData(buildConstData(-20));
+        const under = panelChart.addSeries(LightweightCharts.LineSeries, {
+          color: 'rgba(0,128,0,0.3)',
+          lineStyle: 2,
+          lastValueVisible: true,   // Показываем значение -80 на шкале
+          priceLineVisible: false
+        });
+        under.setData(buildConstData(-80));
+      } else {
+        const s = addLine(panelChart, layer, colors[layer] || 'black');
+        if (!firstPanelSeries) firstPanelSeries = s;
+      }
+    });
+
+    let cleanup = () => {};
+    if (panelChart) {
+      const syncTimeRangeFromMain = (range) => {
+        panelChart.timeScale().setVisibleRange(range);
+      };
+      const syncLogicalRangeFromMain = (range) => {
+        panelChart.timeScale().setVisibleLogicalRange(range);
+      };
+      const syncTimeRangeFromPanel = (range) => {
+        mainChart.timeScale().setVisibleRange(range);
+      };
+      const syncLogicalRangeFromPanel = (range) => {
+        mainChart.timeScale().setVisibleLogicalRange(range);
+      };
+
+      mainChart.timeScale().subscribeVisibleTimeRangeChange(syncTimeRangeFromMain);
+      mainChart.timeScale().subscribeVisibleLogicalRangeChange(syncLogicalRangeFromMain);
+      panelChart.timeScale().subscribeVisibleTimeRangeChange(syncTimeRangeFromPanel);
+      panelChart.timeScale().subscribeVisibleLogicalRangeChange(syncLogicalRangeFromPanel);
+
+      const handleMainCrosshair = (param) => {
+        if (param.time === undefined) {
+          panelChart.clearCrosshairPosition();
+          return;
+        }
+        if (firstPanelSeries) {
+          panelChart.setCrosshairPosition(0, param.time, firstPanelSeries);
+        }
+      };
+      const handlePanelCrosshair = (param) => {
+        if (param.time === undefined) {
+          mainChart.clearCrosshairPosition();
+          return;
+        }
+        mainChart.setCrosshairPosition(0, param.time, candleSeries);
+      };
+      mainChart.subscribeCrosshairMove(handleMainCrosshair);
+      panelChart.subscribeCrosshairMove(handlePanelCrosshair);
+      cleanup = () => {
+        mainChart.timeScale().unsubscribeVisibleTimeRangeChange(syncTimeRangeFromMain);
+        mainChart.timeScale().unsubscribeVisibleLogicalRangeChange(syncLogicalRangeFromMain);
+        panelChart.timeScale().unsubscribeVisibleTimeRangeChange(syncTimeRangeFromPanel);
+        panelChart.timeScale().unsubscribeVisibleLogicalRangeChange(syncLogicalRangeFromPanel);
+        mainChart.unsubscribeCrosshairMove(handleMainCrosshair);
+        panelChart.unsubscribeCrosshairMove(handlePanelCrosshair);
+      };
+    }
+
+    return () => {
+      cleanup();
+      // Очистка маркеров
+      if (chartRef.current.markers) {
+        try {
+          chartRef.current.markers.setMarkers([]);
+        } catch (err) {
+          console.warn('Ошибка очистки маркеров', err);
+        }
+      }
+      if (chartRef.current.overlays) {
+        chartRef.current.overlays.forEach((s) => {
+          try {
+            // Для price lines используем removePriceLine
+            if (s.remove) {
+              s.remove();
+            } else if (s.removePriceLine && candleSeries) {
+              candleSeries.removePriceLine(s);
+            }
+          } catch (err) {
+            console.warn('Ошибка очистки серии', err);
+          }
+        });
+      }
+      Object.values(chartRef.current).forEach((ch) => {
+        if (typeof ch?.remove === 'function') {
+          try {
+            ch.remove();
+          } catch (err) {
+            console.warn('Ошибка очистки графика', err);
+          }
+        }
+      });
+      chartRef.current = {};
+    };
+  }, [data, layers, analysis]);
+
+  // Обработчик изменения размера окна
+  useEffect(() => {
+    const handleResize = () => {
+      if (chartRef.current.main) {
+        const containerSize = getContainerSize();
+        chartRef.current.main.applyOptions({
+          width: containerSize.width,
+          height: containerSize.height,
+        });
+      }
+      if (chartRef.current.panel) {
+        const containerSize = getContainerSize();
+        chartRef.current.panel.applyOptions({
+          width: containerSize.width,
+          height: Math.max(100, containerSize.height * panelRatio),
+        });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [panelRatio]);
+
+  const startDrag = (e) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startRatio = panelRatio;
+    const height = containerRef.current?.getBoundingClientRect().height || 1;
+    const onMove = (evt) => {
+      const delta = evt.clientY - startY;
+      let ratio = startRatio - delta / height;
+      ratio = Math.min(0.9, Math.max(0.1, ratio));
+      setPanelRatio(ratio);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
+  const panelLayers = layers.filter((l) => panelIndicators.has(l));
+
+  return (
+    <div className="chart-panels" ref={containerRef}>
+      <div className="legend">
+        <span className="legend-item"><span className="legend-color" style={{background:'gray'}}></span>Свечи</span>
+        {layers.map((l) => (
+          <span key={l} className="legend-item"><span className="legend-color" style={{background:colors[l]||'black'}}></span>{l}</span>
+        ))}
+      </div>
+      <div ref={mainRef} className="chart" style={{flexGrow: 1 - panelRatio}} />
+      {panelLayers.length > 0 && (
+        <>
+          <div className="resize-handle" onMouseDown={startDrag} />
+          <div ref={panelRef} className="chart-panel" style={{flexGrow: panelRatio}} />
+        </>
+      )}
+    </div>
+  );
+}
