@@ -1,0 +1,305 @@
+/* 
+ * ChartGenius Professional Trading Platform Theme
+ * Based on industry standards: TradingView, Interactive Brokers, Charles Schwab
+ * Focus: Functionality over decoration, maximum data visibility
+ */
+
+:root {
+  /* Professional Color Palette - Neutral & Functional */
+  --pro-bg-primary: #0d1117;        /* Main background - dark but not black */
+  --pro-bg-secondary: #161b22;      /* Panel backgrounds */
+  --pro-bg-tertiary: #21262d;       /* Input fields, buttons */
+  
+  /* Borders and Dividers */
+  --pro-border: #30363d;            /* Subtle borders */
+  --pro-border-light: #21262d;      /* Lighter borders */
+  
+  /* Text Colors */
+  --pro-text-primary: #f0f6fc;      /* Main text - high contrast */
+  --pro-text-secondary: #8b949e;    /* Secondary text */
+  --pro-text-muted: #656d76;        /* Muted text */
+  
+  /* Functional Colors - Trading Specific */
+  --pro-success: #238636;           /* Buy/Profit - muted green */
+  --pro-danger: #da3633;            /* Sell/Loss - muted red */
+  --pro-info: #1f6feb;              /* Information - professional blue */
+  --pro-warning: #d29922;           /* Warning - muted orange */
+  
+  /* Interactive Elements */
+  --pro-button-bg: #21262d;
+  --pro-button-hover: #30363d;
+  --pro-button-active: #373e47;
+  
+  /* Focus and Selection */
+  --pro-focus: #1f6feb;
+  --pro-selection: rgba(31, 111, 235, 0.1);
+}
+
+/* Reset casino-style effects */
+* {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  background-image: none !important;
+}
+
+/* Professional Base Styles */
+.pro-theme {
+  background-color: var(--pro-bg-primary);
+  color: var(--pro-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* Professional Panels */
+.pro-panel {
+  background-color: var(--pro-bg-secondary);
+  border: 1px solid var(--pro-border);
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.pro-panel-compact {
+  background-color: var(--pro-bg-secondary);
+  border: 1px solid var(--pro-border);
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+/* Professional Buttons */
+.pro-btn {
+  background-color: var(--pro-button-bg);
+  border: 1px solid var(--pro-border);
+  color: var(--pro-text-primary);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.pro-btn:hover {
+  background-color: var(--pro-button-hover);
+}
+
+.pro-btn:active {
+  background-color: var(--pro-button-active);
+}
+
+.pro-btn-primary {
+  background-color: var(--pro-info);
+  border-color: var(--pro-info);
+  color: white;
+}
+
+.pro-btn-primary:hover {
+  background-color: #1a5cd8;
+}
+
+.pro-btn-success {
+  background-color: var(--pro-success);
+  border-color: var(--pro-success);
+  color: white;
+}
+
+.pro-btn-success:hover {
+  background-color: #1f7a2e;
+}
+
+.pro-btn-danger {
+  background-color: var(--pro-danger);
+  border-color: var(--pro-danger);
+  color: white;
+}
+
+.pro-btn-danger:hover {
+  background-color: #c2302d;
+}
+
+/* Professional Inputs */
+.pro-input {
+  background-color: var(--pro-bg-tertiary);
+  border: 1px solid var(--pro-border);
+  color: var(--pro-text-primary);
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.pro-input:focus {
+  outline: none;
+  border-color: var(--pro-focus);
+  box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.1);
+}
+
+.pro-select {
+  background-color: var(--pro-bg-tertiary);
+  border: 1px solid var(--pro-border);
+  color: var(--pro-text-primary);
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Professional Text Styles */
+.pro-text-primary {
+  color: var(--pro-text-primary);
+}
+
+.pro-text-secondary {
+  color: var(--pro-text-secondary);
+}
+
+.pro-text-muted {
+  color: var(--pro-text-muted);
+}
+
+.pro-text-success {
+  color: var(--pro-success);
+}
+
+.pro-text-danger {
+  color: var(--pro-danger);
+}
+
+.pro-text-info {
+  color: var(--pro-info);
+}
+
+/* Professional Layout */
+.pro-header {
+  background-color: var(--pro-bg-secondary);
+  border-bottom: 1px solid var(--pro-border);
+  padding: 12px 16px;
+}
+
+.pro-sidebar {
+  background-color: var(--pro-bg-secondary);
+  border-right: 1px solid var(--pro-border);
+  width: 280px;
+  min-height: 100vh;
+}
+
+.pro-main-content {
+  background-color: var(--pro-bg-primary);
+  flex: 1;
+  min-height: 100vh;
+}
+
+/* Professional Navigation */
+.pro-nav {
+  display: flex;
+  border-bottom: 1px solid var(--pro-border);
+}
+
+.pro-nav-item {
+  padding: 8px 16px;
+  color: var(--pro-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.pro-nav-item:hover {
+  color: var(--pro-text-primary);
+  background-color: var(--pro-bg-tertiary);
+}
+
+.pro-nav-item.active {
+  color: var(--pro-text-primary);
+  border-bottom-color: var(--pro-info);
+}
+
+/* Professional Tables */
+.pro-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pro-table th,
+.pro-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--pro-border);
+}
+
+.pro-table th {
+  background-color: var(--pro-bg-tertiary);
+  color: var(--pro-text-secondary);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Professional Status Indicators */
+.pro-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pro-status-success {
+  background-color: rgba(35, 134, 54, 0.15);
+  color: var(--pro-success);
+}
+
+.pro-status-danger {
+  background-color: rgba(218, 54, 51, 0.15);
+  color: var(--pro-danger);
+}
+
+.pro-status-info {
+  background-color: rgba(31, 111, 235, 0.15);
+  color: var(--pro-info);
+}
+
+/* Remove all decorative elements */
+.pro-theme .gradient,
+.pro-theme .glow,
+.pro-theme .shadow-lg,
+.pro-theme .shadow-xl,
+.pro-theme .animate-pulse,
+.pro-theme .animate-bounce {
+  background: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Professional spacing */
+.pro-space-y-2 > * + * {
+  margin-top: 8px;
+}
+
+.pro-space-y-4 > * + * {
+  margin-top: 16px;
+}
+
+.pro-space-x-2 > * + * {
+  margin-left: 8px;
+}
+
+.pro-space-x-4 > * + * {
+  margin-left: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .pro-sidebar {
+    width: 100%;
+    min-height: auto;
+  }
+  
+  .pro-panel {
+    padding: 12px;
+  }
+  
+  .pro-header {
+    padding: 8px 12px;
+  }
+}

@@ -1,0 +1,479 @@
+/* ChartGenius - Фирменная цветовая палитра и визуальные эффекты */
+
+/* ===== ФИРМЕННАЯ ЦВЕТОВАЯ ПАЛИТРА CHARTGENIUS ===== */
+:root {
+  /* Основные фирменные цвета */
+  --cg-primary: #1e40af;        /* Глубокий синий - основной цвет бренда */
+  --cg-primary-light: #3b82f6;  /* Светлый синий */
+  --cg-primary-dark: #1e3a8a;   /* Темный синий */
+
+  /* Торговые цвета */
+  --cg-success: #10b981;        /* Зеленый для прибыли/роста */
+  --cg-success-light: #34d399;  /* Светло-зеленый */
+  --cg-success-dark: #059669;   /* Темно-зеленый */
+
+  --cg-danger: #ef4444;         /* Красный для убытков/падения */
+  --cg-danger-light: #f87171;   /* Светло-красный */
+  --cg-danger-dark: #dc2626;    /* Темно-красный */
+
+  /* Дополнительные цвета */
+  --cg-warning: #f59e0b;        /* Оранжевый для предупреждений */
+  --cg-info: #06b6d4;           /* Голубой для информации */
+  --cg-purple: #8b5cf6;         /* Фиолетовый для акцентов */
+
+  /* Нейтральные цвета для светлой темы */
+  --cg-gray-50: #f9fafb;
+  --cg-gray-100: #f3f4f6;
+  --cg-gray-200: #e5e7eb;
+  --cg-gray-300: #d1d5db;
+  --cg-gray-400: #9ca3af;
+  --cg-gray-500: #6b7280;
+  --cg-gray-600: #4b5563;
+  --cg-gray-700: #374151;
+  --cg-gray-800: #1f2937;
+  --cg-gray-900: #111827;
+
+  /* Темная тема */
+  --cg-dark-bg: #0f172a;        /* Основной фон темной темы */
+  --cg-dark-surface: #1e293b;   /* Поверхности в темной теме */
+  --cg-dark-border: #334155;    /* Границы в темной теме */
+  --cg-dark-text: #f1f5f9;      /* Основной текст в темной теме */
+  --cg-dark-text-muted: #94a3b8; /* Приглушенный текст в темной теме */
+}
+
+/* Фирменные градиенты */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--cg-primary) 0%, var(--cg-primary-dark) 100%);
+}
+
+.gradient-success {
+  background: linear-gradient(135deg, var(--cg-success) 0%, var(--cg-success-light) 100%);
+}
+
+.gradient-danger {
+  background: linear-gradient(135deg, var(--cg-danger) 0%, var(--cg-danger-light) 100%);
+}
+
+.gradient-warning {
+  background: linear-gradient(135deg, var(--cg-warning) 0%, #fb923c 100%);
+}
+
+.gradient-info {
+  background: linear-gradient(135deg, var(--cg-info) 0%, #22d3ee 100%);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, var(--cg-purple) 0%, #a855f7 100%);
+}
+
+.gradient-dark {
+  background: linear-gradient(135deg, var(--cg-dark-surface) 0%, var(--cg-dark-bg) 100%);
+}
+
+/* Фирменные тени и эффекты */
+.shadow-modern {
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+}
+
+.shadow-modern-dark {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.shadow-glow-primary {
+  box-shadow: 0 0 20px rgba(30, 64, 175, 0.4);
+}
+
+.shadow-glow-success {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.shadow-glow-danger {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+.shadow-glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+.shadow-glow-green {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.shadow-glow-purple {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+}
+
+.shadow-glow-warning {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+/* Фирменные анимации */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.8), 0 0 30px rgba(16, 185, 129, 0.4);
+  }
+}
+
+@keyframes pulse-glow-primary {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(30, 64, 175, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(30, 64, 175, 0.8), 0 0 30px rgba(30, 64, 175, 0.4);
+  }
+}
+
+@keyframes pulse-glow-danger {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.8), 0 0 30px rgba(239, 68, 68, 0.4);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Утилиты анимации */
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+/* Стеклянный эффект (Glassmorphism) */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-effect-dark {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Фирменный неоморфизм */
+.neomorphism-dark {
+  background: var(--cg-dark-surface);
+  box-shadow:
+    9px 9px 16px rgba(0, 0, 0, 0.4),
+    -9px -9px 16px rgba(255, 255, 255, 0.05);
+}
+
+.neomorphism-dark-inset {
+  background: var(--cg-dark-surface);
+  box-shadow:
+    inset 9px 9px 16px rgba(0, 0, 0, 0.4),
+    inset -9px -9px 16px rgba(255, 255, 255, 0.05);
+}
+
+.neomorphism-light {
+  background: var(--cg-gray-100);
+  box-shadow:
+    9px 9px 16px rgba(0, 0, 0, 0.1),
+    -9px -9px 16px rgba(255, 255, 255, 0.8);
+}
+
+/* Современные кнопки */
+.btn-modern {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-modern::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-modern:hover::before {
+  left: 100%;
+}
+
+/* Индикаторы состояния */
+.status-indicator {
+  position: relative;
+  display: inline-block;
+}
+
+.status-indicator::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.status-indicator.online::after {
+  background: #10b981;
+  animation: pulse-glow 2s infinite;
+}
+
+.status-indicator.offline::after {
+  background: #ef4444;
+}
+
+.status-indicator.warning::after {
+  background: #f59e0b;
+}
+
+/* Карточки с современным дизайном */
+.card-modern {
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.card-modern-dark {
+  background: linear-gradient(145deg, #1f2937, #111827);
+  border-radius: 16px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.card-modern-dark:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.4),
+    0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Прогресс-бары с градиентами */
+.progress-modern {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-modern::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Текстовые эффекты */
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-glow {
+  text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+/* Скроллбары */
+.scrollbar-modern::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-modern::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.scrollbar-modern::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--cg-primary), var(--cg-primary-dark));
+  border-radius: 3px;
+}
+
+.scrollbar-modern::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--cg-primary-light), var(--cg-primary));
+}
+
+/* ===== ФИРМЕННЫЕ КЛАССЫ CHARTGENIUS ===== */
+
+/* Фирменные текстовые градиенты */
+.text-gradient-primary {
+  background: linear-gradient(135deg, var(--cg-primary), var(--cg-primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-success {
+  background: linear-gradient(135deg, var(--cg-success), var(--cg-success-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-danger {
+  background: linear-gradient(135deg, var(--cg-danger), var(--cg-danger-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Фирменные карточки */
+.card-chartgenius {
+  background: var(--cg-gray-50);
+  border: 1px solid var(--cg-gray-200);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.dark .card-chartgenius {
+  background: var(--cg-dark-surface);
+  border-color: var(--cg-dark-border);
+}
+
+.card-chartgenius:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -10px rgba(30, 64, 175, 0.15);
+}
+
+.dark .card-chartgenius:hover {
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+}
+
+/* Фирменные кнопки */
+.btn-chartgenius-primary {
+  background: var(--cg-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-chartgenius-primary:hover {
+  background: var(--cg-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(30, 64, 175, 0.3);
+}
+
+.btn-chartgenius-success {
+  background: var(--cg-success);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-chartgenius-success:hover {
+  background: var(--cg-success-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+}
+
+.btn-chartgenius-danger {
+  background: var(--cg-danger);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-chartgenius-danger:hover {
+  background: var(--cg-danger-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+}
+
+/* Адаптивные утилиты */
+@media (max-width: 768px) {
+  .shadow-modern,
+  .shadow-modern-dark {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .card-modern,
+  .card-modern-dark,
+  .card-chartgenius {
+    border-radius: 12px;
+  }
+
+  .btn-chartgenius-primary,
+  .btn-chartgenius-success,
+  .btn-chartgenius-danger {
+    padding: 10px 20px;
+    border-radius: 10px;
+  }
+}
