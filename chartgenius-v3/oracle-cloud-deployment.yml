@@ -1,0 +1,226 @@
+# Oracle Cloud Deployment Configuration for ChartGenius v3
+# Optimized for Always Free Tier
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chartgenius-config
+  namespace: default
+data:
+  ENVIRONMENT: "production"
+  API_PORT: "8000"
+  LOG_LEVEL: "INFO"
+  ENABLE_CACHE: "true"
+  RATE_LIMIT_REQUESTS: "50"
+  RATE_LIMIT_WINDOW: "60"
+  DEFAULT_SYMBOL: "BTCUSDT"
+  DEFAULT_INTERVAL: "4h"
+  DEFAULT_DAYS: "15"
+  ALLOWED_ORIGINS: "https://chartgenius.online,https://t.me,https://web.telegram.org"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: chartgenius-secrets
+  namespace: default
+type: Opaque
+stringData:
+  JWT_SECRET_KEY: "34sSDF542rf65EJ1kj"
+  OPENAI_API_KEY: "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"
+  CRYPTOCOMPARE_API_KEY: "4f09e9d732eab748157e44a138d88ac9b686ac373437ec5211910e02c14b7c15"
+  TELEGRAM_BOT_TOKEN: "7279183061:AAERodVAje0VnifJmUJWeq0EM4FxMueXrB0"
+  ORACLE_USERNAME: "ADMIN"
+  ORACLE_PASSWORD: "ChartGenius2025!"
+  ORACLE_DSN: "(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.eu-frankfurt-1.oraclecloud.com))(connect_data=(service_name=g2fbf778b2604d0_chartgenius2_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chartgenius-backend
+  namespace: default
+  labels:
+    app: chartgenius-backend
+    version: v3
+spec:
+  replicas: 1  # Always Free Tier limitation
+  selector:
+    matchLabels:
+      app: chartgenius-backend
+  template:
+    metadata:
+      labels:
+        app: chartgenius-backend
+        version: v3
+    spec:
+      containers:
+      - name: chartgenius-backend
+        image: chartgenius-backend:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: chartgenius-config
+              key: ENVIRONMENT
+        - name: API_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: chartgenius-config
+              key: API_PORT
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: chartgenius-secrets
+              key: JWT_SECRET_KEY
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: chartgenius-secrets
+              key: OPENAI_API_KEY
+        - name: CRYPTOCOMPARE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: chartgenius-secrets
+              key: CRYPTOCOMPARE_API_KEY
+        - name: TELEGRAM_BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: chartgenius-secrets
+              key: TELEGRAM_BOT_TOKEN
+        - name: ORACLE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: chartgenius-secrets
+              key: ORACLE_USERNAME
+        - name: ORACLE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: chartgenius-secrets
+              key: ORACLE_PASSWORD
+        - name: ORACLE_DSN
+          valueFrom:
+            secretKeyRef:
+              name: chartgenius-secrets
+              key: ORACLE_DSN
+        - name: ADMIN_TELEGRAM_ID
+          value: "299820674"
+        - name: WEBAPP_URL
+          value: "https://chartgenius.online"
+        - name: ORACLE_POOL_MIN
+          value: "1"
+        - name: ORACLE_POOL_MAX
+          value: "3"
+        - name: ORACLE_POOL_INCREMENT
+          value: "1"
+        - name: REDIS_URL
+          value: "redis://localhost:6379/0"
+        - name: ENABLE_CACHE
+          valueFrom:
+            configMapKeyRef:
+              name: chartgenius-config
+              key: ENABLE_CACHE
+        - name: RATE_LIMIT_REQUESTS
+          valueFrom:
+            configMapKeyRef:
+              name: chartgenius-config
+              key: RATE_LIMIT_REQUESTS
+        - name: ALLOWED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: chartgenius-config
+              key: ALLOWED_ORIGINS
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: logs
+        emptyDir: {}
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chartgenius-backend-service
+  namespace: default
+  labels:
+    app: chartgenius-backend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 8000
+    protocol: TCP
+    name: https
+  selector:
+    app: chartgenius-backend
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chartgenius-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - chartgenius.online
+    - api.chartgenius.online
+    secretName: chartgenius-tls
+  rules:
+  - host: chartgenius.online
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: chartgenius-backend-service
+            port:
+              number: 80
+  - host: api.chartgenius.online
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: chartgenius-backend-service
+            port:
+              number: 80

@@ -1,0 +1,180 @@
+# ChartGenius v3 Docker Compose
+# Oracle Cloud Always Free Tier Optimized
+
+version: '3.8'
+
+services:
+  # Backend API (Oracle Cloud Production)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chartgenius-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - ./backend/.env.production
+    volumes:
+      - ./backend/logs:/app/logs
+      - ./backend/data:/app/data
+    depends_on:
+      - redis
+    networks:
+      - chartgenius-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Frontend (Nginx для production)
+  frontend:
+    build:
+      context: ./chartgenius-v3-frontend
+      dockerfile: Dockerfile
+    container_name: chartgenius-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+    networks:
+      - chartgenius-network
+
+  # Redis для кэширования (Always Free optimized)
+  redis:
+    image: redis:7-alpine
+    container_name: chartgenius-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru --save 900 1
+    networks:
+      - chartgenius-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.2'
+        reservations:
+          memory: 64M
+          cpus: '0.05'
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+
+  # Nginx Proxy (для production)
+  nginx:
+    image: nginx:alpine
+    container_name: chartgenius-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - chartgenius-network
+    profiles:
+      - production
+
+  # Telegram Bot (отдельный сервис)
+  telegram-bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    container_name: chartgenius-bot
+    restart: unless-stopped
+    environment:
+      - BACKEND_URL=http://backend:8000
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - chartgenius-network
+    profiles:
+      - bot
+
+  # Monitoring (Prometheus + Grafana для production)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: chartgenius-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - chartgenius-network
+    profiles:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: chartgenius-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - chartgenius-network
+    profiles:
+      - monitoring
+
+volumes:
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  chartgenius-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
