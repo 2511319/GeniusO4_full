@@ -1,0 +1,136 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production builds
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Temporary files and directories
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+
+# Archive files
+*.zip
+*.rar
+*.tar.gz
+*.7z
+
+# Exclude specific directories and files in root
+%USERPROFILE%/
+1/
+2*/
+CGP/
+ChartGenius/
+CodexDushT/
+DevilCourier/
+FT/
+GeniusO4*/
+PythonProject/
+chartgenius-v3*/
+chartgenius-gemini-ver*/
+chartgenius-frontend-local.tar.gz
+claude_desktop_config*.json
+codexdush/
+docker-image-extract-main/
+gemT*/
+n8n-mcp-installation-guide.md
+oracle-cloud-ssh-connection-guide.md
+oracle_db_credentials.md
+settings.json
+str2.txt
+test-*.py
+test-*.html
+test_*.py
+test_*.html
+Новая*/
+спеки/
+*копия*/
+*copy*/
+*копия*
+llm_response.json
+prompt.txt
+*.lnk
+
+# Exclude root level files
+/index.html
+/src/
+
+# Allow chartgenius-aug-ver project but exclude its node_modules
+!chartgenius-aug-ver/
+chartgenius-aug-ver/node_modules/
+chartgenius-aug-ver/dist/
